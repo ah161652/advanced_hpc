@@ -224,7 +224,6 @@ int accelerate_flow(const t_param params, t_speed* cells, int* obstacles)
   }
 
   return EXIT_SUCCESS;
-
 }
 
 int propagate(const t_param params, t_speed* cells, t_speed* tmp_cells)
