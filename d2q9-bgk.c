@@ -232,11 +232,7 @@ int propagate(const t_param params, t_speed* cells, t_speed* tmp_cells)
   for (int jj = 0; jj < params.ny; jj++)
   {
 
-    int y_n = (jj + 1) % params.ny;
-    int y_s = (jj == 0) ? (jj + params.ny - 1) : (jj - 1);
-    int index2 = jj*params.nx;
-    int index3 = y_s*params.nx;
-    int index4 = y_n*params.nx;
+
 
     for (int ii = 0; ii < params.nx; ii++)
     {
@@ -245,11 +241,16 @@ int propagate(const t_param params, t_speed* cells, t_speed* tmp_cells)
 
       int x_e = (ii + 1) % params.nx;
       int x_w = (ii == 0) ? (ii + params.nx - 1) : (ii - 1);
+      int y_n = (jj + 1) % params.ny;
+      int y_s = (jj == 0) ? (jj + params.ny - 1) : (jj - 1);
       /* propagate densities from neighbouring cells, following
       ** appropriate directions of travel and writing into
       ** scratch space grid */
 
-      int index = ii + jj*params.nx;
+      int index = ii + index2;
+      int index2 = jj*params.nx;
+      int index3 = y_s*params.nx;
+      int index4 = y_n*params.nx;
 
 
       tmp_cells[index].speeds[0] = cells[index].speeds[0]; /* central cell, no movement */
