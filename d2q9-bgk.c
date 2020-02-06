@@ -247,8 +247,9 @@ int propagate(const t_param params, t_speed* cells, t_speed* tmp_cells)
       ** appropriate directions of travel and writing into
       ** scratch space grid */
 
-      int index = ii + index2;
+
       int index2 = jj*params.nx;
+      int index = ii + index2;
       int index3 = y_s*params.nx;
       int index4 = y_n*params.nx;
 
