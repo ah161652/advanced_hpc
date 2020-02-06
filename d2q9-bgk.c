@@ -204,12 +204,14 @@ int accelerate_flow(const t_param params, t_speed* cells, int* obstacles)
   /* modify the 2nd row of the grid */
   int jj = params.ny - 2;
 
+  float w5 = jj*params.nx;
+
 
   for (int ii = 0; ii < params.nx; ii++)
   {
     /* if the cell is not occupied and
     ** we don't send a negative density */
-    int w4 = ii + jj*params.nx;
+    int w4 = ii + w5;
     if (!obstacles[w4]
         && (cells[w4].speeds[3] - w1) > 0.f
         && (cells[w4].speeds[6] - w2) > 0.f
