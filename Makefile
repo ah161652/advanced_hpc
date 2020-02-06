@@ -2,8 +2,8 @@
 
 EXE=d2q9-bgk
 
-CC=gcc
-CFLAGS= -std=c99 -Wall -O3 
+CC=icc
+CFLAGS= -Ofast -fast -xHOST -qopt-report=5 -qopt-report-phase=vec
 LIBS = -lm
 
 FINAL_STATE_FILE=./final_state.dat
