@@ -234,6 +234,9 @@ int propagate(const t_param params, t_speed* cells, t_speed* tmp_cells)
 
     int y_n = (jj + 1) % params.ny;
     int y_s = (jj == 0) ? (jj + params.ny - 1) : (jj - 1);
+    int index2 = jj*params.nx;
+    int index3 = y_s*params.nx;
+    int index4 = y_n*params.nx;
 
     for (int ii = 0; ii < params.nx; ii++)
     {
@@ -247,9 +250,7 @@ int propagate(const t_param params, t_speed* cells, t_speed* tmp_cells)
       ** scratch space grid */
 
       int index = ii + jj*params.nx;
-      int index2 = jj*params.nx;
-      int index3 = y_s*params.nx;
-      int index4 = y_n*params.nx;
+
 
       tmp_cells[index].speeds[0] = cells[index].speeds[0]; /* central cell, no movement */
       tmp_cells[index].speeds[1] = cells[x_w + index2].speeds[1]; /* east */
