@@ -233,6 +233,9 @@ int fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstac
   const float w1 = 1.f / 9.f;  /* weighting factor */
   const float w2 = 1.f / 36.f; /* weighting factor */
 
+  /* equilibrium densities */
+  float d_equ[NSPEEDS];
+
   for (int jj = 0; jj < params.ny; jj++)
   {
     for (int ii = 0; ii < params.nx; ii++)
@@ -316,8 +319,7 @@ int fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstac
         u[7] = - u_x - u_y;  /* south-west */
         u[8] =   u_x - u_y;  /* south-east */
 
-        /* equilibrium densities */
-        float d_equ[NSPEEDS];
+
         /* zero velocity density: weight w0 */
         d_equ[0] = w0 * local_density
                    * (1.f - u_sq / (2.f * c_sq));
