@@ -271,10 +271,11 @@ int fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstac
 
       }
   }
+  return EXIT_SUCCESS;
 }
 
-return EXIT_SUCCESS;
-}
+
+
 
 int collision(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles)
 {
