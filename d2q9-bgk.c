@@ -92,10 +92,10 @@ int initialise(const char* paramfile, const char* obstaclefile,
 ** timestep calls, in order, the functions:
 ** accelerate_flow(), propagate(), rebound() & collision()
 */
-float timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles);
+int timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles);
 int collision(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles);
 int accelerate_flow(const t_param params, t_speed* cells, int* obstacles);
-float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles);
+int fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles);
 int write_values(const t_param params, t_speed* cells, int* obstacles, float* av_vels);
 
 /* finalise, including freeing up allocated memory */
@@ -155,8 +155,8 @@ int main(int argc, char* argv[])
 
   for (int tt = 0; tt < params.maxIters; tt++)
   {
-
-    av_vels[tt] = timestep(params, cells, tmp_cells, obstacles);
+    timestep(params, cells, tmp_cells, obstacles);
+    av_vels[tt] = av_velocity(params, cells, obstacles);
 #ifdef DEBUG
     printf("==timestep: %d==\n", tt);
     printf("av velocity: %.12E\n", av_vels[tt]);
@@ -184,12 +184,12 @@ int main(int argc, char* argv[])
   return EXIT_SUCCESS;
 }
 
-float timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles)
+int timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles)
 {
   accelerate_flow(params, cells, obstacles);
-  float av = fusion(params, cells, tmp_cells, obstacles);
+  fusion(params, cells, tmp_cells, obstacles);
   //collision(params, cells, tmp_cells, obstacles);
-  return av;
+  return EXIT_SUCCESS;
 }
 
 int accelerate_flow(const t_param params, t_speed* cells, int* obstacles)
@@ -225,24 +225,17 @@ int accelerate_flow(const t_param params, t_speed* cells, int* obstacles)
 }
 
 
-float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles){
+int fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles){
 
-  //collision constants
   const float c_sq = 1.f / 3.f; /* square of speed of sound */
   const float w0 = 4.f / 9.f;  /* weighting factor */
   const float w1 = 1.f / 9.f;  /* weighting factor */
   const float w2 = 1.f / 36.f; /* weighting factor */
 
-  //average variables
-  int    tot_cells = 0;  /* no. of cells used in calculation */
-  float tot_u;          /* accumulated magnitudes of velocity for each cell */
-  tot_u = 0.f;
-
   for (int jj = 0; jj < params.ny; jj++)
   {
     for (int ii = 0; ii < params.nx; ii++)
     {
-
 
       //////////////////////////////////
       //////////PROPAGATE//////////////
@@ -262,8 +255,6 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
       tmp_cells[ii + jj*params.nx].speeds[7] = cells[x_e + y_n*params.nx].speeds[7]; /* south-west */
       tmp_cells[ii + jj*params.nx].speeds[8] = cells[x_w + y_n*params.nx].speeds[8]; /* south-east */
 
-
-
       //////////////////////////////////
       //////////REBOUND////////////////
       /////////////////////////////////
@@ -281,11 +272,9 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
         cells[ii + jj*params.nx].speeds[8] = tmp_cells[ii + jj*params.nx].speeds[6];
       }
 
-
-
-      ///////////////////////////////////
-      //////////Collision////////////////
       //////////////////////////////////
+      //////////Collision////////////////
+      /////////////////////////////////
       if (!obstacles[jj*params.nx + ii])
       {
         /* compute local density total */
@@ -366,46 +355,11 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
                                                   + params.omega
                                                   * (d_equ[kk] - tmp_cells[ii + jj*params.nx].speeds[kk]);
         }
-
-        /////////////////
-        /////Av_Vel//////
-        /////////////////
-
-        float local_density2 = 0.f;
-        for (int kk = 0; kk < NSPEEDS; kk++)
-        {
-          local_density2 += cells[ii + jj*params.nx].speeds[kk];
-        }
-
-        /* x-component of velocity */
-        float u_x2 = (cells[ii + jj*params.nx].speeds[1]
-                      + cells[ii + jj*params.nx].speeds[5]
-                      + cells[ii + jj*params.nx].speeds[8]
-                      - (cells[ii + jj*params.nx].speeds[3]
-                         + cells[ii + jj*params.nx].speeds[6]
-                         + cells[ii + jj*params.nx].speeds[7]))
-                     / local_density2;
-        /* compute y velocity component */
-        float u_y2 = (cells[ii + jj*params.nx].speeds[2]
-                      + cells[ii + jj*params.nx].speeds[5]
-                      + cells[ii + jj*params.nx].speeds[6]
-                      - (cells[ii + jj*params.nx].speeds[4]
-                         + cells[ii + jj*params.nx].speeds[7]
-                         + cells[ii + jj*params.nx].speeds[8]))
-                     / local_density2;
-
-
-        tot_u += sqrtf((u_x2 * u_x2) + (u_y2 * u_y2));
-        ++tot_cells;
-
       }
 
       }
   }
-
-  float av = tot_u/ (float)tot_cells;
-
-  return av;
+  return EXIT_SUCCESS;
 }
 
 
