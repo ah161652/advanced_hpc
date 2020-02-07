@@ -371,10 +371,10 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
         /////Av_Vel//////
         /////////////////
 
-        float local_density = 0.f;
+        float local_density2 = 0.f;
         for (int kk = 0; kk < NSPEEDS; kk++)
         {
-          local_density += cells[ii + jj*params.nx].speeds[kk];
+          local_density2 += cells[ii + jj*params.nx].speeds[kk];
         }
 
         /* x-component of velocity */
@@ -384,7 +384,7 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
                       - (cells[ii + jj*params.nx].speeds[3]
                          + cells[ii + jj*params.nx].speeds[6]
                          + cells[ii + jj*params.nx].speeds[7]))
-                     / local_density;
+                     / local_density2;
         /* compute y velocity component */
         float u_y = (cells[ii + jj*params.nx].speeds[2]
                       + cells[ii + jj*params.nx].speeds[5]
@@ -392,7 +392,7 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
                       - (cells[ii + jj*params.nx].speeds[4]
                          + cells[ii + jj*params.nx].speeds[7]
                          + cells[ii + jj*params.nx].speeds[8]))
-                     / local_density;
+                     / local_density2;
 
 
         tot_u += sqrtf((u_x * u_x) + (u_y * u_y));
