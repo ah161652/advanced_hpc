@@ -270,6 +270,11 @@ int collision(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
   {
     for (int ii = 0; ii < params.nx; ii++)
     {
+
+      int y_n = (jj + 1) % params.ny;
+      int x_e = (ii + 1) % params.nx;
+      int y_s = (jj == 0) ? (jj + params.ny - 1) : (jj - 1);
+      int x_w = (ii == 0) ? (ii + params.nx - 1) : (ii - 1);
       //Propogate and COLLISION
       /* don't consider occupied cells */
       if (!obstacles[ii + jj*params.nx])
