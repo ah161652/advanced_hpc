@@ -1,3 +1,54 @@
+/*
+** Code to implement a d2q9-bgk lattice boltzmann scheme.
+** 'd2' inidates a 2-dimensional grid, and
+** 'q9' indicates 9 velocities per grid cell.
+** 'bgk' refers to the Bhatnagar-Gross-Krook collision step.
+**
+** The 'speeds' in each cell are numbered as follows:
+**
+** 6 2 5
+**  \|/
+** 3-0-1
+**  /|\
+** 7 4 8
+**
+** A 2D grid:
+**
+**           cols
+**       --- --- ---
+**      | D | E | F |
+** rows  --- --- ---
+**      | A | B | C |
+**       --- --- ---
+**
+** 'unwrapped' in row major order to give a 1D array:
+**
+**  --- --- --- --- --- ---
+** | A | B | C | D | E | F |
+**  --- --- --- --- --- ---
+**
+** Grid indicies are:
+**
+**          ny
+**          ^       cols(ii)
+**          |  ----- ----- -----
+**          | | ... | ... | etc |
+**          |  ----- ----- -----
+** rows(jj) | | 1,0 | 1,1 | 1,2 |
+**          |  ----- ----- -----
+**          | | 0,0 | 0,1 | 0,2 |
+**          |  ----- ----- -----
+**          ----------------------> nx
+**
+** Note the names of the input parameter and obstacle files
+** are passed on the command line, e.g.:
+**
+**   ./d2q9-bgk input.params obstacles.dat
+**
+** Be sure to adjust the grid dimensions in the parameter file
+** if you choose a different obstacle file.
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -34,22 +85,22 @@ typedef struct
 /* load params, allocate memory, load obstacles & initialise fluid particle densities */
 int initialise(const char* paramfile, const char* obstaclefile,
                t_param* params, t_speed** cells_ptr, t_speed** tmp_cells_ptr,
-               int** obstacles_ptr, float** av_vels_ptr, t_speed** final_cells_ptr);
+               int** obstacles_ptr, float** av_vels_ptr);
 
 /*
 ** The main calculation methods.
 ** timestep calls, in order, the functions:
 ** accelerate_flow(), propagate(), rebound() & collision()
 */
-int timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_speed* final_cells);
+int timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles);
 int collision(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles);
 int accelerate_flow(const t_param params, t_speed* cells, int* obstacles);
-int fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_speed* final_cells);
+int fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles);
 int write_values(const t_param params, t_speed* cells, int* obstacles, float* av_vels);
 
 /* finalise, including freeing up allocated memory */
 int finalise(const t_param* params, t_speed** cells_ptr, t_speed** tmp_cells_ptr,
-             int** obstacles_ptr, float** av_vels_ptr, t_speed** final_cells_ptr);
+             int** obstacles_ptr, float** av_vels_ptr);
 
 /* Sum all the densities in the grid.
 ** The total should remain constant from one timestep to the next. */
@@ -76,7 +127,6 @@ int main(int argc, char* argv[])
   t_param  params;              /* struct to hold parameter values */
   t_speed* cells     = NULL;    /* grid containing fluid densities */
   t_speed* tmp_cells = NULL;    /* scratch space */
-  t_speed* final_cells = NULL;
   int*     obstacles = NULL;    /* grid indicating which cells are blocked */
   float* av_vels   = NULL;     /* a record of the av. velocity computed for each timestep */
   struct timeval timstr;        /* structure to hold elapsed time */
@@ -97,7 +147,7 @@ int main(int argc, char* argv[])
   }
 
   /* initialise our data structures and load values from file */
-  initialise(paramfile, obstaclefile, &params, &cells, &tmp_cells, &obstacles, &av_vels, &final_cells);
+  initialise(paramfile, obstaclefile, &params, &cells, &tmp_cells, &obstacles, &av_vels);
 
   /* iterate for maxIters timesteps */
   gettimeofday(&timstr, NULL);
@@ -105,12 +155,12 @@ int main(int argc, char* argv[])
 
   for (int tt = 0; tt < params.maxIters; tt++)
   {
-    timestep(params, cells, tmp_cells, obstacles, final_cells);
-    av_vels[tt] = av_velocity(params, final_cells, obstacles);
+    timestep(params, cells, tmp_cells, obstacles);
+    av_vels[tt] = av_velocity(params, cells, obstacles);
 #ifdef DEBUG
     printf("==timestep: %d==\n", tt);
     printf("av velocity: %.12E\n", av_vels[tt]);
-    printf("tot density: %.12E\n", total_density(params, final_cells));
+    printf("tot density: %.12E\n", total_density(params, cells));
 #endif
   }
 
@@ -124,20 +174,20 @@ int main(int argc, char* argv[])
 
   /* write final values and free memory */
   printf("==done==\n");
-  printf("Reynolds number:\t\t%.12E\n", calc_reynolds(params, final_cells, obstacles));
+  printf("Reynolds number:\t\t%.12E\n", calc_reynolds(params, cells, obstacles));
   printf("Elapsed time:\t\t\t%.6lf (s)\n", toc - tic);
   printf("Elapsed user CPU time:\t\t%.6lf (s)\n", usrtim);
   printf("Elapsed system CPU time:\t%.6lf (s)\n", systim);
-  write_values(params, final_cells, obstacles, av_vels);
-  finalise(&params, &cells, &tmp_cells, &obstacles, &av_vels, &final_cells);
+  write_values(params, cells, obstacles, av_vels);
+  finalise(&params, &cells, &tmp_cells, &obstacles, &av_vels);
 
   return EXIT_SUCCESS;
 }
 
-int timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_speed* final_cells)
+int timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles)
 {
   accelerate_flow(params, cells, obstacles);
-  fusion(params, cells, tmp_cells, obstacles, final_cells);
+  fusion(params, cells, tmp_cells, obstacles);
   // collision(params, cells, tmp_cells, obstacles);
   return EXIT_SUCCESS;
 }
@@ -175,7 +225,7 @@ int accelerate_flow(const t_param params, t_speed* cells, int* obstacles)
 }
 
 //does propagate, rebound and collision all in one double loop
-int fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_speed* final_cells){
+int fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles){
 
   //colission constants
   const float c_sq = 1.f / 3.f; /* square of speed of sound */
@@ -303,7 +353,7 @@ int fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstac
        /* relaxation step */
        for (int kk = 0; kk < NSPEEDS; kk++)
        {
-         final_cells[ii + jj*params.nx].speeds[kk] = tmp_cells[ii + jj*params.nx].speeds[kk]
+         cells[ii + jj*params.nx].speeds[kk] = tmp_cells[ii + jj*params.nx].speeds[kk]
                                                  + params.omega
                                                  * (d_equ[kk] - tmp_cells[ii + jj*params.nx].speeds[kk]);
        }
@@ -313,6 +363,8 @@ int fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstac
         }
       }
   }
+
+
 
 
   return EXIT_SUCCESS;
@@ -475,7 +527,7 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles)
 
 int initialise(const char* paramfile, const char* obstaclefile,
                t_param* params, t_speed** cells_ptr, t_speed** tmp_cells_ptr,
-               int** obstacles_ptr, float** av_vels_ptr, t_speed** final_cells_ptr)
+               int** obstacles_ptr, float** av_vels_ptr)
 {
   char   message[1024];  /* message buffer */
   FILE*   fp;            /* file pointer */
@@ -553,12 +605,6 @@ int initialise(const char* paramfile, const char* obstaclefile,
 
   if (*tmp_cells_ptr == NULL) die("cannot allocate memory for tmp_cells", __LINE__, __FILE__);
 
-  //Final cells
-  *final_cells_ptr = (t_speed*)malloc(sizeof(t_speed) * (params->ny * params->nx));
-
-  if (*final_cells_ptr == NULL) die("cannot allocate memory for cells", __LINE__, __FILE__);
-
-
   /* the map of obstacles */
   *obstacles_ptr = malloc(sizeof(int) * (params->ny * params->nx));
 
@@ -635,16 +681,13 @@ int initialise(const char* paramfile, const char* obstaclefile,
 }
 
 int finalise(const t_param* params, t_speed** cells_ptr, t_speed** tmp_cells_ptr,
-             int** obstacles_ptr, float** av_vels_ptr, t_speed** final_cells_ptr)
+             int** obstacles_ptr, float** av_vels_ptr)
 {
   /*
   ** free up allocated memory
   */
   free(*cells_ptr);
   *cells_ptr = NULL;
-
-  free(*final_cells_ptr);
-  *final_cells_ptr = NULL;
 
   free(*tmp_cells_ptr);
   *tmp_cells_ptr = NULL;
