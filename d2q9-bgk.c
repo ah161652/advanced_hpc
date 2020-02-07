@@ -293,7 +293,7 @@ int collision(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
       int x_e = (ii + 1) % params.nx;
       int y_s = (jj == 0) ? (jj + params.ny - 1) : (jj - 1);
       int x_w = (ii == 0) ? (ii + params.nx - 1) : (ii - 1);
-      t_speed tmp_speeds[9];
+      float tmp_speeds[9];
 
       tmp_speeds[0] = cells[ii + jj*params.nx].speeds[0]; /* central cell, no movement */
       tmp_speeds[1] = cells[x_w + jj*params.nx].speeds[1]; /* east */
