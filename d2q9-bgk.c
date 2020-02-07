@@ -333,7 +333,7 @@ int collision(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
         u[7] = - u_x - u_y;  /* south-west */
         u[8] =   u_x - u_y;  /* south-east */
 
-
+        float d_equ[NSPEEDS];
         /* zero velocity density: weight w0 */
         d_equ[0] = w0 * local_density
                    * (1.f - u_sq / (2.f * c_sq));
