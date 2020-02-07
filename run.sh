@@ -1,3 +1,4 @@
+git pull
 source env.sh
 make
 sleep 10
