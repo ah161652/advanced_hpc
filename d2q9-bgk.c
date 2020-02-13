@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
   gettimeofday(&timstr, NULL);
   tic = timstr.tv_sec + (timstr.tv_usec / 1000000.0);
 
-  for (int tt = 0; tt < params.maxIters; tt++)
+  for (int tt = 0; tt < params.maxIters; tt++2)
   {
     timestep(params, cells, tmp_cells, obstacles);
     av_vels[tt] = av_velocity(params, cells, obstacles);
@@ -188,7 +188,7 @@ int timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
 {
   accelerate_flow(params, cells, obstacles);
   fusion(params, cells, tmp_cells, obstacles);
-  fusion(params, tmp_cells, cells , obstacles);
+  //fusion(params, tmp_cells, cells , obstacles);
   //collision(params, cells, tmp_cells, obstacles);
   return EXIT_SUCCESS;
 }
