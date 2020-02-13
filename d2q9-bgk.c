@@ -255,6 +255,14 @@ int fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstac
       tmp_cells[ii + jj*params.nx].speeds[7] = cells[x_e + y_n*params.nx].speeds[7]; /* south-west */
       tmp_cells[ii + jj*params.nx].speeds[8] = cells[x_w + y_n*params.nx].speeds[8]; /* south-east */
 
+      /* relaxation step */
+      for (int kk = 0; kk < NSPEEDS; kk++)
+      {
+        cells[(ii-1) + (jj-1)*params.nx].speeds[kk] = tmp_cells[(ii-1) + (jj-1)*params.nx].speeds[kk]
+                                                + params.omega
+                                                * (d_equ[kk] - tmp_cells[(ii-1) + (jj-1)*params.nx].speeds[kk]);
+      }
+
       //////////////////////////////////
       //////////REBOUND////////////////
       /////////////////////////////////
@@ -348,7 +356,7 @@ int fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstac
                                          + (u[8] * u[8]) / (2.f * c_sq * c_sq)
                                          - u_sq / (2.f * c_sq));
 
-        /* relaxation step */
+        if (ii == params.nx-1 && jj == params.ny-1){
         for (int kk = 0; kk < NSPEEDS; kk++)
         {
           cells[ii + jj*params.nx].speeds[kk] = tmp_cells[ii + jj*params.nx].speeds[kk]
@@ -357,8 +365,12 @@ int fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstac
         }
       }
 
+
+      }
+
       }
   }
+
   return EXIT_SUCCESS;
 }
 
