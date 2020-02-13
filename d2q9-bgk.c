@@ -275,7 +275,7 @@ int fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstac
       //////////////////////////////////
       //////////Collision////////////////
       /////////////////////////////////
-      if (obstacles[jj*params.nx + ii])
+      if (!obstacles[jj*params.nx + ii])
       {
         /* compute local density total */
         float local_density = 0.f;
