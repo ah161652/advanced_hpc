@@ -238,14 +238,6 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
   const float w1 = 1.f / 9.f;  /* weighting factor */
   const float w2 = 1.f / 36.f; /* weighting factor */
 
-  float local_density;
-
-  float u[NSPEEDS];
-
-  float u_sq;
-
-  float d_equ[NSPEEDS];
-
   int    tot_cells = 0;  /* no. of cells used in calculation */
   float tot_u =0.f;         /* accumulated magnitudes of velocity for each cell */
 
@@ -309,14 +301,14 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
         // tmp_cells[ii + jj*params.nx].speeds[8] = cells[x_w + y_n*params.nx].speeds[8]; /* south-east */
 
         /* compute local density total */
-        local_density = 0.f;
+        float local_density = 0.f;
 
         // for (int kk = 0; kk < NSPEEDS; kk++)
         // {
         //   local_density += tmp_cells[ii + jj*params.nx].speeds[kk];
         // }
 
-        local_density += cells[ii + jj*params.nx].speeds[0] + cells[x_w + jj*params.nx].speeds[1] + cells[ii + y_s*params.nx].speeds[2] + cells[x_e + jj*params.nx].speeds[3] + cells[ii + y_n*params.nx].speeds[4] + cells[x_w + y_s*params.nx].speeds[5] + cells[x_e + y_s*params.nx].speeds[6] + cells[x_e + y_n*params.nx].speeds[7] + cells[x_w + y_n*params.nx].speeds[8];
+        local_density = local_density + cells[ii + jj*params.nx].speeds[0] + cells[x_w + jj*params.nx].speeds[1] + cells[ii + y_s*params.nx].speeds[2] + cells[x_e + jj*params.nx].speeds[3] + cells[ii + y_n*params.nx].speeds[4] + cells[x_w + y_s*params.nx].speeds[5] + cells[x_e + y_s*params.nx].speeds[6] + cells[x_e + y_n*params.nx].speeds[7] + cells[x_w + y_n*params.nx].speeds[8];
 
         /* compute x velocity component */
         float u_x = (cells[x_w + jj*params.nx].speeds[1]
@@ -336,10 +328,10 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
                      / local_density;
 
         /* velocity squared */
-         u_sq = u_x * u_x + u_y * u_y;
+        float u_sq = u_x * u_x + u_y * u_y;
 
         /* directional velocity components */
-
+        float u[NSPEEDS];
         u[1] =   u_x;        /* east */
         u[2] =         u_y;  /* north */
         u[3] = - u_x;        /* west */
@@ -350,7 +342,7 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
         u[8] =   u_x - u_y;  /* south-east */
 
         /* equilibrium densities */
-
+        float d_equ[NSPEEDS];
         /* zero velocity density: weight w0 */
         d_equ[0] = w0 * local_density
                    * (1.f - u_sq / (2.f * c_sq));
@@ -367,6 +359,8 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
         d_equ[4] = w1 * local_density * (1.f + u[4] / c_sq
                                          + (u[4] * u[4]) / (2.f * c_sq * c_sq)
                                          - u_sq / (2.f * c_sq));
+
+
         /* diagonal speeds: weight w2 */
         d_equ[5] = w2 * local_density * (1.f + u[5] / c_sq
                                          + (u[5] * u[5]) / (2.f * c_sq * c_sq)
