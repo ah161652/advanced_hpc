@@ -239,7 +239,7 @@ int fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstac
   const float w2 = 1.f / 36.f; /* weighting factor */
 
   int    tot_cells = 0;  /* no. of cells used in calculation */
-  float tot_u;          /* accumulated magnitudes of velocity for each cell */
+  float tot_u =0.f;         /* accumulated magnitudes of velocity for each cell */
 
   for (int jj = 0; jj < params.ny; jj++)
   {
