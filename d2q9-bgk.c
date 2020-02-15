@@ -301,10 +301,12 @@ int fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstac
         /* compute local density total */
         float local_density = 0.f;
 
-        for (int kk = 0; kk < NSPEEDS; kk++)
-        {
-          local_density += tmp_cells[ii + jj*params.nx].speeds[kk];
-        }
+        // for (int kk = 0; kk < NSPEEDS; kk++)
+        // {
+        //   local_density += tmp_cells[ii + jj*params.nx].speeds[kk];
+        // }
+
+        local_density +=  cells[ii + jj*params.nx].speeds[0] + cells[x_w + jj*params.nx].speeds[1] + cells[ii + y_s*params.nx].speeds[2] + cells[x_e + jj*params.nx].speeds[3] + cells[ii + y_n*params.nx].speeds[4] + cells[x_w + y_s*params.nx].speeds[5] + cells[x_e + y_s*params.nx].speeds[6] + cells[x_e + y_n*params.nx].speeds[7] + cells[x_w + y_n*params.nx].speeds[8];
 
         /* compute x velocity component */
         float u_x = (cells[x_w + jj*params.nx].speeds[1]
