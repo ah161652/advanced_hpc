@@ -188,7 +188,7 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
       /////////////////////////////////
       if (obstacles[jj*params.nx + ii])
       {
-        tmp_cells->speeds1[ii + jj*params.nx] = cells->peeds3[x_e + jj*params.nx];
+        tmp_cells->speeds1[ii + jj*params.nx] = cells->speeds3[x_e + jj*params.nx];
         tmp_cells->speeds2[ii + jj*params.nx] = cells->speeds4[ii + y_n*params.nx];
         tmp_cells->speeds3[ii + jj*params.nx] = cells->speeds1[x_w + jj*params.nx];
         tmp_cells->speeds4[ii + jj*params.nx] = cells->speeds2[ii + y_s*params.nx];
@@ -402,7 +402,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
   */
 
   /* main grid */
-  *cells = (t_speed*)malloc(sizeof(t_speed) * (params->ny *params -> nx))l
+  *cells = (t_speed*)malloc(sizeof(t_speed) * (params->ny *params -> nx));
 
   if (*cells == NULL) die("cannot allocate memory for cells", __LINE__, __FILE__);
 
