@@ -50,7 +50,7 @@ float total_density(const t_param params, t_speed* cells);
 float calc_reynolds(const t_param params, t_speed* cells, int* obstacles);
 void die(const char* message, const int line, const char* file);
 void usage(const char* exe);
-float av_velocity(const t_param params, t_speed* cells, int* obstacles)
+float av_velocity(const t_param params, t_speed* cells, int* obstacles);
 int accelerate_flow(const t_param params, t_speed* restrict cells, int* restrict obstacles);
 float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tmp_cells, int* restrict obstacles);
 
