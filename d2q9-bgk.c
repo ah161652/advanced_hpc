@@ -41,10 +41,10 @@ typedef struct
 
 
 int initialise(const char* paramfile, const char* obstaclefile,
-               t_param* params, t_speed**  cells, t_speed**  tmp_cells,
+               t_param* params, t_speed*  cells, t_speed*  tmp_cells,
                int** obstacles_ptr, float** av_vels_ptr);
 int write_values(const t_param params, t_speed* cells, int* obstacles, float* av_vels);
-int finalise(const t_param* params, t_speed** cells, t_speed** tmp_cells,
+int finalise(const t_param* params, t_speed* cells, t_speed* tmp_cells,
              int** obstacles_ptr, float** av_vels_ptr);
 float total_density(const t_param params, t_speed* cells);
 float calc_reynolds(const t_param params, t_speed* cells, int* obstacles);
@@ -60,8 +60,8 @@ int main(int argc, char* argv[])
   char*    paramfile = NULL;    /* name of the input parameter file */
   char*    obstaclefile = NULL; /* name of a the input obstacle file */
   t_param  params;              /* struct to hold parameter values */
-  t_speed cells     = NULL;    /* grid containing fluid densities */
-  t_speed tmp_cells = NULL;    /* scratch space */
+  t_speed cells;    /* grid containing fluid densities */
+  t_speed tmp_cells;    /* scratch space */
   int*     obstacles = NULL;    /* grid indicating which cells are blocked */
   float* av_vels   = NULL;     /* a record of the av. velocity computed for each timestep */
   struct timeval timstr;        /* structure to hold elapsed time */
