@@ -139,9 +139,9 @@ int accelerate_flow(const t_param params, t_speed* restrict cells, int* restrict
     /* if the cell is not occupied and
     ** we don't send a negative density */
     if (!obstacles[ii + jj*params.nx]
-        && cells->speeds3[ii + jj*params.nx] - w1) > 0.f
-        && cells->speeds6[ii + jj*params.nx] - w2) > 0.f
-        && cells->speeds7[ii + jj*params.nx] - w2) > 0.f)
+        && (cells->speeds3[ii + jj*params.nx] - w1) > 0.f
+        && (cells->speeds6[ii + jj*params.nx] - w2) > 0.f
+        && (cells->speeds7[ii + jj*params.nx] - w2) > 0.f)
     {
       /* increase 'east-side' densities */
       cells->speeds1[ii + jj*params.nx] += w1;
