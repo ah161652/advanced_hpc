@@ -332,7 +332,7 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles)
 
 
 int initialise(const char* paramfile, const char* obstaclefile,
-               t_param* params, t_speed** cells, t_speed** tmp_cells,
+               t_param* params, t_speed* cells, t_speed* tmp_cells,
                int** obstacles_ptr, float** av_vels_ptr)
 {
   char   message[1024];  /* message buffer */
