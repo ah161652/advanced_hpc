@@ -9,6 +9,10 @@
 #define FINALSTATEFILE  "final_state.dat"
 #define AVVELSFILE      "av_vels.dat"
 
+OMP_NUM_THREADS=28;
+
+
+
 typedef struct
 {
   int    nx;            /* no. of cells in x-direction */
@@ -163,6 +167,7 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
   int    tot_cells = 0;  /* no. of cells used in calculation */
   float tot_u =0.f;         /* accumulated magnitudes of velocity for each cell */
 
+  #pragma omp parallel for
   for (int jj = 0; jj < params.ny; jj++)
   {
     for (int ii = 0; ii < params.nx; ii++)
@@ -270,7 +275,7 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
 
   //Av vels
   return tot_u / (float)tot_cells;
-  
+
 }
 
 
