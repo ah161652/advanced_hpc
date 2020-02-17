@@ -3,7 +3,7 @@
 EXE=d2q9-bgk
 
 CC=gcc
-CFLAGS= -Ofast march=native -fopenmp
+CFLAGS= -Ofast -march=native -fopenmp
 LIBS = -lm
 
 FINAL_STATE_FILE=./final_state.dat
