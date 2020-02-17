@@ -134,7 +134,7 @@ int accelerate_flow(const t_param params, t_speed* cells, int* obstacles)
   /* modify the 2nd row of the grid */
   int jj = params.ny - 2;
 
-  #pragma omp parallel for schedule(static) shared(cells,obstacles)
+  #pragma omp parallel for schedule(static)
   for (int ii = 0; ii < params.nx; ii++)
   {
     /* if the cell is not occupied and
@@ -171,7 +171,7 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
   int    tot_cells = 0;  /* no. of cells used in calculation */
   float tot_u =0.f;         /* accumulated magnitudes of velocity for each cell */
 
-  #pragma omp parallel for schedule(static) shared(cells, obstacles) reduction(+:tot_u,tot_cells)
+  #pragma omp parallel for schedule(static)  reduction(+:tot_u,tot_cells)
   for (int jj = 0; jj < params.ny; jj++)
   {
     for (int ii = 0; ii < params.nx; ii++)
