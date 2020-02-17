@@ -175,10 +175,10 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
   int    tot_cells = 0;  /* no. of cells used in calculation */
   float tot_u =0.f;         /* accumulated magnitudes of velocity for each cell */
 
-  #pragma omp parallel num_threads(28) schedule(static) reduction(+:tot_u,tot_cells)
+  #pragma omp parallel num_threads(28) reduction(+:tot_u,tot_cells)
   {
 
-  #pragma omp for nowait
+  #pragma omp for nowait schedule(static)
   for (int ii = 0; ii < params.nx; ii++)
   {
     /* if the cell is not occupied and
@@ -201,7 +201,7 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
 
 
 
-  #pragma omp for nowait
+  #pragma omp for nowait schedule(static)
   for (int jj = 0; jj < params.ny; jj++)
   {
     for (int ii = 0; ii < params.nx; ii++)
@@ -457,10 +457,10 @@ int initialise(const char* paramfile, const char* obstaclefile,
   float w1 = params->density      / 9.f;
   float w2 = params->density      / 36.f;
 
-  #pragma omp parallel num_threads(28) schedule(static)
+  #pragma omp parallel num_threads(28)
   {
 
-  #pragma omp for nowait
+  #pragma omp for nowait schedule(static)
   for (int jj = 0; jj < params->ny; jj++)
   {
     for (int ii = 0; ii < params->nx; ii++)
@@ -480,7 +480,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
     }
   }
 
-  #pragma omp for nowait
+  #pragma omp for nowait schedule(static)
   /* first set all cells in obstacle array to zero */
   for (int jj = 0; jj < params->ny; jj++)
   {
