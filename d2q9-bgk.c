@@ -457,10 +457,10 @@ int initialise(const char* paramfile, const char* obstaclefile,
   float w1 = params->density      / 9.f;
   float w2 = params->density      / 36.f;
 
-  // #pragma omp parallel num_threads(28)
-  // {
+ #pragma omp parallel num_threads(28)
+{
 
-  // #pragma omp for nowait schedule(static)
+#pragma omp for nowait schedule(static)
   for (int jj = 0; jj < params->ny; jj++)
   {
     for (int ii = 0; ii < params->nx; ii++)
@@ -480,7 +480,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
     }
   }
 
-  // #pragma omp for nowait schedule(static)
+#pragma omp for nowait schedule(static)
   /* first set all cells in obstacle array to zero */
   for (int jj = 0; jj < params->ny; jj++)
   {
@@ -489,7 +489,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
       (*obstacles_ptr)[ii + jj*params->nx] = 0;
     }
   }
-// }
+ }
 
 
 
