@@ -84,10 +84,10 @@ int main(int argc, char* argv[])
 
   for (int tt = 0; tt < params.maxIters; tt=tt+2)
   {
-  accelerate_flow(params, cells, obstacles);
+  //accelerate_flow(params, cells, obstacles);
   av_vels[tt] = fusion(params, cells, tmp_cells, obstacles);
 
-  accelerate_flow(params, tmp_cells, obstacles);
+  //accelerate_flow(params, tmp_cells, obstacles);
   av_vels[tt+1] = fusion(params, tmp_cells, cells, obstacles);
 
 #ifdef DEBUG
@@ -168,8 +168,35 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
   const float w4 = 2.f * c_sq;
   const float w3 =w4 * c_sq;
 
+  float a1 = params.density * params.accel / 9.f;
+  float a2 = params.density * params.accel / 36.f;
+  int jj = params.ny - 2;
+
   int    tot_cells = 0;  /* no. of cells used in calculation */
   float tot_u =0.f;         /* accumulated magnitudes of velocity for each cell */
+
+
+  for (int ii = 0; ii < params.nx; ii++)
+  {
+    /* if the cell is not occupied and
+    ** we don't send a negative density */
+    if (!obstacles[ii + jj*params.nx]
+        && (cells[ii + jj*params.nx].speeds[3] - a1) > 0.f
+        && (cells[ii + jj*params.nx].speeds[6] - a2) > 0.f
+        && (cells[ii + jj*params.nx].speeds[7] - a2) > 0.f)
+    {
+      /* increase 'east-side' densities */
+      cells[ii + jj*params.nx].speeds[1] += a1;
+      cells[ii + jj*params.nx].speeds[5] += a2;
+      cells[ii + jj*params.nx].speeds[8] += a2;
+      /* decrease 'west-side' densities */
+      cells[ii + jj*params.nx].speeds[3] -= a1;
+      cells[ii + jj*params.nx].speeds[6] -= a2;
+      cells[ii + jj*params.nx].speeds[7] -= a2;
+    }
+  }
+
+
 
   #pragma omp parallel for schedule(static) shared(cells, tmp_cells, params, obstacles) reduction(+:tot_u,tot_cells)
   for (int jj = 0; jj < params.ny; jj++)
