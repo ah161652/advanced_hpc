@@ -171,7 +171,7 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
   int    tot_cells = 0;  /* no. of cells used in calculation */
   float tot_u =0.f;         /* accumulated magnitudes of velocity for each cell */
 
-  #pragma omp parallel for nowait schedule(static) shared(cells, tmp_cells, params, obstacles) reduction(+:tot_u,tot_cells) 
+  #pragma omp parallel for schedule(static) shared(cells, tmp_cells, params, obstacles) reduction(+:tot_u,tot_cells)
   for (int jj = 0; jj < params.ny; jj++)
   {
     for (int ii = 0; ii < params.nx; ii++)
