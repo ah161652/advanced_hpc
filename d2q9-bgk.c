@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
   double usrtim;                /* floating point number to record elapsed user CPU time */
   double systim;                /* floating point number to record elapsed system CPU time */
 
-    omp_set_num_threads(16);
+    //omp_set_num_threads(16);
 
   /* parse the command line */
   if (argc != 3)
