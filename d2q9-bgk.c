@@ -134,7 +134,7 @@ int accelerate_flow(const t_param params, t_speed* cells, int* obstacles)
   /* modify the 2nd row of the grid */
   int jj = params.ny - 2;
 
-
+  #pragma omp parallel for schedule(static)
   for (int ii = 0; ii < params.nx; ii++)
   {
     /* if the cell is not occupied and
@@ -446,7 +446,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
     }
   }
 
-//  #pragma omp parallel for schedule(static)
+  #pragma omp parallel for schedule(static)
   /* first set all cells in obstacle array to zero */
   for (int jj = 0; jj < params->ny; jj++)
   {
