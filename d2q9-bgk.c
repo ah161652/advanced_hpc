@@ -435,7 +435,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
 
   /* main grid */
 
-  //(*cells) = malloc(sizeof(float*) * 9);
+  (*cells) = malloc(sizeof(float*) * 9);
   (*cells)->speeds0 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
   (*cells)->speeds1 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
   (*cells)->speeds2 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
@@ -449,7 +449,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
   if (cells == NULL) die("cannot allocate memory for cells", __LINE__, __FILE__);
 
   /* 'helper' grid, used as scratch space */
-  //tmp_cells = malloc(sizeof(float*) * 9);
+  tmp_cells = malloc(sizeof(float*) * 9);
   (*tmp_cells)->speeds0 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
   (*tmp_cells)->speeds1 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
   (*tmp_cells)->speeds2 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
