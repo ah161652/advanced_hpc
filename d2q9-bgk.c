@@ -8,7 +8,7 @@
 #define NSPEEDS         9
 #define FINALSTATEFILE  "final_state.dat"
 #define AVVELSFILE      "av_vels.dat"
-#define DEBUG true
+// #define DEBUG true
 
 
 typedef struct
@@ -212,6 +212,8 @@ float fusion(const t_param params, t_speed*  cells, t_speed*  tmp_cells, int*  o
       int x_e = (ii + 1) % params.nx;
       int y_s = (jj == 0) ? (jj + params.ny - 1) : (jj - 1);
       int x_w = (ii == 0) ? (ii + params.nx - 1) : (ii - 1);
+
+      printf("cell check: %d==\n", cells->speeds3[x_e + jj*params.nx]);
 
 
 
