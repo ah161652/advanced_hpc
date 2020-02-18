@@ -117,46 +117,46 @@ int main(int argc, char* argv[])
   return EXIT_SUCCESS;
 }
 
-int timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles)
-{
-  accelerate_flow(params, cells, obstacles);
-  fusion(params, cells, tmp_cells, obstacles);
-  //collision(params, cells, tmp_cells, obstacles);
-  return EXIT_SUCCESS;
-}
+// int timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles)
+// {
+//   accelerate_flow(params, cells, obstacles);
+//   fusion(params, cells, tmp_cells, obstacles);
+//   //collision(params, cells, tmp_cells, obstacles);
+//   return EXIT_SUCCESS;
+// }
 
-int accelerate_flow(const t_param params, t_speed* cells, int* obstacles)
-{
-  /* compute weighting factors */
-  float w1 = params.density * params.accel / 9.f;
-  float w2 = params.density * params.accel / 36.f;
-
-  /* modify the 2nd row of the grid */
-  int jj = params.ny - 2;
-
-
-  for (int ii = 0; ii < params.nx; ii++)
-  {
-    /* if the cell is not occupied and
-    ** we don't send a negative density */
-    if (!obstacles[ii + jj*params.nx]
-        && (cells[ii + jj*params.nx].speeds[3] - w1) > 0.f
-        && (cells[ii + jj*params.nx].speeds[6] - w2) > 0.f
-        && (cells[ii + jj*params.nx].speeds[7] - w2) > 0.f)
-    {
-      /* increase 'east-side' densities */
-      cells[ii + jj*params.nx].speeds[1] += w1;
-      cells[ii + jj*params.nx].speeds[5] += w2;
-      cells[ii + jj*params.nx].speeds[8] += w2;
-      /* decrease 'west-side' densities */
-      cells[ii + jj*params.nx].speeds[3] -= w1;
-      cells[ii + jj*params.nx].speeds[6] -= w2;
-      cells[ii + jj*params.nx].speeds[7] -= w2;
-    }
-  }
-
-  return EXIT_SUCCESS;
-}
+// int accelerate_flow(const t_param params, t_speed* cells, int* obstacles)
+// {
+//   /* compute weighting factors */
+//   float w1 = params.density * params.accel / 9.f;
+//   float w2 = params.density * params.accel / 36.f;
+//
+//   /* modify the 2nd row of the grid */
+//   int jj = params.ny - 2;
+//
+//
+//   for (int ii = 0; ii < params.nx; ii++)
+//   {
+//     /* if the cell is not occupied and
+//     ** we don't send a negative density */
+//     if (!obstacles[ii + jj*params.nx]
+//         && (cells[ii + jj*params.nx].speeds[3] - w1) > 0.f
+//         && (cells[ii + jj*params.nx].speeds[6] - w2) > 0.f
+//         && (cells[ii + jj*params.nx].speeds[7] - w2) > 0.f)
+//     {
+//       /* increase 'east-side' densities */
+//       cells[ii + jj*params.nx].speeds[1] += w1;
+//       cells[ii + jj*params.nx].speeds[5] += w2;
+//       cells[ii + jj*params.nx].speeds[8] += w2;
+//       /* decrease 'west-side' densities */
+//       cells[ii + jj*params.nx].speeds[3] -= w1;
+//       cells[ii + jj*params.nx].speeds[6] -= w2;
+//       cells[ii + jj*params.nx].speeds[7] -= w2;
+//     }
+//   }
+//
+//   return EXIT_SUCCESS;
+// }
 
 
 float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles){
@@ -178,7 +178,7 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
   #pragma omp parallel num_threads(28) reduction(+:tot_u,tot_cells)
   {
 
-  #pragma omp for nowait schedule(static)
+  #pragma omp for nowait schedule(guided)
   for (int ii = 0; ii < params.nx; ii++)
   {
     /* if the cell is not occupied and
@@ -201,7 +201,7 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
 
 
 
-  #pragma omp for nowait schedule(static)
+  #pragma omp for nowait schedule(guided)
   for (int jj = 0; jj < params.ny; jj++)
   {
     for (int ii = 0; ii < params.nx; ii++)
@@ -460,7 +460,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
  #pragma omp parallel num_threads(28)
 {
 
-#pragma omp for nowait schedule(static)
+#pragma omp for nowait schedule(guided)
   for (int jj = 0; jj < params->ny; jj++)
   {
     for (int ii = 0; ii < params->nx; ii++)
@@ -480,8 +480,8 @@ int initialise(const char* paramfile, const char* obstaclefile,
     }
   }
 
-#pragma omp for nowait schedule(static)
   /* first set all cells in obstacle array to zero */
+#pragma omp for nowait schedule(guided)
   for (int jj = 0; jj < params->ny; jj++)
   {
     for (int ii = 0; ii < params->nx; ii++)
