@@ -243,7 +243,7 @@ float fusion(const t_param params, t_speed*  cells, t_speed*  tmp_cells, int*  o
 
         local_density = local_density + cells->speeds0[ii + jj*params.nx] + cells->speeds1[x_w + jj*params.nx] + cells->speeds2[ii + y_s*params.nx] + cells->speeds3[x_e + jj*params.nx] + cells->speeds4[ii + y_n*params.nx] + cells->speeds5[x_w + y_s*params.nx] + cells->speeds6[x_e + y_s*params.nx] + cells->speeds7[x_e + y_n*params.nx] + cells->speeds8[x_w + y_n*params.nx];
 
-        printf("density check: %d==\n", local_density);
+        //printf("density check: %d==\n", local_density);
 
         /* compute x velocity component */
         float u_x = (cells->speeds1[x_w + jj*params.nx]
@@ -303,7 +303,7 @@ float fusion(const t_param params, t_speed*  cells, t_speed*  tmp_cells, int*  o
         tmp_cells->speeds7[ii + jj*params.nx] = cells->speeds7[x_e + y_n*params.nx] + params.omega * (d_equ[0] - cells->speeds7[x_e + y_n*params.nx]);
         tmp_cells->speeds8[ii + jj*params.nx] = cells->speeds8[x_w + y_n*params.nx] + params.omega * (d_equ[0] -cells->speeds8[x_w + y_n*params.nx] );
 
-
+        printf("%d\n", ((u_x * u_x) + (u_y * u_y)) );
         tot_u += sqrtf((u_x * u_x) + (u_y * u_y));
         ++tot_cells;
 
