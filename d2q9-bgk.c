@@ -213,7 +213,7 @@ float fusion(const t_param params, t_speed*  cells, t_speed*  tmp_cells, int*  o
       int y_s = (jj == 0) ? (jj + params.ny - 1) : (jj - 1);
       int x_w = (ii == 0) ? (ii + params.nx - 1) : (ii - 1);
 
-      printf("cell check: %d==\n", cells->speeds3[x_e + jj*params.nx]);
+      //printf("cell check: %d==\n", cells->speeds3[x_e + jj*params.nx]);
 
 
 
@@ -242,6 +242,8 @@ float fusion(const t_param params, t_speed*  cells, t_speed*  tmp_cells, int*  o
         float local_density = 0.f;
 
         local_density = local_density + cells->speeds0[ii + jj*params.nx] + cells->speeds1[x_w + jj*params.nx] + cells->speeds2[ii + y_s*params.nx] + cells->speeds3[x_e + jj*params.nx] + cells->speeds4[ii + y_n*params.nx] + cells->speeds5[x_w + y_s*params.nx] + cells->speeds6[x_e + y_s*params.nx] + cells->speeds7[x_e + y_n*params.nx] + cells->speeds8[x_w + y_n*params.nx];
+
+        printf("density check: %d==\n", local_density);
 
         /* compute x velocity component */
         float u_x = (cells->speeds1[x_w + jj*params.nx]
