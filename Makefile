@@ -3,7 +3,7 @@
 EXE=d2q9-bgk
 
 CC=icc
-CFLAGS= -Ofast -fast -xHOST -qopt-report=5 -qopt-report-phase=vec -g
+CFLAGS= -Ofast -fast -xHOST -qopt-report=5 -qopt-report-phase=vec 
 #CFLAGS= -Ofast -fast -xHOST -qopt-report=5 -qopt-report-phase=vec -qopenmp
 LIBS = -lm
 
