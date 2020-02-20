@@ -96,6 +96,7 @@ for (int tt = 0; tt < 100; tt=tt+2)
 //accelerate_flow(params, cells, obstacles);
 av_vels[tt] = fusion(params, &cells, &tmp_cells, obstacles);
 
+
 //accelerate_flow(params, tmp_cells, obstacles);
 av_vels[tt+1] = fusion(params, &tmp_cells, &cells, obstacles);
 
@@ -316,7 +317,7 @@ float fusion(const t_param params, t_speed*  cells, t_speed*  tmp_cells, int*  o
 }
 //  printf("%f\n", (tot_u / (float)tot_cells) );
 
-  printf("%f  %d\n", tot_u, tot_cells );
+  printf("%f\n", tot_u / (float)tot_cells);
   return tot_u / (float)tot_cells;
 
 }
