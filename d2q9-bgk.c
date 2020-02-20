@@ -102,7 +102,7 @@ av_vels[tt+1] = fusion(params, &tmp_cells, &cells, obstacles);
 #ifdef DEBUG
   printf("==timestep: %d==\n", tt);
   printf("av velocity: %.12E\n", av_vels[tt]);
-  printf("tot density: %.12E\n", total_density(params, cells));
+  printf("tot density: %.12E\n", total_density(params, &cells));
 #endif
 }
 
