@@ -3,8 +3,8 @@
 EXE=d2q9-bgk
 
 CC=icc
-CFLAGS= -Ofast -fast -xHOST -qopt-report=2 -qopt-report-phase=vec -qopt-report-file=stdout
-# CFLAGS= -Ofast -fast -xHOST -qopt-report=5 -qopt-report-phase=vec -qopenmp
+# CFLAGS= -Ofast -fast -xHOST -qopt-report=2 -qopt-report-phase=vec -qopt-report-file=stdout
+CFLAGS= -Ofast -fast -xHOST -qopt-report=5 -qopt-report-phase=vec -qopenmp
 LIBS = -lm
 
 FINAL_STATE_FILE=./final_state.dat
