@@ -225,6 +225,7 @@ float fusion(const t_param params, t_speed*  cells, t_speed*  tmp_cells, int*  o
   #pragma omp for nowait schedule(static)
   for (int jj = 0; jj < params.ny; jj++)
   {
+    #pragma omp simd
     for (int ii = 0; ii < params.nx; ii++)
     {
 
