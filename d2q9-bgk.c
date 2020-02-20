@@ -458,7 +458,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
   float w1 = params->density      / 9.f;
   float w2 = params->density      / 36.f;
 
- #pragma omp parallel num_threads(28)
+ #pragma omp parallel num_threads(THREAD)
 {
 
 #pragma omp for nowait schedule(guided)
