@@ -229,7 +229,7 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
   for (int jj = 0; jj < params.ny; jj++)
   {
     #pragma omp simd
-    #pragma simd aligned
+    // #pragma simd aligned
     for (int ii = 0; ii < params.nx; ii++)
     {
 
