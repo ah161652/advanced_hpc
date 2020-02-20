@@ -45,7 +45,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
                t_param* params, t_speed* cells_ptr, t_speed* tmp_cells_ptr,
                int** obstacles_ptr, float** av_vels_ptr);
 int accelerate_flow(const t_param params, t_speed* cells, int* obstacles);
-float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles);
+float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tmp_cells, int* restrict obstacles);
 int write_values(const t_param params, t_speed* cells, int* obstacles, float* av_vels);
 int finalise(const t_param* params, t_speed* cells_ptr, t_speed* tmp_cells_ptr,
              int** obstacles_ptr, float** av_vels_ptr);
@@ -162,7 +162,7 @@ int accelerate_flow(const t_param params, t_speed*  cells, int*  obstacles)
 }
 
 
-float fusion(const t_param params, t_speed*  cells, t_speed*  tmp_cells, int*  obstacles){
+float fusion(const t_param params, t_speed* restrict  cells, t_speed* restrict  tmp_cells, int* restrict  obstacles){
 
   const float c_sq = 1.f / 3.f; /* square of speed of sound */
   const float w0 = 4.f / 9.f;  /* weighting factor */
