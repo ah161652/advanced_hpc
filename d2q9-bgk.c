@@ -91,7 +91,7 @@ initialise(paramfile, obstaclefile, &params, &cells, &tmp_cells, &obstacles, &av
 gettimeofday(&timstr, NULL);
 tic = timstr.tv_sec + (timstr.tv_usec / 1000000.0);
 
-for (int tt = 0; tt < params.maxIters; tt=tt+2)
+for (int tt = 0; tt < 100; tt=tt+2)
 {
 //accelerate_flow(params, cells, obstacles);
 av_vels[tt] = fusion(params, &cells, &tmp_cells, obstacles);
@@ -302,6 +302,9 @@ float fusion(const t_param params, t_speed*  cells, t_speed*  tmp_cells, int*  o
         tmp_cells->speeds6[ii + jj*params.nx] = cells->speeds6[x_e + y_s*params.nx] + params.omega * (d_equ[0] -cells->speeds6[x_e + y_s*params.nx] );
         tmp_cells->speeds7[ii + jj*params.nx] = cells->speeds7[x_e + y_n*params.nx] + params.omega * (d_equ[0] - cells->speeds7[x_e + y_n*params.nx]);
         tmp_cells->speeds8[ii + jj*params.nx] = cells->speeds8[x_w + y_n*params.nx] + params.omega * (d_equ[0] -cells->speeds8[x_w + y_n*params.nx] );
+
+
+        printf("%f  %f\n", u_x, u_y );
 
       //  printf("%d\n", ((u_x * u_x) + (u_y * u_y)) );
         tot_u += sqrtf((u_x * u_x) + (u_y * u_y));
