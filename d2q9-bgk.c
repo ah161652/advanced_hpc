@@ -447,29 +447,29 @@ int initialise(const char* paramfile, const char* obstaclefile,
   /* main grid */
 
   // cells = malloc(sizeof(float*) * 9);
-  cells->speeds0 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  cells->speeds1 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  cells->speeds2 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  cells->speeds3 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  cells->speeds4 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  cells->speeds5 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  cells->speeds6 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  cells->speeds7 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  cells->speeds8 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
+  cells->speeds0 = (float*)_mm_malloc(sizeof(float) * (params->ny *params -> nx), 64);
+  cells->speeds1 = (float*)_mm_malloc(sizeof(float) * (params->ny *params -> nx), 64);
+  cells->speeds2 = (float*)_mm_malloc(sizeof(float) * (params->ny *params -> nx), 64);
+  cells->speeds3 = (float*)_mm_malloc(sizeof(float) * (params->ny *params -> nx), 64);
+  cells->speeds4 = (float*)_mm_malloc(sizeof(float) * (params->ny *params -> nx), 64);
+  cells->speeds5 = (float*)_mm_malloc(sizeof(float) * (params->ny *params -> nx), 64);
+  cells->speeds6 = (float*)_mm_malloc(sizeof(float) * (params->ny *params -> nx), 64);
+  cells->speeds7 = (float*)_mm_malloc(sizeof(float) * (params->ny *params -> nx), 64);
+  cells->speeds8 = (float*)_mm_malloc(sizeof(float) * (params->ny *params -> nx), 64);
 
   if (cells == NULL) die("cannot allocate memory for cells", __LINE__, __FILE__);
 
   /* 'helper' grid, used as scratch space */
    // (*tmp_cells) = malloc(sizeof(float*) * 9);
-  tmp_cells->speeds0 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  tmp_cells->speeds1 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  tmp_cells->speeds2 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  tmp_cells->speeds3 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  tmp_cells->speeds4 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  tmp_cells->speeds5 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  tmp_cells->speeds6 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  tmp_cells->speeds7 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  tmp_cells->speeds8 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
+  tmp_cells->speeds0 = (float*)_mm_malloc(sizeof(float) * (params->ny *params -> nx), 64);
+  tmp_cells->speeds1 = (float*)_mm_malloc(sizeof(float) * (params->ny *params -> nx), 64);
+  tmp_cells->speeds2 = (float*)_mm_malloc(sizeof(float) * (params->ny *params -> nx), 64);
+  tmp_cells->speeds3 = (float*)_mm_malloc(sizeof(float) * (params->ny *params -> nx), 64);
+  tmp_cells->speeds4 = (float*)_mm_malloc(sizeof(float) * (params->ny *params -> nx), 64);
+  tmp_cells->speeds5 = (float*)_mm_malloc(sizeof(float) * (params->ny *params -> nx), 64);
+  tmp_cells->speeds6 = (float*)_mm_malloc(sizeof(float) * (params->ny *params -> nx), 64);
+  tmp_cells->speeds7 = (float*)_mm_malloc(sizeof(float) * (params->ny *params -> nx), 64);
+  tmp_cells->speeds8 = (float*)_mm_malloc(sizeof(float) * (params->ny *params -> nx), 64);
 
   if (tmp_cells == NULL) die("cannot allocate memory for tmp_cells", __LINE__, __FILE__);
 
@@ -561,42 +561,42 @@ int finalise(const t_param* params, t_speed* cells, t_speed* tmp_cells,
   ** free up allocated memory
   */
 
-  free (cells->speeds0);
+  _mm_free (cells->speeds0);
   cells->speeds0 = NULL;
-  free (cells->speeds1);
+  _mm_free (cells->speeds1);
   cells->speeds1 = NULL;
-  free (cells->speeds2);
+  _mm_free (cells->speeds2);
   cells->speeds2 = NULL;
-  free (cells->speeds3);
+  _mm_free (cells->speeds3);
   cells->speeds3 = NULL;
-  free (cells->speeds4);
+  _mm_free (cells->speeds4);
   cells->speeds4 = NULL;
-  free (cells->speeds5);
+  _mm_free (cells->speeds5);
   cells->speeds5 = NULL;
-  free (cells->speeds6);
+  _mm_free (cells->speeds6);
   cells->speeds6 = NULL;
-  free (cells->speeds7);
+  _mm_free (cells->speeds7);
   cells->speeds7 = NULL;
-  free (cells->speeds8);
+  _mm_free (cells->speeds8);
   cells->speeds8 = NULL;
 
-  free (tmp_cells->speeds0);
+  _mm_free (tmp_cells->speeds0);
   tmp_cells->speeds0 = NULL;
-  free (tmp_cells->speeds1);
+  _mm_free (tmp_cells->speeds1);
   tmp_cells->speeds1 = NULL;
-  free (tmp_cells->speeds2);
+  _mm_free (tmp_cells->speeds2);
   tmp_cells->speeds2 = NULL;
-  free (tmp_cells->speeds3);
+  _mm_free (tmp_cells->speeds3);
   tmp_cells->speeds3 = NULL;
-  free (tmp_cells->speeds4);
+  _mm_free (tmp_cells->speeds4);
   tmp_cells->speeds4 = NULL;
-  free (tmp_cells->speeds5);
+  _mm_free (tmp_cells->speeds5);
   tmp_cells->speeds5 = NULL;
-  free (tmp_cells->speeds6);
+  _mm_free (tmp_cells->speeds6);
   tmp_cells->speeds6 = NULL;
-  free (tmp_cells->speeds7);
+  _mm_free (tmp_cells->speeds7);
   tmp_cells->speeds7 = NULL;
-  free (tmp_cells->speeds8);
+  _mm_free (tmp_cells->speeds8);
   tmp_cells->speeds8 = NULL;
 
 
