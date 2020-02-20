@@ -91,7 +91,7 @@ initialise(paramfile, obstaclefile, &params, &cells, &tmp_cells, &obstacles, &av
 gettimeofday(&timstr, NULL);
 tic = timstr.tv_sec + (timstr.tv_usec / 1000000.0);
 
-for (int tt = 0; tt < params.maxIters; tt=tt+2)
+for (int tt = 0; tt < 100; tt=tt+2)
 {
 //accelerate_flow(params, cells, obstacles);
 av_vels[tt] = fusion(params, &cells, &tmp_cells, obstacles);
