@@ -116,7 +116,7 @@ systim = timstr.tv_sec + (timstr.tv_usec / 1000000.0);
 
 /* write final values and free memory */
 printf("==done==\n");
-printf("Reynolds number:\t\t%.12E\n", calc_reynolds(params, &cells, obstacles));
+printf("Reynolds number:\t\t%.d\n", calc_reynolds(params, &cells, obstacles));
 printf("Elapsed time:\t\t\t%.6lf (s)\n", toc - tic);
 printf("Elapsed user CPU time:\t\t%.6lf (s)\n", usrtim);
 printf("Elapsed system CPU time:\t%.6lf (s)\n", systim);
@@ -441,29 +441,29 @@ int initialise(const char* paramfile, const char* obstaclefile,
   /* main grid */
 
   // cells = malloc(sizeof(float*) * 9);
-  cells->speeds0 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  cells->speeds1 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  cells->speeds2 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  cells->speeds3 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  cells->speeds4 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  cells->speeds5 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  cells->speeds6 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  cells->speeds7 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  cells->speeds8 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
+  cells->speeds0 = malloc(sizeof(float) * (params->ny *params -> nx));
+  cells->speeds1 = malloc(sizeof(float) * (params->ny *params -> nx));
+  cells->speeds2 = malloc(sizeof(float) * (params->ny *params -> nx));
+  cells->speeds3 = malloc(sizeof(float) * (params->ny *params -> nx));
+  cells->speeds4 = malloc(sizeof(float) * (params->ny *params -> nx));
+  cells->speeds5 = malloc(sizeof(float) * (params->ny *params -> nx));
+  cells->speeds6 = malloc(sizeof(float) * (params->ny *params -> nx));
+  cells->speeds7 = malloc(sizeof(float) * (params->ny *params -> nx));
+  cells->speeds8 = malloc(sizeof(float) * (params->ny *params -> nx));
 
   if (cells == NULL) die("cannot allocate memory for cells", __LINE__, __FILE__);
 
   /* 'helper' grid, used as scratch space */
    // (*tmp_cells) = malloc(sizeof(float*) * 9);
-  tmp_cells->speeds0 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  tmp_cells->speeds1 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  tmp_cells->speeds2 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  tmp_cells->speeds3 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  tmp_cells->speeds4 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  tmp_cells->speeds5 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  tmp_cells->speeds6 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  tmp_cells->speeds7 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
-  tmp_cells->speeds8 = (float*)malloc(sizeof(float) * (params->ny *params -> nx));
+  tmp_cells->speeds0 = malloc(sizeof(float) * (params->ny *params -> nx));
+  tmp_cells->speeds1 = malloc(sizeof(float) * (params->ny *params -> nx));
+  tmp_cells->speeds2 = malloc(sizeof(float) * (params->ny *params -> nx));
+  tmp_cells->speeds3 = malloc(sizeof(float) * (params->ny *params -> nx));
+  tmp_cells->speeds4 = malloc(sizeof(float) * (params->ny *params -> nx));
+  tmp_cells->speeds5 = malloc(sizeof(float) * (params->ny *params -> nx));
+  tmp_cells->speeds6 = malloc(sizeof(float) * (params->ny *params -> nx));
+  tmp_cells->speeds7 = malloc(sizeof(float) * (params->ny *params -> nx));
+  tmp_cells->speeds8 = malloc(sizeof(float) * (params->ny *params -> nx));
 
   if (tmp_cells == NULL) die("cannot allocate memory for tmp_cells", __LINE__, __FILE__);
 
