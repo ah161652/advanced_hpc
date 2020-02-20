@@ -311,7 +311,7 @@ float fusion(const t_param params, t_speed*  cells, t_speed*  tmp_cells, int*  o
     }
   }
 }
-  printf("%.12E\n", (tot_u / ((float)tot_cells)) );
+  printf("%d\n", (tot_u / ((float)tot_cells)) );
   return tot_u / (float)tot_cells;
 
 }
