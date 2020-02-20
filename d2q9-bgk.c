@@ -129,40 +129,40 @@ return EXIT_SUCCESS;
 
 
 
-int accelerate_flow(const t_param params, t_speed*  cells, int*  obstacles)
-{
-  /* compute weighting factors */
-  float w1 = params.density * params.accel / 9.f;
-  float w2 = params.density * params.accel / 36.f;
+// int accelerate_flow(const t_param params, t_speed*  cells, int*  obstacles)
+// {
+//   /* compute weighting factors */
+//   float w1 = params.density * params.accel / 9.f;
+//   float w2 = params.density * params.accel / 36.f;
+//
+//   /* modify the 2nd row of the grid */
+//   int jj = params.ny - 2;
+//
+//   for (int ii = 0; ii < params.nx; ii++)
+//   {
+//     /* if the cell is not occupied and
+//     ** we don't send a negative density */
+//     if (!obstacles[ii + jj*params.nx]
+//         && (cells->speeds3[ii + jj*params.nx] - w1) > 0.f
+//         && (cells->speeds6[ii + jj*params.nx] - w2) > 0.f
+//         && (cells->speeds7[ii + jj*params.nx] - w2) > 0.f)
+//     {
+//       /* increase 'east-side' densities */
+//       cells->speeds1[ii + jj*params.nx] += w1;
+//       cells->speeds5[ii + jj*params.nx] += w2;
+//       cells->speeds8[ii + jj*params.nx] += w2;
+//       /* decrease 'west-side' densities */
+//       cells->speeds3[ii + jj*params.nx] -= w1;
+//       cells->speeds6[ii + jj*params.nx] -= w2;
+//       cells->speeds7[ii + jj*params.nx] -= w2;
+//     }
+//   }
+//
+//   return EXIT_SUCCESS;
+// }
 
-  /* modify the 2nd row of the grid */
-  int jj = params.ny - 2;
 
-  for (int ii = 0; ii < params.nx; ii++)
-  {
-    /* if the cell is not occupied and
-    ** we don't send a negative density */
-    if (!obstacles[ii + jj*params.nx]
-        && (cells->speeds3[ii + jj*params.nx] - w1) > 0.f
-        && (cells->speeds6[ii + jj*params.nx] - w2) > 0.f
-        && (cells->speeds7[ii + jj*params.nx] - w2) > 0.f)
-    {
-      /* increase 'east-side' densities */
-      cells->speeds1[ii + jj*params.nx] += w1;
-      cells->speeds5[ii + jj*params.nx] += w2;
-      cells->speeds8[ii + jj*params.nx] += w2;
-      /* decrease 'west-side' densities */
-      cells->speeds3[ii + jj*params.nx] -= w1;
-      cells->speeds6[ii + jj*params.nx] -= w2;
-      cells->speeds7[ii + jj*params.nx] -= w2;
-    }
-  }
-
-  return EXIT_SUCCESS;
-}
-
-
-float fusion(const t_param params, t_speed* restrict  cells, t_speed* restrict  tmp_cells, int* restrict  obstacles){
+float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tmp_cells, int* restrict obstacles){
 
   const float c_sq = 1.f / 3.f; /* square of speed of sound */
   const float w0 = 4.f / 9.f;  /* weighting factor */
