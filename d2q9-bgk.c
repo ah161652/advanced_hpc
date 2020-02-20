@@ -232,7 +232,10 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
     __assume_aligned(tmp_cells->speeds7, 64);
     __assume_aligned(tmp_cells->speeds8, 64);
 
-    __assume(ii%params.nx==0);
+    __assume(params.nx%2==0);
+    __assume(params.nx%4==0);
+    __assume(params.nx%16==0);
+  
     #pragma omp simd
     #pragma simd
     for (int ii = 0; ii < params.nx; ii++)
