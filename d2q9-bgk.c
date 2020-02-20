@@ -225,7 +225,7 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
   __assume_aligned(tmp_cells->speeds8, 64);
 
   #pragma omp for nowait schedule(static)
-  #pragma simd aligned
+  // #pragma simd aligned
   for (int jj = 0; jj < params.ny; jj++)
   {
     #pragma omp simd
