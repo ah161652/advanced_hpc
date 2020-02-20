@@ -304,7 +304,7 @@ float fusion(const t_param params, t_speed*  cells, t_speed*  tmp_cells, int*  o
         tmp_cells->speeds8[ii + jj*params.nx] = cells->speeds8[x_w + y_n*params.nx] + params.omega * (d_equ[0] -cells->speeds8[x_w + y_n*params.nx] );
 
 
-        printf("%f  %f\n", u_x, u_y );
+
 
       //  printf("%d\n", ((u_x * u_x) + (u_y * u_y)) );
         tot_u += sqrtf((u_x * u_x) + (u_y * u_y));
@@ -314,7 +314,9 @@ float fusion(const t_param params, t_speed*  cells, t_speed*  tmp_cells, int*  o
     }
   }
 }
-  printf("%f\n", (tot_u / (float)tot_cells) );
+//  printf("%f\n", (tot_u / (float)tot_cells) );
+
+  printf("%f  %d\n", tot_u, tot_cells );
   return tot_u / (float)tot_cells;
 
 }
