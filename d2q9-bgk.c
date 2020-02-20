@@ -212,7 +212,7 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
   {
 
 
-    __assume_aligned(cells->speeds0, 64);
+    __assume_aligned((cells->speeds0), 64);
     __assume_aligned(cells->speeds1, 64);
     __assume_aligned(cells->speeds2, 64);
     __assume_aligned(cells->speeds3, 64);
