@@ -213,6 +213,7 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
 
 
     #pragma omp simd
+    #pragma simd
     for (int ii = 0; ii < params.nx; ii++)
     {
 
