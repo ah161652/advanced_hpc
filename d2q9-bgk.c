@@ -202,6 +202,9 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
   __assume(params.nx%4==0);
   __assume(params.nx%16==0);
 
+  __assume(params.ny%2==0);
+  __assume(params.ny%4==0);
+  __assume(params.ny%16==0);
 
 
   #pragma omp parallel num_threads(28) reduction(+:tot_u,tot_cells)
