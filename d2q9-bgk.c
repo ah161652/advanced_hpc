@@ -178,15 +178,15 @@ float fusion(const t_param params, t_speed*  cells, t_speed*  tmp_cells, int*  o
   int    tot_cells = 0;  /* no. of cells used in calculation */
   float tot_u =0.f;         /* accumulated magnitudes of velocity for each cell */
 
-  _assume_aligned(cells->speed0, 64);
-  _assume_aligned(cells->speed1, 64);
-  _assume_aligned(cells->speed2, 64);
-  _assume_aligned(cells->speed3, 64);
-  _assume_aligned(cells->speed4, 64);
-  _assume_aligned(cells->speed5, 64);
-  _assume_aligned(cells->speed6, 64);
-  _assume_aligned(cells->speed7, 64);
-  _assume_aligned(cells->speed8, 64);
+  __assume_aligned(cells->speed0, 64);
+  __assume_aligned(cells->speed1, 64);
+  __assume_aligned(cells->speed2, 64);
+  __assume_aligned(cells->speed3, 64);
+  __assume_aligned(cells->speed4, 64);
+  __assume_aligned(cells->speed5, 64);
+  __assume_aligned(cells->speed6, 64);
+  __assume_aligned(cells->speed7, 64);
+  __assume_aligned(cells->speed8, 64);
 
   #pragma omp parallel num_threads(28) reduction(+:tot_u,tot_cells)
   {
