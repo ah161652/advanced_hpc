@@ -251,12 +251,7 @@ float fusion(const t_param params, t_speed*  cells, t_speed*  tmp_cells, int*  o
         tmp_cells->speeds6[ii + jj*params.nx] = cells->speeds8[x_w + y_n*params.nx];
         tmp_cells->speeds7[ii + jj*params.nx] = cells->speeds5[x_w + y_s*params.nx];
         tmp_cells->speeds8[ii + jj*params.nx] = cells->speeds6[x_e + y_s*params.nx];
-      }
-
-      //////////////////////////////////
-      //////////Collision////////////////
-      /////////////////////////////////
-      if (!obstacles[jj*params.nx + ii])
+      }else
       {
 
         /* compute local density total */
