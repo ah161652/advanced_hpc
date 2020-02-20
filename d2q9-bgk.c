@@ -204,32 +204,34 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
     }
   }
 
-  __assume_aligned(cells->speeds0, 64);
-  __assume_aligned(cells->speeds1, 64);
-  __assume_aligned(cells->speeds2, 64);
-  __assume_aligned(cells->speeds3, 64);
-  __assume_aligned(cells->speeds4, 64);
-  __assume_aligned(cells->speeds5, 64);
-  __assume_aligned(cells->speeds6, 64);
-  __assume_aligned(cells->speeds7, 64);
-  __assume_aligned(cells->speeds8, 64);
 
-  __assume_aligned(tmp_cells->speeds0, 64);
-  __assume_aligned(tmp_cells->speeds1, 64);
-  __assume_aligned(tmp_cells->speeds2, 64);
-  __assume_aligned(tmp_cells->speeds3, 64);
-  __assume_aligned(tmp_cells->speeds4, 64);
-  __assume_aligned(tmp_cells->speeds5, 64);
-  __assume_aligned(tmp_cells->speeds6, 64);
-  __assume_aligned(tmp_cells->speeds7, 64);
-  __assume_aligned(tmp_cells->speeds8, 64);
 
   #pragma omp for nowait schedule(static)
   // #pragma simd aligned
   for (int jj = 0; jj < params.ny; jj++)
   {
+
+    __assume_aligned(cells->speeds0, 64);
+    __assume_aligned(cells->speeds1, 64);
+    __assume_aligned(cells->speeds2, 64);
+    __assume_aligned(cells->speeds3, 64);
+    __assume_aligned(cells->speeds4, 64);
+    __assume_aligned(cells->speeds5, 64);
+    __assume_aligned(cells->speeds6, 64);
+    __assume_aligned(cells->speeds7, 64);
+    __assume_aligned(cells->speeds8, 64);
+
+    __assume_aligned(tmp_cells->speeds0, 64);
+    __assume_aligned(tmp_cells->speeds1, 64);
+    __assume_aligned(tmp_cells->speeds2, 64);
+    __assume_aligned(tmp_cells->speeds3, 64);
+    __assume_aligned(tmp_cells->speeds4, 64);
+    __assume_aligned(tmp_cells->speeds5, 64);
+    __assume_aligned(tmp_cells->speeds6, 64);
+    __assume_aligned(tmp_cells->speeds7, 64);
+    __assume_aligned(tmp_cells->speeds8, 64);
     #pragma omp simd
-    // #pragma simd aligned
+    #pragma simd unaligned
     for (int ii = 0; ii < params.nx; ii++)
     {
 
