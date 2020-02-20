@@ -237,6 +237,25 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
       __assume_aligned(tmp_cells->speeds7, 64);
       __assume_aligned(tmp_cells->speeds8, 64);
 
+      __assume_aligned(cells->speeds0[ii + jj*params.nx],64);
+        __assume_aligned(cells->speeds1[x_w + jj*params.nx],64);
+          __assume_aligned(cells->speeds2[ii + y_s*params.nx],64);
+            __assume_aligned(cells->speeds3[x_e + jj*params.nx],64);
+              __assume_aligned(cells->speeds4[ii + y_n*params.nx],64);
+                __assume_aligned(cells->speeds5[x_w + y_s*params.nx],64);
+                  __assume_aligned(cells->speeds6[x_e + y_s*params.nx],64);
+                    __assume_aligned(cells->speeds7[x_e + y_n*params.nx],64);
+                      __assume_aligned(cells->speeds8[x_w + y_n*params.nx],64);
+                        // __assume_aligned(,64);
+                        //   __assume_aligned(,64);
+                        //     __assume_aligned(,64);
+                        //       __assume_aligned(,64);
+                        //         __assume_aligned(,64);
+                        //           __assume_aligned(,64);
+                        //             __assume_aligned(,64);
+                        //               __assume_aligned(,64);
+                        //                 __assume_aligned(,64);
+
 
 
 
