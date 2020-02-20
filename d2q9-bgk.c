@@ -231,7 +231,8 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
     // __assume_aligned(tmp_cells->speeds8, 64);
 
     #pragma omp simd
-    #pragma simd aligned(cells->speeds0:64,cells->speeds1:64,cells->speeds2:64,cells->speeds3:64,cells->speeds4:64,cells->speeds5:64,cells->speeds6:64,cells->speeds7:64,cells->speeds8:64,tmp_cells->speeds0:64,tmp_cells->speeds1:64,tmp_cells->speeds2:64,tmp_cells->speeds3:64,tmp_cells->speeds4:64,tmp_cells->speeds5:64,tmp_cells->speeds6:64,tmp_cells->speeds7:64,tmp_cells->speeds8:64)
+    #pragma simd aligned(cells->speeds0:64,cells->speeds1:64,cells->speeds2:64,cells->speeds3:64,cells->speeds4:64,cells->speeds5:64,cells->speeds6:64,cells->speeds7:64,cells->speeds8:64)
+    #pragma simd aligned(tmp_cells->speeds0:64,tmp_cells->speeds1:64,tmp_cells->speeds2:64,tmp_cells->speeds3:64,tmp_cells->speeds4:64,tmp_cells->speeds5:64,tmp_cells->speeds6:64,tmp_cells->speeds7:64,tmp_cells->speeds8:64)
     for (int ii = 0; ii < params.nx; ii++)
     {
 
