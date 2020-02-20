@@ -186,18 +186,18 @@ float fusion(const t_param params, t_speed*  cells, t_speed*  tmp_cells, int*  o
     /* if the cell is not occupied and
     ** we don't send a negative density */
     if (!obstacles[ii + jj*params.nx]
-        && (cells->speeds3[ii + jj*params.nx] - w1) > 0.f
-        && (cells->speeds6[ii + jj*params.nx] - w2) > 0.f
-        && (cells->speeds7[ii + jj*params.nx] - w2) > 0.f)
+        && (cells->speeds3[ii + jj*params.nx] - a1) > 0.f
+        && (cells->speeds6[ii + jj*params.nx] - a2) > 0.f
+        && (cells->speeds7[ii + jj*params.nx] - a2) > 0.f)
     {
       /* increase 'east-side' densities */
-      cells->speeds1[ii + jj*params.nx] += w1;
-      cells->speeds5[ii + jj*params.nx] += w2;
-      cells->speeds8[ii + jj*params.nx] += w2;
+      cells->speeds1[ii + jj*params.nx] += a1;
+      cells->speeds5[ii + jj*params.nx] += a2;
+      cells->speeds8[ii + jj*params.nx] += a2;
       /* decrease 'west-side' densities */
-      cells->speeds3[ii + jj*params.nx] -= w1;
-      cells->speeds6[ii + jj*params.nx] -= w2;
-      cells->speeds7[ii + jj*params.nx] -= w2;
+      cells->speeds3[ii + jj*params.nx] -= a1;
+      cells->speeds6[ii + jj*params.nx] -= a2;
+      cells->speeds7[ii + jj*params.nx] -= a2;
     }
   }
 
