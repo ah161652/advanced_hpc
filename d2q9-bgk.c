@@ -365,6 +365,7 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles)
     }
   }
 
+    printf("%f\n", tot_u / (float)tot_cells);
   return tot_u / (float)tot_cells;
 }
 
