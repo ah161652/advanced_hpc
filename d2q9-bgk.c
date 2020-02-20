@@ -233,6 +233,33 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
   }
 
 
+  __assume_aligned((cells->speeds0), 64);
+  __assume_aligned(cells->speeds1, 64);
+  __assume_aligned(cells->speeds2, 64);
+  __assume_aligned(cells->speeds3, 64);
+  __assume_aligned(cells->speeds4, 64);
+  __assume_aligned(cells->speeds5, 64);
+  __assume_aligned(cells->speeds6, 64);
+  __assume_aligned(cells->speeds7, 64);
+  __assume_aligned(cells->speeds8, 64);
+
+  __assume_aligned(tmp_cells->speeds0, 64);
+  __assume_aligned(tmp_cells->speeds1, 64);
+  __assume_aligned(tmp_cells->speeds2, 64);
+  __assume_aligned(tmp_cells->speeds3, 64);
+  __assume_aligned(tmp_cells->speeds4, 64);
+  __assume_aligned(tmp_cells->speeds5, 64);
+  __assume_aligned(tmp_cells->speeds6, 64);
+  __assume_aligned(tmp_cells->speeds7, 64);
+  __assume_aligned(tmp_cells->speeds8, 64);
+
+  __assume(params.nx%2==0);
+  __assume(params.nx%4==0);
+  __assume(params.nx%16==0);
+  __assume(params.ny%2==0);
+  __assume(params.ny%4==0);
+  __assume(params.ny%16==0);
+
 
   #pragma omp for nowait schedule(static)
   // #pragma simd aligned
@@ -263,6 +290,9 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
     __assume(params.nx%2==0);
     __assume(params.nx%4==0);
     __assume(params.nx%16==0);
+    __assume(params.ny%2==0);
+    __assume(params.ny%4==0);
+    __assume(params.ny%16==0);
 
 
     //#pragma simd
