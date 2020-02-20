@@ -120,7 +120,7 @@ printf("Reynolds number:\t\t%.12E\n", calc_reynolds(params, &cells, obstacles));
 printf("Elapsed time:\t\t\t%.6lf (s)\n", toc - tic);
 printf("Elapsed user CPU time:\t\t%.6lf (s)\n", usrtim);
 printf("Elapsed system CPU time:\t%.6lf (s)\n", systim);
-write_values(params, cells, obstacles, av_vels);
+write_values(params, &cells, obstacles, av_vels);
 finalise(&params, &cells, &tmp_cells, &obstacles, &av_vels);
 
 return EXIT_SUCCESS;
