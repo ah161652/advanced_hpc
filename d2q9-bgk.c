@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
   gettimeofday(&timstr, NULL);
   tic = timstr.tv_sec + (timstr.tv_usec / 1000000.0);
 
-  for (int tt = 0; tt < params.maxIters; tt=tt+2)
+  for (int tt = 0; tt <100; tt=tt+2)
   {
   //accelerate_flow(params, cells, obstacles);
   av_vels[tt] = fusion(params, cells, tmp_cells, obstacles);
@@ -309,6 +309,7 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
   }
 }
 
+      printf("%f\n", tot_u / (float)tot_cells);
   //Av vels
   return tot_u / (float)tot_cells;
 
@@ -365,7 +366,7 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles)
     }
   }
 
-    printf("%f\n", tot_u / (float)tot_cells);
+
   return tot_u / (float)tot_cells;
 }
 
