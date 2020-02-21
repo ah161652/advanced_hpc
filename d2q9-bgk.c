@@ -371,8 +371,8 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
 
 
       //  printf("%d\n", ((u_x * u_x) + (u_y * u_y)) );
-      tot_u = (!obstacles[jj*params.nx + ii]) ? (tot_u + sqrtf((u_x * u_x) + (u_y * u_y))): tot_u;
-      tot_cells = (!obstacles[jj*params.nx + ii]) ? tot_cells+1 : tot_cells;
+      tot_u = (!obstacles[jj*params.nx + ii]) ? (tot_u + sqrtf((u_x * u_x) + (u_y * u_y))): void();
+      tot_cells = (!obstacles[jj*params.nx + ii]) ? tot_cells+1 : void();
 
       }
     }
