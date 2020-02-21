@@ -799,7 +799,7 @@ int write_values(const t_param params, t_speed* cells, int* obstacles, float* av
                    + cells->speeds6[ii + jj*params.nx]
                    + cells->speeds7[ii + jj*params.nx]))
                / local_density;
-//
+////
   /* compute y velocity component */
    u_y = (cells->speeds2[ii + jj*params.nx]
                 + cells->speeds5[ii + jj*params.nx]
