@@ -236,7 +236,7 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
     __assume(params.nx%16==0);
 
     //#pragma omp simd
-    #pragma simd
+    #pragma simd lastprivate(tot_u)
     for (int ii = 0; ii < params.nx; ii++)
     {
 
@@ -324,6 +324,7 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
         // }
 
         #pragma novector
+        {
         d_equ[1] = w1 * local_density * (1.f + u[1] / c_sq + (u[1]*u[1]) / w3 - u_sq / w4);
         d_equ[2] = w1 * local_density * (1.f + u[2] / c_sq + (u[2]*u[2]) / w3 - u_sq / w4);
         d_equ[3] = w1 * local_density * (1.f + u[3] / c_sq + (u[3]*u[3]) / w3 - u_sq / w4);
@@ -333,6 +334,7 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
         d_equ[6] = w2 * local_density * (1.f + u[6] / c_sq + (u[6]*u[6]) / w3 - u_sq / w4);
         d_equ[7] = w2 * local_density * (1.f + u[7] / c_sq + (u[7]*u[7]) / w3 - u_sq / w4);
         d_equ[8] = w2 * local_density * (1.f + u[8] / c_sq + (u[8]*u[8]) / w3 - u_sq / w4);
+      }
 
 
 
@@ -375,7 +377,7 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
 
       }
     }
-  
+
 // }
 //  printf("%f\n", (tot_u / (float)tot_cells) );
 
