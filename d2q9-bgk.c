@@ -206,7 +206,7 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
 
 
 
-  #pragma omp parallel for schedule(static) num_threads(28) reduction(+:tot_u,tot_cells)
+
   for (int jj = 0; jj < params.ny; jj++)
   {
 
@@ -236,7 +236,8 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
     __assume(params.nx%16==0);
 
     //#pragma omp simd
-    #pragma simd reduction(+:tot_u)
+    #pragma omp parallel for schedule(static) num_threads(28) reduction(+:tot_u,tot_cells)
+    #pragma simd
     for (int ii = 0; ii < params.nx; ii++)
     {
 
