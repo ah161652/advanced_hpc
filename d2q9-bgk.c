@@ -322,7 +322,7 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
 
 float av_velocity(const t_param params, t_speed* cells, int* obstacles)
 {
-  int    tot_cells = 0;  /* no. of cells used in calculation */
+  //int    tot_cells = 0;  /* no. of cells used in calculation */
   float tot_u;          /* accumulated magnitudes of velocity for each cell */
 
   /* initialise */
