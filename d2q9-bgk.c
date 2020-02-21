@@ -179,6 +179,11 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
   float tot_u =0.f;         /* accumulated magnitudes of velocity for each cell */
 
 
+
+  #pragma omp parallel num_threads(28) reduction(+:tot_u,tot_cells)
+  {
+
+  #pragma omp for nowait schedule(guided)
   for (int ii = 0; ii < params.nx; ii++)
   {
     /* if the cell is not occupied and
@@ -201,7 +206,8 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
 
 
 
-  #pragma omp parallel for reduction(+:tot_u,tot_cells)
+  #pragma omp for nowait schedule(guided)
+  // #pragma simd aligned
   for (int jj = 0; jj < params.ny; jj++)
   {
 
@@ -230,8 +236,8 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
     __assume(params.nx%4==0);
     __assume(params.nx%16==0);
 
-
-    //#pragma omp simd
+    #pragma omp simd reduction(+:tot_u,tot_cells)
+    //#pragma simd
     for (int ii = 0; ii < params.nx; ii++)
     {
 
@@ -364,18 +370,13 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
 
 
 
-
-      // tot_u = (!obstacles[jj*params.nx + ii]) ? (tot_u + sqrtf((u_x * u_x) + (u_y * u_y))): tot_u;
-      // tot_cells = (!obstacles[jj*params.nx + ii]) ? tot_cells+1 : tot_cells;
-
-      if (!obstacles[jj*params.nx + ii]){(tot_u = tot_u + sqrtf((u_x * u_x) + (u_y * u_y)));
-        tot_cells = tot_cells+1;
-      }
-
+      //  printf("%d\n", ((u_x * u_x) + (u_y * u_y)) );
+      tot_u = (!obstacles[jj*params.nx + ii]) ? (tot_u + sqrtf((u_x * u_x) + (u_y * u_y))): tot_u;
+      tot_cells = (!obstacles[jj*params.nx + ii]) ? tot_cells+1 : tot_cells;
 
       }
     }
-
+  }
 // }
 //  printf("%f\n", (tot_u / (float)tot_cells) );
 
@@ -548,7 +549,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
  #pragma omp parallel num_threads(28)
  {
 
- #pragma omp for nowait schedule(static)
+ #pragma omp for nowait schedule(guided)
   for (int jj = 0; jj < params->ny; jj++)
   {
     for (int ii = 0; ii < params->nx; ii++)
@@ -568,7 +569,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
     }
   }
 
-  #pragma omp for nowait schedule(static)
+  #pragma omp for nowait schedule(guided)
   for (int jj = 0; jj < params->ny; jj++)
   {
     for (int ii = 0; ii < params->nx; ii++)
