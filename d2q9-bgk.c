@@ -32,6 +32,8 @@ typedef struct
   float speeds[NSPEEDS];
 } t_speed;
 
+int tot_cells = 0;
+
 
 int initialise(const char* paramfile, const char* obstaclefile,
                t_param* params, t_speed** cells_ptr, t_speed** tmp_cells_ptr,
@@ -78,6 +80,7 @@ int main(int argc, char* argv[])
 
   /* initialise our data structures and load values from file */
   initialise(paramfile, obstaclefile, &params, &cells, &tmp_cells, &obstacles, &av_vels);
+  for (int ii = 0; ii < params.nx * params.ny; ii++) if (!obstacles[ii]) ++tot_cells;
 
   /* iterate for maxIters timesteps */
   gettimeofday(&timstr, NULL);
@@ -173,10 +176,10 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
   float a2 = params.density * params.accel / 36.f;
   int jj = params.ny - 2;
 
-  int    tot_cells = 0;  /* no. of cells used in calculation */
+  //int    tot_cells = 0;  /* no. of cells used in calculation */
   float tot_u =0.f;         /* accumulated magnitudes of velocity for each cell */
 
-  #pragma omp parallel num_threads(28) reduction(+:tot_u,tot_cells)
+  #pragma omp parallel num_threads(28) reduction(+:tot_u)
   {
 
   #pragma omp for nowait schedule(static)
@@ -302,7 +305,7 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
 
           //Av vels
           tot_u += sqrtf((u_x * u_x) + (u_y * u_y));
-          ++tot_cells;
+          //++tot_cells;
 
       }
     }
@@ -360,7 +363,7 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles)
         /* accumulate the norm of x- and y- velocity components */
         tot_u += sqrtf((u_x * u_x) + (u_y * u_y));
         /* increase counter of inspected cells */
-        ++tot_cells;
+        //++tot_cells;
       }
     }
   }
