@@ -201,7 +201,7 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
 
 
 
-  #pragma omp for
+  #pragma omp for num_threads(28) schedule(static)
   for (int jj = 0; jj < params.ny; jj++)
   {
 
