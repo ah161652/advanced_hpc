@@ -231,7 +231,7 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
     __assume(params.nx%16==0);
 
 
-    //#pragma omp simd
+    #pragma omp simd
     for (int ii = 0; ii < params.nx; ii++)
     {
 
@@ -364,9 +364,14 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
 
 
 
-      //  printf("%d\n", ((u_x * u_x) + (u_y * u_y)) );
-      tot_u = (!obstacles[jj*params.nx + ii]) ? (tot_u + sqrtf((u_x * u_x) + (u_y * u_y))): tot_u;
-      tot_cells = (!obstacles[jj*params.nx + ii]) ? tot_cells+1 : tot_cells;
+
+      // tot_u = (!obstacles[jj*params.nx + ii]) ? (tot_u + sqrtf((u_x * u_x) + (u_y * u_y))): tot_u;
+      // tot_cells = (!obstacles[jj*params.nx + ii]) ? tot_cells+1 : tot_cells;
+
+      if (!obstacles[jj*params.nx + ii]){(tot_u = tot_u + sqrtf((u_x * u_x) + (u_y * u_y)));
+        tot_cells = tot_cells+1;
+      }
+
 
       }
     }
