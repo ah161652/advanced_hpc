@@ -166,7 +166,7 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
   __assume(params.ny%16==0);
 
 
-  #pragma omp parallel num_threads(1) reduction(+:tot_u,tot_cells)
+  #pragma omp parallel num_threads(2) reduction(+:tot_u,tot_cells)
   {
 
   #pragma omp for nowait schedule(static)
@@ -513,7 +513,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
   float w1 = params->density      / 9.f;
   float w2 = params->density      / 36.f;
 
- #pragma omp parallel num_threads(1)
+ #pragma omp parallel num_threads(2)
  {
 
  #pragma omp for nowait schedule(static)
