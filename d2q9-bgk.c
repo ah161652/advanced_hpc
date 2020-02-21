@@ -236,7 +236,7 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
     __assume(params.nx%16==0);
 
     //#pragma omp simd
-    #pragma simd lastprivate(tot_u)
+    #pragma simd reduction(+:tot_u)
     for (int ii = 0; ii < params.nx; ii++)
     {
 
