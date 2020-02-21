@@ -201,7 +201,7 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
 
 
 
-  #pragma omp for reduction(:+tot_u,tot_cells)
+  #pragma omp for reduction(+:tot_u,tot_cells)
   for (int jj = 0; jj < params.ny; jj++)
   {
 
