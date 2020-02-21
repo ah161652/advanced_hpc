@@ -180,7 +180,7 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
 
 
 
-  #pragma omp parallel num_threads(28) reduction(+:tot_u,tot_cells)
+  #pragma omp parallel num_threads(28)
   {
 
   #pragma omp for nowait schedule(static)
@@ -237,7 +237,7 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
     __assume(params.nx%16==0);
 
     //#pragma omp simd
-    #pragma simd lastprivate(tot_u) 
+    #pragma simd reduction(+:tot_u,tot_cells)
     for (int ii = 0; ii < params.nx; ii++)
     {
 
