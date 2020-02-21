@@ -236,8 +236,9 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
     __assume(params.nx%4==0);
     __assume(params.nx%16==0);
 
-    //#pragma omp simd
-    #pragma simd shared(tot_u)
+
+    //#pragma simd
+    #pragma omp simd 
     for (int ii = 0; ii < params.nx; ii++)
     {
 
