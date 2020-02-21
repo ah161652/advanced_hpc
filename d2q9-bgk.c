@@ -206,7 +206,7 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
 
 
 
-  #pragma omp for nowait schedule(static) reduction(+:tot_u,tot_cells)
+  #pragma omp for nowait schedule(static) firstprivate(tot_u,tot_cells) reduction(+:tot_u,tot_cells)
   // #pragma simd aligned
   for (int jj = 0; jj < params.ny; jj++)
   {
@@ -371,8 +371,8 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
 
 
       //  printf("%d\n", ((u_x * u_x) + (u_y * u_y)) );
-      tot_u = (!obstacles[jj*params.nx + ii]) ? (tot_u + sqrtf((u_x * u_x) + (u_y * u_y))): 0;
-      tot_cells = (!obstacles[jj*params.nx + ii]) ? tot_cells+1 : 0;
+      tot_u = (!obstacles[jj*params.nx + ii]) ? (tot_u + sqrtf((u_x * u_x) + (u_y * u_y))): tot_u;
+      tot_cells = (!obstacles[jj*params.nx + ii]) ? tot_cells+1 : tot_cells;
 
       }
     }
