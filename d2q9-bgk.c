@@ -297,7 +297,7 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
 
     //#pragma simd
   //  #pragma vector aligned
-    #pragma omp simd firstprivate(tot_u,tot_cells)
+    #pragma omp simd 
     for (int ii = 0; ii < params.nx; ii++)
     {
 
