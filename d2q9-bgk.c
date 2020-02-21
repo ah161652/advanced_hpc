@@ -179,11 +179,6 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
   float tot_u =0.f;         /* accumulated magnitudes of velocity for each cell */
 
 
-
-  #pragma omp parallel num_threads(28) reduction(+:tot_u,tot_cells)
-  {
-
-  #pragma omp for nowait schedule(static)
   for (int ii = 0; ii < params.nx; ii++)
   {
     /* if the cell is not occupied and
@@ -206,7 +201,7 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
 
 
 
-  #pragma omp for nowait schedule(static)
+  #pragma omp for reduction(:+tot_u,tot_cells)
   for (int jj = 0; jj < params.ny; jj++)
   {
 
@@ -235,7 +230,7 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
     __assume(params.nx%4==0);
     __assume(params.nx%16==0);
 
-    #pragma omp simd 
+    #pragma omp simd
     for (int ii = 0; ii < params.nx; ii++)
     {
 
@@ -374,7 +369,7 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
 
       }
     }
-  }
+
 // }
 //  printf("%f\n", (tot_u / (float)tot_cells) );
 
