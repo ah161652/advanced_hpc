@@ -629,8 +629,8 @@ int finalise(const t_param* params, t_speed** cells_ptr, t_speed** tmp_cells_ptr
   clReleaseKernel(ocl.accelerate_flow);
   clReleaseKernel(ocl.propagate);
   clReleaseKernel(ocl.rebound);
+  clReleaseKernel(ocl.collision);
   clReleaseProgram(ocl.program);
-  clReleaseProgram(ocl.collision);
   clReleaseCommandQueue(ocl.queue);
   clReleaseContext(ocl.context);
 
