@@ -81,7 +81,7 @@ kernel void rebound(global t_speed* cells ,global t_speed* tmp_cells,
   int jj = get_global_id(1);
 
       /* if the cell contains an obstacle */
-      if (obstacles[jj*.nx + ii])
+      if (obstacles[jj*nx + ii])
       {
         /* called after propagate, so taking values from scratch space
         ** mirroring, and writing into main grid */
