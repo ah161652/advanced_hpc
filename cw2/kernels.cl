@@ -85,14 +85,14 @@ kernel void rebound(global t_speed* cells ,global t_speed* tmp_cells,
       {
         /* called after propagate, so taking values from scratch space
         ** mirroring, and writing into main grid */
-        cells[ii + jj*.nx].speeds[1] = tmp_cells[ii + jj*.nx].speeds[3];
-        cells[ii + jj*.nx].speeds[2] = tmp_cells[ii + jj*.nx].speeds[4];
-        cells[ii + jj*.nx].speeds[3] = tmp_cells[ii + jj*.nx].speeds[1];
-        cells[ii + jj*.nx].speeds[4] = tmp_cells[ii + jj*.nx].speeds[2];
-        cells[ii + jj*.nx].speeds[5] = tmp_cells[ii + jj*.nx].speeds[7];
-        cells[ii + jj*.nx].speeds[6] = tmp_cells[ii + jj*.nx].speeds[8];
-        cells[ii + jj*.nx].speeds[7] = tmp_cells[ii + jj*.nx].speeds[5];
-        cells[ii + jj*.nx].speeds[8] = tmp_cells[ii + jj*.nx].speeds[6];
+        cells[ii + jj*nx].speeds[1] = tmp_cells[ii + jj*nx].speeds[3];
+        cells[ii + jj*nx].speeds[2] = tmp_cells[ii + jj*nx].speeds[4];
+        cells[ii + jj*nx].speeds[3] = tmp_cells[ii + jj*nx].speeds[1];
+        cells[ii + jj*nx].speeds[4] = tmp_cells[ii + jj*nx].speeds[2];
+        cells[ii + jj*nx].speeds[5] = tmp_cells[ii + jj*nx].speeds[7];
+        cells[ii + jj*nx].speeds[6] = tmp_cells[ii + jj*nx].speeds[8];
+        cells[ii + jj*nx].speeds[7] = tmp_cells[ii + jj*nx].speeds[5];
+        cells[ii + jj*nx].speeds[8] = tmp_cells[ii + jj*nx].speeds[6];
       }
 
 
