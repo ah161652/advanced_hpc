@@ -212,12 +212,12 @@ kernel void av_velocity(global t_speed* cells,
   int local_id_y       = get_local_id(1);
   int group_id_x       = get_group_id(0);
   int group_id_y      = get_group_id(1);
-  int group_area = x_work_items*y_work_items;
+  int group_area = num_x_work_items*num_y_work_items;
   int num_x_groups =nx / num_x_work_items;
   int num_y_groups = ny / num_y_work_items;
 
-  int position_in_group = local_idX + (x_work_items * local_idY);
-  int group_index = group_idX + (num_x_groups * group_idY)
+  int position_in_group = local_id_x + (num_x_work_items * local_id_y);
+  int group_index = group_id_x + (num_x_groups * group_id_y)
 
       /* ignore occupied cells */
       if (!obstacles[ii + jj*nx])
@@ -256,7 +256,7 @@ kernel void av_velocity(global t_speed* cells,
 
   barrier(CLK_LOCAL_MEM_FENCE);
 
-  if (local_idx ==0 && local_idY ==0){
+  if (local_id_x ==0 && local_id_y ==0){
 
     int total_cell_count = 0;
     float total_vel_count = 0.0f;
