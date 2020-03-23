@@ -368,11 +368,11 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
   checkError(err, "setting av_velocity arg 3", __LINE__);
   err = clSetKernelArg(ocl.av_velocity, 4, sizeof(float)*group_size, NULL);
   checkError(err, "setting av_velocity arg 4", __LINE__);
-  err = clSetKernelArg(ocl.av_velocity, 5, sizeof(cl_mem), vel_counts);
+  err = clSetKernelArg(ocl.av_velocity, 5, sizeof(cl_mem), &vel_counts);
   checkError(err, "setting av_velocity arg 5", __LINE__);
   err = clSetKernelArg(ocl.av_velocity, 6, sizeof(float)*group_size,NULL);
   checkError(err, "setting av_velocity arg 6", __LINE__);
-  err = clSetKernelArg(ocl.av_velocity, 7, sizeof(cl_mem),cell_counts);
+  err = clSetKernelArg(ocl.av_velocity, 7, sizeof(cl_mem),&cell_counts);
   checkError(err, "setting av_velocity arg 7", __LINE__);
 
   size_t global[2] = {params.nx, params.ny};
