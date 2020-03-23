@@ -554,7 +554,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
   *av_vels_ptr = (float*)malloc(sizeof(float) * params->maxIters);
 
   params->group_size = group_size_y * group_size_x;
-  params->n_groups = (params.nx * params.ny)/(group_size_y * group_size_x);
+  params->n_groups = (params->nx * params->ny)/(group_size_y * group_size_x);
 
 
   cl_int err;
@@ -634,12 +634,12 @@ int initialise(const char* paramfile, const char* obstaclefile,
     sizeof(cl_int) * params->nx * params->ny, NULL, &err);
   checkError(err, "creating obstacles buffer", __LINE__);
   ocl->cell_counts = clCreateBuffer(
-    ocl.context, CL_MEM_READ_WRITE,
-    sizeof(int) * n_groups, NULL, &err);
+    ocl->context, CL_MEM_READ_WRITE,
+    sizeof(int) * params->n_groups, NULL, &err);
   checkError(err, "creating cell_count buffer", __LINE__);
   ocl->vel_counts = clCreateBuffer(
-    ocl.context, CL_MEM_READ_WRITE,
-    sizeof(float) * n_groups, NULL, &err);
+    ocl->context, CL_MEM_READ_WRITE,
+    sizeof(float) * params->n_groups, NULL, &err);
   checkError(err, "creating vel_count buffer", __LINE__);
 
   return EXIT_SUCCESS;
