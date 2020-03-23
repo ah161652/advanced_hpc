@@ -337,8 +337,6 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
     checkError(err, "Getting kernel work group info", __LINE__);
 
   printf("%zu\n", group_size);
-  group_size = 128;
-
 
   int n_groups = (params.nx * params.ny)/group_size;
 
@@ -378,7 +376,7 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
 
   size_t global[2] = {params.nx, params.ny};
   err = clEnqueueNDRangeKernel(ocl.queue, ocl.av_velocity,
-                               2, NULL, global, &group_size, 0, NULL, NULL);
+                               2, NULL, global, NULL, 0, NULL, NULL);
   checkError(err, "enqueueing av_velocity kernel", __LINE__);
 
   // Wait for kernel to finish
