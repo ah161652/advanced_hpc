@@ -212,6 +212,7 @@ kernel void av_velocity(global t_speed* cells,
   int local_id_y       = get_local_id(1);
   int group_id_x       = get_group_id(0);
   int group_id_y      = get_group_id(1);
+
   int group_area = num_x_work_items*num_y_work_items;
   int num_x_groups =nx / num_x_work_items;
   int num_y_groups = ny / num_y_work_items;
@@ -256,10 +257,10 @@ kernel void av_velocity(global t_speed* cells,
 
   barrier(CLK_LOCAL_MEM_FENCE);
 
-  if (local_id_x ==0 && local_id_y ==0){
+  int total_cell_count = 0;
+  float total_vel_count = 0.0f;
 
-    int total_cell_count = 0;
-    float total_vel_count = 0.0f;
+  if (local_id_x ==0 && local_id_y ==0){
 
     for (int i=0; i<group_area; i++) {
       total_cell_count = total_cell_count + local_total_cells[i];
