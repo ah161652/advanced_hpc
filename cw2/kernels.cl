@@ -260,7 +260,7 @@ kernel void av_velocity(global t_speed* cells,
   int total_cell_count = 0;
   float total_vel_count = 0.0f;
 
-  if (local_id_x ==1 && local_id_y ==1){
+  if (local_id_x ==0 && local_id_y ==0){
 
     for (int i=0; i<group_area; i++) {
       total_cell_count = total_cell_count + local_total_cells[i];

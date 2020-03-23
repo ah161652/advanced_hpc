@@ -54,6 +54,12 @@ typedef struct
   float speeds[NSPEEDS];
 } t_speed;
 
+int group_size_x = 16;
+int group_size_y = 16;
+int total_group_size = group_size_x*group_size_y;
+
+int n_groups = (params.nx * params.ny)/total_group_size;
+
 /*
 ** function prototypes
 */
@@ -326,37 +332,16 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
 {
 
 
-  cl_mem cell_counts;
-  cl_mem vel_counts;
 
-  cl_int err;
+    int *tot_cells = (int*)malloc(sizeof(int) * n_groups);
+    float *tot_u = (float*)malloc(sizeof(float) * n_groups);
 
-  size_t group_size;
 
-  err = clGetKernelWorkGroupInfo (ocl.av_velocity, ocl.device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &group_size, NULL);
-    checkError(err, "Getting kernel work group info", __LINE__);
+    cl_int err;
 
-  //printf("%zu\n", group_size);
 
-  group_size = 128;
 
-  int n_groups = (params.nx * params.ny)/group_size;
 
-  int *tot_cells;
-  float *tot_u;
-
-  tot_cells = calloc(sizeof(int), n_groups);
-  tot_u = calloc(sizeof(float), n_groups);
-
-  cell_counts = clCreateBuffer(
-    ocl.context, CL_MEM_READ_WRITE,
-    sizeof(int) * n_groups, NULL, &err);
-  checkError(err, "creating cell_count buffer", __LINE__);
-
-  vel_counts = clCreateBuffer(
-    ocl.context, CL_MEM_READ_WRITE,
-    sizeof(float) * n_groups, NULL, &err);
-  checkError(err, "creating vel_count buffer", __LINE__);
 
 
   err = clSetKernelArg(ocl.av_velocity, 0, sizeof(cl_mem), &ocl.cells);
@@ -367,17 +352,17 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
   checkError(err, "setting av_velocity arg 2", __LINE__);
   err = clSetKernelArg(ocl.av_velocity, 3, sizeof(cl_int), &params.ny);
   checkError(err, "setting av_velocity arg 3", __LINE__);
-  err = clSetKernelArg(ocl.av_velocity, 4, sizeof(float)*group_size, NULL);
+  err = clSetKernelArg(ocl.av_velocity, 4, sizeof(float)*total_group_size, NULL);
   checkError(err, "setting av_velocity arg 4", __LINE__);
-  err = clSetKernelArg(ocl.av_velocity, 5, sizeof(cl_mem), &vel_counts);
+  err = clSetKernelArg(ocl.av_velocity, 5, sizeof(cl_mem), &ocl.vel_counts);
   checkError(err, "setting av_velocity arg 5", __LINE__);
-  err = clSetKernelArg(ocl.av_velocity, 6, sizeof(int)*group_size,NULL);
+  err = clSetKernelArg(ocl.av_velocity, 6, sizeof(int)*total_group_size,NULL);
   checkError(err, "setting av_velocity arg 6", __LINE__);
-  err = clSetKernelArg(ocl.av_velocity, 7, sizeof(cl_mem),&cell_counts);
+  err = clSetKernelArg(ocl.av_velocity, 7, sizeof(cl_mem),&ocl.cell_counts);
   checkError(err, "setting av_velocity arg 7", __LINE__);
 
   size_t global[2] = {params.nx, params.ny};
-  size_t local[2] = {32, 4};
+  size_t local[2] = {group_size_x, group_size_y};
   err = clEnqueueNDRangeKernel(ocl.queue, ocl.av_velocity,
                                2, NULL, global, local, 0, NULL, NULL);
   checkError(err, "enqueueing av_velocity kernel", __LINE__);
@@ -387,12 +372,12 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
   checkError(err, "waiting for av_velocity kernel", __LINE__);
 
   err = clEnqueueReadBuffer(
-    ocl.queue, cell_counts, CL_TRUE, 0,
+    ocl.queue, ocl.cell_counts, CL_TRUE, 0,
     sizeof(int) * n_groups, tot_cells, 0, NULL, NULL);
   checkError(err, "reading tot_cells data", __LINE__);
 
   err = clEnqueueReadBuffer(
-    ocl.queue, vel_counts, CL_TRUE, 0,
+    ocl.queue, ocl.vel_counts, CL_TRUE, 0,
     sizeof(float) * n_groups, tot_u, 0, NULL, NULL);
   checkError(err, "reading tot_u data", __LINE__);
 
@@ -643,6 +628,14 @@ int initialise(const char* paramfile, const char* obstaclefile,
     ocl->context, CL_MEM_READ_WRITE,
     sizeof(cl_int) * params->nx * params->ny, NULL, &err);
   checkError(err, "creating obstacles buffer", __LINE__);
+  ocl->cell_counts = clCreateBuffer(
+    ocl.context, CL_MEM_READ_WRITE,
+    sizeof(int) * n_groups, NULL, &err);
+  checkError(err, "creating cell_count buffer", __LINE__);
+  ocl->vel_counts = clCreateBuffer(
+    ocl.context, CL_MEM_READ_WRITE,
+    sizeof(float) * n_groups, NULL, &err);
+  checkError(err, "creating vel_count buffer", __LINE__);
 
   return EXIT_SUCCESS;
 }
