@@ -196,9 +196,82 @@ kernel void collision(global t_speed* cells ,global t_speed* tmp_cells,
         }
       }
 
+}
+
+
+kernel void av_velocity(global t_speed* cells,
+                      global int* obstacles,
+                      int nx, int ny, local float* local_tot_u, global float* partial_tot_u, local int* local_total_cells, global int* partial_total_cells)
+{
+  /* get column and row indices */
+  int ii = get_global_id(0);
+  int jj = get_global_id(1);
+  int num_x_work_items  = get_local_size(0);
+  int num_y_work_items  = get_local_size(1);
+  int local_id_x       = get_local_id(0);
+  int local_id_y       = get_local_id(1);
+  int group_id_x       = get_group_id(0);
+  int group_id_y      = get_group_id(1);
+  int group_area = x_work_items*y_work_items;
+  int num_x_groups =nx / num_x_work_items;
+  int num_y_groups = ny / num_y_work_items;
+
+  int position_in_group = local_idX + (x_work_items * local_idY);
+  int group_index = group_idX + (num_x_groups * group_idY)
+
+      /* ignore occupied cells */
+      if (!obstacles[ii + jj*nx])
+      {
+        /* local density total */
+        float local_density = 0.f;
+
+        for (int kk = 0; kk < 9; kk++)
+        {
+          local_density += cells[ii + jj*nx].speeds[kk];
+        }
+
+        /* x-component of velocity */
+        float u_x = (cells[ii + jj*nx].speeds[1]
+                      + cells[ii + jj*nx].speeds[5]
+                      + cells[ii + jj*nx].speeds[8]
+                      - (cells[ii + jj*nx].speeds[3]
+                         + cells[ii + jj*nx].speeds[6]
+                         + cells[ii + jj*nx].speeds[7]))
+                     / local_density;
+        /* compute y velocity component */
+        float u_y = (cells[ii + jj*nx].speeds[2]
+                      + cells[ii + jj*nx].speeds[5]
+                      + cells[ii + jj*nx].speeds[6]
+                      - (cells[ii + jj*nx].speeds[4]
+                         + cells[ii + jj*nx].speeds[7]
+                         + cells[ii + jj*nx].speeds[8]))
+                     / local_density;
+        /* accumulate the norm of x- and y- velocity components */
+        local_tot_u[position_in_group] = sqrt((u_x * u_x) + (u_y * u_y));
+        local_total_cells[position_in_group] = 1;
+
+      }
 
 
 
+  barrier(CLK_LOCAL_MEM_FENCE);
+
+  if (local_idx ==0 && local_idY ==0){
+
+    int total_cell_count = 0;
+    float total_vel_count = 0.0f;
+
+    for (int i=0; i<group_area; i++) {
+      total_cell_count = total_cell_count + local_total_cells[i];
+      total_vel_count = total_vel_count + local_tot_u[i];
+  }
+
+  partial_total_cells[group_index] = total_cell_count;
+  partial_tot_u[group_index] = total_vel_count;
+
+
+
+}
 
 
 
