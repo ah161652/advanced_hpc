@@ -331,7 +331,7 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
 
   cl_int err;
 
-  int group_size;
+  size_t group_size;
 
   err = clGetKernelWorkGroupInfo (ocl.av_velocity, ocl.device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(int), &group_size, NULL);
     checkError(err, "Getting kernel work group info", __LINE__);
