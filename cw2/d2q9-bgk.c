@@ -27,6 +27,9 @@ typedef struct
   float density;       /* density per link */
   float accel;         /* density redistribution */
   float omega;         /* relaxation parameter */
+  int group_size;
+  int n_groups;
+
 } t_param;
 
 /* struct to hold OpenCL objects */
@@ -56,9 +59,6 @@ typedef struct
 
 int group_size_x = 16;
 int group_size_y = 16;
-int total_group_size = group_size_x*group_size_y;
-
-int n_groups = (params.nx * params.ny)/total_group_size;
 
 /*
 ** function prototypes
@@ -333,8 +333,8 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
 
 
 
-    int *tot_cells = (int*)malloc(sizeof(int) * n_groups);
-    float *tot_u = (float*)malloc(sizeof(float) * n_groups);
+    int *tot_cells = (int*)malloc(sizeof(int) * params.n_groups);
+    float *tot_u = (float*)malloc(sizeof(float) * params.n_groups);
 
 
     cl_int err;
@@ -352,11 +352,11 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
   checkError(err, "setting av_velocity arg 2", __LINE__);
   err = clSetKernelArg(ocl.av_velocity, 3, sizeof(cl_int), &params.ny);
   checkError(err, "setting av_velocity arg 3", __LINE__);
-  err = clSetKernelArg(ocl.av_velocity, 4, sizeof(float)*total_group_size, NULL);
+  err = clSetKernelArg(ocl.av_velocity, 4, sizeof(float)*params.group_size, NULL);
   checkError(err, "setting av_velocity arg 4", __LINE__);
   err = clSetKernelArg(ocl.av_velocity, 5, sizeof(cl_mem), &ocl.vel_counts);
   checkError(err, "setting av_velocity arg 5", __LINE__);
-  err = clSetKernelArg(ocl.av_velocity, 6, sizeof(int)*total_group_size,NULL);
+  err = clSetKernelArg(ocl.av_velocity, 6, sizeof(int)*params.group_size,NULL);
   checkError(err, "setting av_velocity arg 6", __LINE__);
   err = clSetKernelArg(ocl.av_velocity, 7, sizeof(cl_mem),&ocl.cell_counts);
   checkError(err, "setting av_velocity arg 7", __LINE__);
@@ -373,18 +373,18 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
 
   err = clEnqueueReadBuffer(
     ocl.queue, ocl.cell_counts, CL_TRUE, 0,
-    sizeof(int) * n_groups, tot_cells, 0, NULL, NULL);
+    sizeof(int) * params.n_groups, tot_cells, 0, NULL, NULL);
   checkError(err, "reading tot_cells data", __LINE__);
 
   err = clEnqueueReadBuffer(
     ocl.queue, ocl.vel_counts, CL_TRUE, 0,
-    sizeof(float) * n_groups, tot_u, 0, NULL, NULL);
+    sizeof(float) * params.n_groups, tot_u, 0, NULL, NULL);
   checkError(err, "reading tot_u data", __LINE__);
 
 
   int final_tot_cells = 0;
   float final_tot_u = 0.0f;
-  for (int i = 0; i < n_groups; i++)
+  for (int i = 0; i < params.n_groups; i++)
     {
         final_tot_cells = final_tot_cells + tot_cells[i];
         final_tot_u = final_tot_u + tot_u[i];
@@ -550,6 +550,9 @@ int initialise(const char* paramfile, const char* obstaclefile,
   ** at each timestep
   */
   *av_vels_ptr = (float*)malloc(sizeof(float) * params->maxIters);
+
+  params->group_size = group_size_y * group_size_x;
+  params->n_groups = (params.nx * params.ny)/(group_size_y * group_size_x);
 
 
   cl_int err;
