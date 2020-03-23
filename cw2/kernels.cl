@@ -217,7 +217,7 @@ kernel void av_velocity(global t_speed* cells,
   int num_y_groups = ny / num_y_work_items;
 
   int position_in_group = local_id_x + (num_x_work_items * local_id_y);
-  int group_index = group_id_x + (num_x_groups * group_id_y)
+  int group_index = group_id_x + (num_x_groups * group_id_y);
 
       /* ignore occupied cells */
       if (!obstacles[ii + jj*nx])
