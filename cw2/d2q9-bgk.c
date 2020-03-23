@@ -49,6 +49,8 @@ typedef struct
   cl_mem cells;
   cl_mem tmp_cells;
   cl_mem obstacles;
+  cl_mem vel_counts;
+  cl_mem cell_counts;
 } t_ocl;
 
 /* struct to hold the 'speed' values */
