@@ -1,3 +1,54 @@
+/*
+** Code to implement a d2q9-bgk lattice boltzmann scheme.
+** 'd2' inidates a 2-dimensional grid, and
+** 'q9' indicates 9 velocities per grid cell.
+** 'bgk' refers to the Bhatnagar-Gross-Krook collision step.
+**
+** The 'speeds' in each cell are numbered as follows:
+**
+** 6 2 5
+**  \|/
+** 3-0-1
+**  /|\
+** 7 4 8
+**
+** A 2D grid:
+**
+**           cols
+**       --- --- ---
+**      | D | E | F |
+** rows  --- --- ---
+**      | A | B | C |
+**       --- --- ---
+**
+** 'unwrapped' in row major order to give a 1D array:
+**
+**  --- --- --- --- --- ---
+** | A | B | C | D | E | F |
+**  --- --- --- --- --- ---
+**
+** Grid indicies are:
+**
+**          ny
+**          ^       cols(ii)
+**          |  ----- ----- -----
+**          | | ... | ... | etc |
+**          |  ----- ----- -----
+** rows(jj) | | 1,0 | 1,1 | 1,2 |
+**          |  ----- ----- -----
+**          | | 0,0 | 0,1 | 0,2 |
+**          |  ----- ----- -----
+**          ----------------------> nx
+**
+** Note the names of the input parameter and obstacle files
+** are passed on the command line, e.g.:
+**
+**   ./d2q9-bgk input.params obstacles.dat
+**
+** Be sure to adjust the grid dimensions in the parameter file
+** if you choose a different obstacle file.
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -17,6 +68,10 @@
 #define AVVELSFILE      "av_vels.dat"
 #define OCLFILE         "kernels.cl"
 
+#define LOCAL_SIZE_X 16
+#define LOCAL_SIZE_Y 16
+
+
 /* struct to hold the parameter values */
 typedef struct
 {
@@ -27,9 +82,8 @@ typedef struct
   float density;       /* density per link */
   float accel;         /* density redistribution */
   float omega;         /* relaxation parameter */
-  int group_size;
-  int n_groups;
-
+  size_t size_wkg;   /*size of work groups*/
+  size_t num_wkg;      /*no, of work groups*/
 } t_param;
 
 /* struct to hold OpenCL objects */
@@ -44,13 +98,13 @@ typedef struct
   cl_kernel  propagate;
   cl_kernel  rebound;
   cl_kernel  collision;
-  cl_kernel av_velocity;
+  cl_kernel  av_velocity;
 
+  cl_mem partial_cells;
+  cl_mem partial_u;
   cl_mem cells;
   cl_mem tmp_cells;
   cl_mem obstacles;
-  cl_mem vel_counts;
-  cl_mem cell_counts;
 } t_ocl;
 
 /* struct to hold the 'speed' values */
@@ -58,9 +112,6 @@ typedef struct
 {
   float speeds[NSPEEDS];
 } t_speed;
-
-int group_size_x = 16;
-int group_size_y = 16;
 
 /*
 ** function prototypes
@@ -201,12 +252,11 @@ int timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
   rebound(params, cells, tmp_cells, obstacles, ocl);
   collision(params, cells, tmp_cells, obstacles, ocl);
 
-  // Read tmp_cells from device
+      // Read cells from device
   err = clEnqueueReadBuffer(
     ocl.queue, ocl.cells, CL_TRUE, 0,
     sizeof(t_speed) * params.nx * params.ny, cells, 0, NULL, NULL);
   checkError(err, "reading cells data", __LINE__);
-
   return EXIT_SUCCESS;
 }
 
@@ -272,6 +322,7 @@ int propagate(const t_param params, t_speed* cells, t_speed* tmp_cells, t_ocl oc
 
 int rebound(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl)
 {
+
   cl_int err;
 
   // Set kernel arguments
@@ -284,6 +335,7 @@ int rebound(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obsta
   err = clSetKernelArg(ocl.rebound, 3, sizeof(cl_int), &params.nx);
   checkError(err, "setting rebound arg 3", __LINE__);
 
+  // Enqueue kernel
   size_t global[2] = {params.nx, params.ny};
   err = clEnqueueNDRangeKernel(ocl.queue, ocl.rebound,
                                2, NULL, global, NULL, 0, NULL, NULL);
@@ -293,15 +345,13 @@ int rebound(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obsta
   err = clFinish(ocl.queue);
   checkError(err, "waiting for rebound kernel", __LINE__);
 
-
-
   return EXIT_SUCCESS;
 }
 
 int collision(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl)
 {
 
-  cl_int err;
+      cl_int err;
 
   // Set kernel arguments
   err = clSetKernelArg(ocl.collision, 0, sizeof(cl_mem), &ocl.cells);
@@ -310,13 +360,12 @@ int collision(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
   checkError(err, "setting collision arg 1", __LINE__);
   err = clSetKernelArg(ocl.collision, 2, sizeof(cl_mem), &ocl.obstacles);
   checkError(err, "setting collision arg 2", __LINE__);
-  err = clSetKernelArg(ocl.collision, 3, sizeof(cl_int), &params.nx);
+  err = clSetKernelArg(ocl.collision, 3, sizeof(int), &params.nx);
   checkError(err, "setting collision arg 3", __LINE__);
-  err = clSetKernelArg(ocl.collision, 4, sizeof(cl_int), &params.ny);
+  err = clSetKernelArg(ocl.collision, 4, sizeof(int), &params.omega);
   checkError(err, "setting collision arg 4", __LINE__);
-  err = clSetKernelArg(ocl.collision, 5, sizeof(cl_float), &params.omega);
-  checkError(err, "setting collision arg 5", __LINE__);
 
+  // Enqueue kernel
   size_t global[2] = {params.nx, params.ny};
   err = clEnqueueNDRangeKernel(ocl.queue, ocl.collision,
                                2, NULL, global, NULL, 0, NULL, NULL);
@@ -326,45 +375,41 @@ int collision(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
   err = clFinish(ocl.queue);
   checkError(err, "waiting for collision kernel", __LINE__);
 
-
   return EXIT_SUCCESS;
 }
 
 float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl ocl)
 {
+  int tot_cells = 0;    /* no. of cells used in calculation */
+  float tot_u = 0.f;    /* accumulated magnitudes of velocity for each cell */
+
+  int* sum_cells = (int*)malloc(sizeof(int)  * params.num_wkg);
+  float* sum_u = (float*)malloc(sizeof(float)  * params.num_wkg);
 
 
+  cl_int err;
 
-    int *tot_cells = (int*)malloc(sizeof(int) * params.n_groups);
-    float *tot_u = (float*)malloc(sizeof(float) * params.n_groups);
-
-
-    cl_int err;
-
-
-
-
-
-
+  // Set kernel arguments
   err = clSetKernelArg(ocl.av_velocity, 0, sizeof(cl_mem), &ocl.cells);
   checkError(err, "setting av_velocity arg 0", __LINE__);
   err = clSetKernelArg(ocl.av_velocity, 1, sizeof(cl_mem), &ocl.obstacles);
   checkError(err, "setting av_velocity arg 1", __LINE__);
-  err = clSetKernelArg(ocl.av_velocity, 2, sizeof(cl_int), &params.nx);
+  err = clSetKernelArg(ocl.av_velocity, 2, sizeof(int), &params.nx);
   checkError(err, "setting av_velocity arg 2", __LINE__);
-  err = clSetKernelArg(ocl.av_velocity, 3, sizeof(cl_int), &params.ny);
+  err = clSetKernelArg(ocl.av_velocity, 3, sizeof(int), &params.ny);
   checkError(err, "setting av_velocity arg 3", __LINE__);
-  err = clSetKernelArg(ocl.av_velocity, 4, sizeof(float)*params.group_size, NULL);
+  err = clSetKernelArg(ocl.av_velocity, 4, sizeof(int) * params.size_wkg, NULL);
   checkError(err, "setting av_velocity arg 4", __LINE__);
-  err = clSetKernelArg(ocl.av_velocity, 5, sizeof(cl_mem), &ocl.vel_counts);
+  err = clSetKernelArg(ocl.av_velocity, 5, sizeof(float) * params.size_wkg, NULL);
   checkError(err, "setting av_velocity arg 5", __LINE__);
-  err = clSetKernelArg(ocl.av_velocity, 6, sizeof(int)*params.group_size,NULL);
+  err = clSetKernelArg(ocl.av_velocity, 6, sizeof(cl_mem), &ocl.partial_cells);
   checkError(err, "setting av_velocity arg 6", __LINE__);
-  err = clSetKernelArg(ocl.av_velocity, 7, sizeof(cl_mem),&ocl.cell_counts);
+  err = clSetKernelArg(ocl.av_velocity, 7, sizeof(cl_mem), &ocl.partial_u);
   checkError(err, "setting av_velocity arg 7", __LINE__);
 
+  // Enqueue kernel
   size_t global[2] = {params.nx, params.ny};
-  size_t local[2] = {group_size_x, group_size_y};
+  size_t local[2] = {LOCAL_SIZE_X, LOCAL_SIZE_Y};
   err = clEnqueueNDRangeKernel(ocl.queue, ocl.av_velocity,
                                2, NULL, global, local, 0, NULL, NULL);
   checkError(err, "enqueueing av_velocity kernel", __LINE__);
@@ -374,28 +419,24 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
   checkError(err, "waiting for av_velocity kernel", __LINE__);
 
   err = clEnqueueReadBuffer(
-    ocl.queue, ocl.cell_counts, CL_TRUE, 0,
-    sizeof(int) * params.n_groups, tot_cells, 0, NULL, NULL);
-  checkError(err, "reading tot_cells data", __LINE__);
-
+    ocl.queue, ocl.partial_cells, CL_TRUE, 0,
+    sizeof(int) * params.num_wkg, sum_cells, 0, NULL, NULL);
+  checkError(err, "Reading partial_cells", __LINE__);
   err = clEnqueueReadBuffer(
-    ocl.queue, ocl.vel_counts, CL_TRUE, 0,
-    sizeof(float) * params.n_groups, tot_u, 0, NULL, NULL);
-  checkError(err, "reading tot_u data", __LINE__);
+    ocl.queue, ocl.partial_u, CL_TRUE, 0,
+    sizeof(float) * params.num_wkg, sum_u, 0, NULL, NULL);
+  checkError(err, "Reading partial_u", __LINE__);
 
+  for (int x = 0; x < params.num_wkg; x++)
+  {
+      tot_cells += sum_cells[x];
+      tot_u += sum_u[x];
+  }
 
-  int final_tot_cells = 0;
-  float final_tot_u = 0.0f;
-  for (int i = 0; i < params.n_groups; i++)
-    {
-        final_tot_cells = final_tot_cells + tot_cells[i];
-        final_tot_u = final_tot_u + tot_u[i];
-    }
+  free(sum_cells);
+  free(sum_u);
 
-
-    free(tot_u);
-    free(tot_cells);
-    return final_tot_u / (float)final_tot_cells;
+  return tot_u / (float)tot_cells;
 
 }
 
@@ -553,9 +594,6 @@ int initialise(const char* paramfile, const char* obstaclefile,
   */
   *av_vels_ptr = (float*)malloc(sizeof(float) * params->maxIters);
 
-  params->group_size = group_size_y * group_size_x;
-  params->n_groups = (params->nx * params->ny)/(group_size_y * group_size_x);
-
 
   cl_int err;
 
@@ -620,6 +658,10 @@ int initialise(const char* paramfile, const char* obstaclefile,
   ocl->av_velocity = clCreateKernel(ocl->program, "av_velocity", &err);
   checkError(err, "creating av_velocity kernel", __LINE__);
 
+  params->size_wkg = LOCAL_SIZE_X * LOCAL_SIZE_Y;
+  params->num_wkg = (params->nx * params->ny) / (LOCAL_SIZE_X * LOCAL_SIZE_Y);
+
+
   // Allocate OpenCL buffers
   ocl->cells = clCreateBuffer(
     ocl->context, CL_MEM_READ_WRITE,
@@ -633,14 +675,15 @@ int initialise(const char* paramfile, const char* obstaclefile,
     ocl->context, CL_MEM_READ_WRITE,
     sizeof(cl_int) * params->nx * params->ny, NULL, &err);
   checkError(err, "creating obstacles buffer", __LINE__);
-  ocl->cell_counts = clCreateBuffer(
-    ocl->context, CL_MEM_READ_WRITE,
-    sizeof(int) * params->n_groups, NULL, &err);
-  checkError(err, "creating cell_count buffer", __LINE__);
-  ocl->vel_counts = clCreateBuffer(
-    ocl->context, CL_MEM_READ_WRITE,
-    sizeof(float) * params->n_groups, NULL, &err);
-  checkError(err, "creating vel_count buffer", __LINE__);
+  ocl->partial_cells = clCreateBuffer(
+    ocl->context, CL_MEM_WRITE_ONLY,
+    sizeof(int) * params->num_wkg, NULL, &err);
+  checkError(err, "creating buffer for partial_cells", __LINE__);
+  ocl->partial_u = clCreateBuffer(
+    ocl->context, CL_MEM_WRITE_ONLY,
+    sizeof(float) * params->num_wkg, NULL, &err);
+  checkError(err, "creating buffer for partial_u", __LINE__);
+
 
   return EXIT_SUCCESS;
 }
@@ -670,9 +713,12 @@ int finalise(const t_param* params, t_speed** cells_ptr, t_speed** tmp_cells_ptr
   clReleaseKernel(ocl.propagate);
   clReleaseKernel(ocl.rebound);
   clReleaseKernel(ocl.collision);
+  clReleaseKernel(ocl.av_velocity);
   clReleaseProgram(ocl.program);
   clReleaseCommandQueue(ocl.queue);
   clReleaseContext(ocl.context);
+  clReleaseMemObject(ocl.partial_cells);
+  clReleaseMemObject(ocl.partial_u);
 
   return EXIT_SUCCESS;
 }
