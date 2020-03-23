@@ -333,13 +333,13 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
 
   int group_size;
 
-  err = clGetKernelWorkGroupInfo (ocl.av_velocity, ocl->device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(int), group_size, NULL);
-    checkError(err, "Getting kernel work group info");
+  err = clGetKernelWorkGroupInfo (ocl.av_velocity, ocl.device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(int), &group_size, NULL);
+    checkError(err, "Getting kernel work group info", __LINE__);
 
-  fprintf(group_size, "%s\n", );
+  printf(group_size, "%s\n");
 
 
-  int n_groups = (params->nx * params->ny)/group_size;
+  int n_groups = (params.nx * params.ny)/group_size;
 
   int *tot_cells;
   float *tot_u;
@@ -348,12 +348,12 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
   tot_u = calloc(sizeof(float), n_groups);
 
   cell_counts = clCreateBuffer(
-    ocl->context, CL_MEM_READ_WRITE,
+    ocl.context, CL_MEM_READ_WRITE,
     sizeof(int) * n_groups, NULL, &err);
   checkError(err, "creating cell_count buffer", __LINE__);
 
   vel_counts = clCreateBuffer(
-    ocl->context, CL_MEM_READ_WRITE,
+    ocl.context, CL_MEM_READ_WRITE,
     sizeof(float) * n_groups, NULL, &err);
   checkError(err, "creating vel_count buffer", __LINE__);
 
@@ -377,7 +377,7 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
 
   size_t global[2] = {params.nx, params.ny};
   err = clEnqueueNDRangeKernel(ocl.queue, ocl.av_velocity,
-                               2, NULL, global, group_size, 0, NULL, NULL);
+                               2, NULL, global, &group_size, 0, NULL, NULL);
   checkError(err, "enqueueing av_velocity kernel", __LINE__);
 
   // Wait for kernel to finish
