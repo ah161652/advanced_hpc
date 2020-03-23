@@ -149,27 +149,8 @@ int main(int argc, char* argv[])
 
   for (int tt = 0; tt < params.maxIters; tt++)
   {
-
-    // Write cells to device
-    err = clEnqueueWriteBuffer(
-      ocl.queue, ocl.cells, CL_TRUE, 0,
-      sizeof(t_speed) * params.nx * params.ny, cells, 0, NULL, NULL);
-    checkError(err, "writing cells data", __LINE__);
-
-    accelerate_flow(params, cells, obstacles, ocl);
-    propagate(params, cells, tmp_cells, ocl);
-    rebound(params, cells, tmp_cells, obstacles, ocl);
-    collision(params, cells, tmp_cells, obstacles, ocl);
+    timestep(params, cells, tmp_cells, obstacles, ocl);
     av_vels[tt] = av_velocity(params, cells, obstacles, ocl);
-
-    // Read  from device
-    err = clEnqueueReadBuffer(
-      ocl.queue, ocl.cells, CL_TRUE, 0,
-      sizeof(t_speed) * params.nx * params.ny, cells, 0, NULL, NULL);
-    checkError(err, "reading cells data", __LINE__);
-
-    //timestep(params, cells, tmp_cells, obstacles, ocl);
-
 #ifdef DEBUG
     printf("==timestep: %d==\n", tt);
     printf("av velocity: %.12E\n", av_vels[tt]);
@@ -212,7 +193,7 @@ int timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
   rebound(params, cells, tmp_cells, obstacles, ocl);
   collision(params, cells, tmp_cells, obstacles, ocl);
 
-  // Read  from device
+  // Read tmp_cells from device
   err = clEnqueueReadBuffer(
     ocl.queue, ocl.cells, CL_TRUE, 0,
     sizeof(t_speed) * params.nx * params.ny, cells, 0, NULL, NULL);
@@ -390,7 +371,7 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
   checkError(err, "setting av_velocity arg 4", __LINE__);
   err = clSetKernelArg(ocl.av_velocity, 5, sizeof(cl_mem), &vel_counts);
   checkError(err, "setting av_velocity arg 5", __LINE__);
-  err = clSetKernelArg(ocl.av_velocity, 6, sizeof(float)*group_size,NULL);
+  err = clSetKernelArg(ocl.av_velocity, 6, sizeof(int)*group_size,NULL);
   checkError(err, "setting av_velocity arg 6", __LINE__);
   err = clSetKernelArg(ocl.av_velocity, 7, sizeof(cl_mem),&cell_counts);
   checkError(err, "setting av_velocity arg 7", __LINE__);
