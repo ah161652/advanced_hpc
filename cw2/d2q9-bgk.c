@@ -349,7 +349,7 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
 
   //get work group size and save to variable
   err = clGetKernelWorkGroupInfo (ocl.av_vels, ocl.device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
-  checkError(err, "Getting kernel work group info");
+  checkError(err, "Getting kernel work group info", __LINE__);
 
 
   // calculate number of work groups from work group size
@@ -363,15 +363,15 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
   //checking print
   printf(" %ld work-groups of size %ld.\n",
           nwork_groups,
-          work_group_sizes);
+          work_group_size);
 
 
   // create device buffers
   d_partial_us = clCreateBuffer(ocl.context, CL_MEM_WRITE_ONLY, sizeof(float) * nwork_groups, NULL, &err);
-  checkError(err, "Creating buffer d_partial_us");
+  checkError(err, "Creating buffer d_partial_us", __LINE__);
 
   d_partial_tot_cells = clCreateBuffer(ocl.context, CL_MEM_WRITE_ONLY, sizeof(int) * nwork_groups, NULL, &err);
-  checkError(err, "Creating buffer d_partial_tot_cells");
+  checkError(err, "Creating buffer d_partial_tot_cells", __LINE__);
 
 
 
