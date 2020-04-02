@@ -17,6 +17,9 @@
 #define AVVELSFILE      "av_vels.dat"
 #define OCLFILE         "kernels.cl"
 
+int global_group_size_x = 32;
+int global_group_size_y = 32;
+
 /* struct to hold the parameter values */
 typedef struct
 {
@@ -46,6 +49,9 @@ typedef struct
   cl_mem cells;
   cl_mem tmp_cells;
   cl_mem obstacles;
+
+  size_t work_group_size;
+  size_t num_work_groups;
 } t_ocl;
 
 /* struct to hold the 'speed' values */
@@ -130,6 +136,7 @@ int main(int argc, char* argv[])
 
   /* initialise our data structures and load values from file */
   initialise(paramfile, obstaclefile, &params, &cells, &tmp_cells, &obstacles, &av_vels, &ocl);
+
 
   /* iterate for maxIters timesteps */
   gettimeofday(&timstr, NULL);
@@ -251,8 +258,9 @@ int propagate(const t_param params, t_speed* cells, t_speed* tmp_cells, t_ocl oc
 
   // Enqueue kernel
   size_t global[2] = {params.nx, params.ny};
+  size_t local[2] = {global_group_size_x, global_group_size_y};
   err = clEnqueueNDRangeKernel(ocl.queue, ocl.propagate,
-                               2, NULL, global, NULL, 0, NULL, NULL);
+                               2, NULL, global, local, 0, NULL, NULL);
   checkError(err, "enqueueing propagate kernel", __LINE__);
 
   // Wait for kernel to finish
@@ -277,8 +285,9 @@ int rebound(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obsta
   checkError(err, "setting rebound arg 3", __LINE__);
 
   size_t global[2] = {params.nx, params.ny};
+  size_t local[2] = {global_group_size_x, global_group_size_y};
   err = clEnqueueNDRangeKernel(ocl.queue, ocl.rebound,
-                               2, NULL, global, NULL, 0, NULL, NULL);
+                               2, NULL, global, local, 0, NULL, NULL);
   checkError(err, "enqueueing rebound kernel", __LINE__);
 
   // Wait for kernel to finish
@@ -310,8 +319,9 @@ int collision(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
   checkError(err, "setting collision arg 5", __LINE__);
 
   size_t global[2] = {params.nx, params.ny};
+  size_t local[2] = {global_group_size_x, global_group_size_y};
   err = clEnqueueNDRangeKernel(ocl.queue, ocl.collision,
-                               2, NULL, global, NULL, 0, NULL, NULL);
+                               2, NULL, global, local, 0, NULL, NULL);
   checkError(err, "enqueueing collision kernel", __LINE__);
 
   // Wait for kernel to finish
@@ -340,20 +350,21 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
   cl_mem d_partial_tot_cells;
 
   // work group variables
-  size_t nwork_groups;
-  size_t work_group_size;
+  size_t work_group_size = global_group_size_x*global_group_size_y;
+  size_t nwork_groups = (params.nx * params.ny)/work_group_size;
+
 
 
   cl_int err;
 
 
-  //get work group size and save to variable
-  err = clGetKernelWorkGroupInfo (ocl.av_vels, ocl.device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
-  checkError(err, "Getting kernel work group info", __LINE__);
+  // //get work group size and save to variable
+  // err = clGetKernelWorkGroupInfo (ocl.av_vels, ocl.device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
+  // checkError(err, "Getting kernel work group info", __LINE__);
 
 
   // calculate number of work groups from work group size
-  nwork_groups = (params.nx * params.ny)/work_group_size;
+  // nwork_groups = (params.nx * params.ny)/work_group_size;
 
   //allocate space for host buffers
   h_partial_us = calloc(sizeof(float), nwork_groups);
@@ -394,7 +405,7 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
 
   //set global and local sizes
   size_t global[2] = {params.nx, params.ny};
-  size_t local[2] = {sqrtf(work_group_size), sqrtf(work_group_size)};
+  size_t local[2] = {global_group_size_x, global_group_size_y};
 
 
 
