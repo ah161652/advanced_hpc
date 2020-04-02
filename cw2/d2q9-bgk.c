@@ -398,14 +398,14 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
 
   //set global and local sizes
   size_t global[2] = {params.nx, params.ny};
-  size_t local = work_group_size;
+  size_t local[2] = {sqrtf(work_group_size), sqrtf(work_group_size);
 
 
 
 
   //enqueue kernel
   err = clEnqueueNDRangeKernel(ocl.queue, ocl.av_vels,
-                               2, NULL, global, &local, 0, NULL, NULL);
+                               2, NULL, global, local, 0, NULL, NULL);
   checkError(err, "enqueueing av_vels kernel", __LINE__);
 
 
