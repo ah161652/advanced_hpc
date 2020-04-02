@@ -203,3 +203,128 @@ kernel void collision(global t_speed* cells ,global t_speed* tmp_cells,
 
 
 }
+
+
+
+
+
+
+
+
+
+
+
+kernel void av_vels(global t_speed* cells,
+                            global int* obstacles,
+                            int nx,
+                            int ny,
+                            local float* local_u ,
+                            global float* partial_u ,
+                            local int* local_tot_cells ,
+                            global int* partial_tot_cells )
+{
+
+  // global id's
+  int ii = get_global_id(0);
+  int jj = get_global_id(1);
+
+
+  // local data
+  int num_wrk_items_x = get_local_size(0);
+  int num_wrk_items_y = get_local_size(1);
+  int total_work_items = num_wrk_items_x* num_wrk_items_y;
+
+  int local_id_x       = get_local_id(0);
+  int local_id_y       = get_local_id(1);
+
+  int group_id_x       = get_group_id(0);
+  int group_id_y       = get_group_id(1);
+
+  int num_groups_x = nx/num_wrk_items_x;
+  int num_groups_y = ny/num_wrk_items_y;
+
+
+
+  // calculate cell index in work group
+  int cell_index = (num_wrk_items_x * local_id_y) +  local_id_x;
+  int group_index = (num_groups_x *group_id_y) +  group_id_x;
+
+
+
+  //init local_u for this cell to 0
+  local_u[cell_index] = 0.f;
+
+
+
+
+    // calculate u's
+      /* ignore occupied cells */
+      if (!obstacles[ii + jj*params.nx])
+      {
+        /* local density total */
+        float local_density = 0.f;
+
+        for (int kk = 0; kk < NSPEEDS; kk++)
+        {
+          local_density += cells[ii + jj*params.nx].speeds[kk];
+        }
+
+        /* x-component of velocity */
+        float u_x = (cells[ii + jj*params.nx].speeds[1]
+                      + cells[ii + jj*params.nx].speeds[5]
+                      + cells[ii + jj*params.nx].speeds[8]
+                      - (cells[ii + jj*params.nx].speeds[3]
+                         + cells[ii + jj*params.nx].speeds[6]
+                         + cells[ii + jj*params.nx].speeds[7]))
+                     / local_density;
+        /* compute y velocity component */
+        float u_y = (cells[ii + jj*params.nx].speeds[2]
+                      + cells[ii + jj*params.nx].speeds[5]
+                      + cells[ii + jj*params.nx].speeds[6]
+                      - (cells[ii + jj*params.nx].speeds[4]
+                         + cells[ii + jj*params.nx].speeds[7]
+                         + cells[ii + jj*params.nx].speeds[8]))
+                     / local_density;
+
+
+
+        // calculate cell local_u value
+          local_u[cell_index] += sqrt((u_x * u_x) + (u_y * u_y));
+
+
+        // make local tot_cells =1
+        local_tot_cells[cell_index] = 1;
+      }
+
+
+//REDUCTION (adding up all the totals from within each work group)
+
+
+// work group variables
+float work_group_total_u;
+int work_group_total_cells;
+
+if (local_id_x == 0 && local_id_y == 0) {
+  work_group_total_u = 0.f;
+  work_group_total_cells = 0;
+
+  for (size_t i=0; i<total_work_items; i++) {
+      work_group_total_u += local_u[i];
+      work_group_total_cells += local_tot_cells[i];
+  }
+
+  partial_u[group_index] = work_group_total_u;
+  partial_tot_cells[group_index] = work_group_total_cells;
+
+}
+
+
+
+
+
+
+
+
+
+
+}
