@@ -420,10 +420,10 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
 
   //read buffers
   err = clEnqueueReadBuffer(ocl.queue, d_partial_us, CL_TRUE, 0, sizeof(float)* nwork_groups, h_partial_us, 0, NULL, NULL );
-  checkError(err, "Reading back d_partial_us");
+  checkError(err, "Reading back d_partial_us", __LINE__);
 
   err = clEnqueueReadBuffer(ocl.queue, d_partial_tot_cells, CL_TRUE, 0, sizeof(int)* nwork_groups, h_partial_tot_cells, 0, NULL, NULL );
-  checkError(err, "Reading back d_partial_tot_cells");
+  checkError(err, "Reading back d_partial_tot_cells", __LINE__);
 
 
 
