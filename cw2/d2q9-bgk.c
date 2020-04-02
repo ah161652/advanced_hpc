@@ -333,7 +333,7 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
   float tot_u =0.0f;
   int tot_cells = 0;
   float* h_partial_us;
-  int* h_partial_tot_cells
+  int* h_partial_tot_cells;
 
   // set device buffer
   cl_mem d_partial_us;
