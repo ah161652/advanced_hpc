@@ -341,19 +341,20 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
 
   // work group variables
   size_t nwork_groups;
-  size_t work_group_size;
+  // size_t work_group_size;
 
 
   cl_int err;
 
 
-  //get work group size and save to variable
-  err = clGetKernelWorkGroupInfo (ocl.av_vels, ocl.device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
-  checkError(err, "Getting kernel work group info", __LINE__);
+  // //get work group size and save to variable
+  // err = clGetKernelWorkGroupInfo (ocl.av_vels, ocl.device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
+  // checkError(err, "Getting kernel work group info", __LINE__);
 
 
   // calculate number of work groups from work group size
-  nwork_groups = (params.nx * params.ny)/work_group_size;
+  // nwork_groups = (params.nx * params.ny)/work_group_size;
+    nwork_groups = (params.nx * params.ny)/(32*4);
 
   //allocate space for host buffers
   h_partial_us = calloc(sizeof(float), nwork_groups);
@@ -380,11 +381,13 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
   checkError(err, "setting av_vels nx", __LINE__);
   err = clSetKernelArg(ocl.av_vels, 3, sizeof(cl_int), &params.ny);
   checkError(err, "setting av_vels ny", __LINE__);
-  err = clSetKernelArg(ocl.av_vels, 4, sizeof(cl_float)*work_group_size,NULL);
+  // err = clSetKernelArg(ocl.av_vels, 4, sizeof(cl_float)*(work_group_size),NULL);
+  err = clSetKernelArg(ocl.av_vels, 4, sizeof(cl_float)*(32*4),NULL);
   checkError(err, "setting av_vels local_u", __LINE__);
   err = clSetKernelArg(ocl.av_vels, 5, sizeof(cl_mem),&d_partial_us);
   checkError(err, "setting av_vels partial_u", __LINE__);
-  err = clSetKernelArg(ocl.av_vels, 6, sizeof(cl_int)*work_group_size,NULL);
+  // err = clSetKernelArg(ocl.av_vels, 6, sizeof(cl_int)*work_group_size,NULL);
+    err = clSetKernelArg(ocl.av_vels, 6, sizeof(cl_int)*(32*4),NULL);
   checkError(err, "setting av_vels local_tot_cells", __LINE__);
   err = clSetKernelArg(ocl.av_vels, 7, sizeof(cl_mem),&d_partial_tot_cells);
   checkError(err, "setting av_vels partial_tot_cells", __LINE__);
@@ -394,7 +397,8 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
 
   //set global and local sizes
   size_t global[2] = {params.nx, params.ny};
-  size_t local[2] = {sqrtf(work_group_size), sqrtf(work_group_size)};
+  // size_t local[2] = {sqrtf(work_group_size), sqrtf(work_group_size)};
+    size_t local[2] = {32, 4};
 
 
 
@@ -423,7 +427,7 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
 
 
 
-  //computations
+  //summing
   for (size_t i = 0; i < nwork_groups; i++)
   {
       tot_u += h_partial_us[i];
