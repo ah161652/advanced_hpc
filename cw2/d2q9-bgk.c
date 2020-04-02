@@ -398,7 +398,7 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
 
   //set global and local sizes
   size_t global[2] = {params.nx, params.ny};
-  size_t local[2] = {sqrtf(work_group_size), sqrtf(work_group_size);
+  size_t local[2] = {sqrtf(work_group_size), sqrtf(work_group_size)};
 
 
 
