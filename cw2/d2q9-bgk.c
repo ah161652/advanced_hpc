@@ -184,8 +184,8 @@ int timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
 
   // Write cells to device
   err = clEnqueueWriteBuffer(
-    ocl.queue, ocl.cells, CL_TRUE, 0,
-    sizeof(t_speed) * params.nx * params.ny, cells, 0, NULL, NULL);
+  ocl.queue, ocl.cells, CL_TRUE, 0,
+  sizeof(t_speed) * params.nx * params.ny, cells, 0, NULL, NULL);
   checkError(err, "writing cells data", __LINE__);
 
   accelerate_flow(params, cells, obstacles, ocl);
@@ -193,7 +193,7 @@ int timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
   rebound(params, cells, tmp_cells, obstacles, ocl);
   collision(params, cells, tmp_cells, obstacles, ocl);
 
-  // Read tmp_cells from device
+  // Read cells from device
   err = clEnqueueReadBuffer(
     ocl.queue, ocl.cells, CL_TRUE, 0,
     sizeof(t_speed) * params.nx * params.ny, cells, 0, NULL, NULL);
@@ -352,8 +352,11 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
   checkError(err, "Getting kernel work group info", __LINE__);
 
 
+
   // calculate number of work groups from work group size
   nwork_groups = (params.nx * params.ny)/work_group_size;
+
+
 
   //allocate space for host buffers
   h_partial_us = calloc(sizeof(float), nwork_groups);

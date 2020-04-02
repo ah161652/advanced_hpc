@@ -245,7 +245,7 @@ kernel void av_vels(global t_speed* cells,
 
 
 
-  // calculate cell index in work group
+  // calculate cell index in work group and group index for whole problem
   int cell_index = (num_wrk_items_x * local_id_y) +  local_id_x;
   int group_index = (num_groups_x *group_id_y) +  group_id_x;
 
@@ -289,7 +289,7 @@ kernel void av_vels(global t_speed* cells,
 
 
         // calculate cell local_u value
-          local_u[cell_index] += sqrt((u_x * u_x) + (u_y * u_y));
+          local_u[cell_index] = sqrt((u_x * u_x) + (u_y * u_y));
 
 
         // make local tot_cells =1
@@ -304,15 +304,21 @@ kernel void av_vels(global t_speed* cells,
 float work_group_total_u;
 int work_group_total_cells;
 
+// Check so you only do the summing on one cell
 if (local_id_x == 0 && local_id_y == 0) {
+
+  //init to 0
   work_group_total_u = 0.f;
   work_group_total_cells = 0;
 
+  //sum all cells in work group
   for (size_t i=0; i<total_work_items; i++) {
       work_group_total_u += local_u[i];
       work_group_total_cells += local_tot_cells[i];
   }
 
+
+  //add work group sums to global arrays
   partial_u[group_index] = work_group_total_u;
   partial_tot_cells[group_index] = work_group_total_cells;
 
