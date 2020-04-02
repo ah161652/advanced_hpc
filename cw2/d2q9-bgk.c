@@ -326,131 +326,183 @@ int collision(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
 
 
 
+// float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl ocl)
+// {
+//
+//   //set host variables and buffers
+//   float tot_u =0.0f;
+//   int tot_cells = 0;
+//   float* h_partial_us;
+//   int* h_partial_tot_cells;
+//
+//   // set device buffer
+//   cl_mem d_partial_us;
+//   cl_mem d_partial_tot_cells;
+//
+//   // work group variables
+//   size_t nwork_groups;
+//   size_t work_group_size;
+//
+//
+//   cl_int err;
+//
+//
+//   //get work group size and save to variable
+//   err = clGetKernelWorkGroupInfo (ocl.av_vels, ocl.device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
+//   checkError(err, "Getting kernel work group info", __LINE__);
+//
+//
+//
+//   // calculate number of work groups from work group size
+//   nwork_groups = (params.nx * params.ny)/work_group_size;
+//
+//
+//
+//   //allocate space for host buffers
+//   h_partial_us = calloc(sizeof(float), nwork_groups);
+//   h_partial_tot_cells = calloc(sizeof(int), nwork_groups);
+//
+//
+//
+//
+//   // create device buffers
+//   d_partial_us = clCreateBuffer(ocl.context, CL_MEM_WRITE_ONLY, sizeof(float) * nwork_groups, NULL, &err);
+//   checkError(err, "Creating buffer d_partial_us", __LINE__);
+//
+//   d_partial_tot_cells = clCreateBuffer(ocl.context, CL_MEM_WRITE_ONLY, sizeof(int) * nwork_groups, NULL, &err);
+//   checkError(err, "Creating buffer d_partial_tot_cells", __LINE__);
+//
+//
+//
+//   // Set kernel arguments
+//   err = clSetKernelArg(ocl.av_vels, 0, sizeof(cl_mem), &ocl.cells);
+//   checkError(err, "setting av_vels cells", __LINE__);
+//   err = clSetKernelArg(ocl.av_vels, 1, sizeof(cl_mem), &ocl.obstacles);
+//   checkError(err, "setting av_vels obstacles", __LINE__);
+//   err = clSetKernelArg(ocl.av_vels, 2, sizeof(cl_int), &params.nx);
+//   checkError(err, "setting av_vels nx", __LINE__);
+//   err = clSetKernelArg(ocl.av_vels, 3, sizeof(cl_int), &params.ny);
+//   checkError(err, "setting av_vels ny", __LINE__);
+//   err = clSetKernelArg(ocl.av_vels, 4, sizeof(cl_float)*work_group_size,NULL);
+//   checkError(err, "setting av_vels local_u", __LINE__);
+//   err = clSetKernelArg(ocl.av_vels, 5, sizeof(cl_mem),&d_partial_us);
+//   checkError(err, "setting av_vels partial_u", __LINE__);
+//   err = clSetKernelArg(ocl.av_vels, 6, sizeof(cl_int)*work_group_size,NULL);
+//   checkError(err, "setting av_vels local_tot_cells", __LINE__);
+//   err = clSetKernelArg(ocl.av_vels, 7, sizeof(cl_mem),&d_partial_tot_cells);
+//   checkError(err, "setting av_vels partial_tot_cells", __LINE__);
+//
+//
+//
+//
+//   //set global and local sizes
+//   size_t global[2] = {params.nx, params.ny};
+//   size_t local[2] = {sqrtf(work_group_size), sqrtf(work_group_size)};
+//
+//
+//
+//
+//   //enqueue kernel
+//   err = clEnqueueNDRangeKernel(ocl.queue, ocl.av_vels,
+//                                2, NULL, global, local, 0, NULL, NULL);
+//   checkError(err, "enqueueing av_vels kernel", __LINE__);
+//
+//
+//
+//
+//   // Wait for kernel to finish
+//   err = clFinish(ocl.queue);
+//   checkError(err, "waiting for av_vels kernel", __LINE__);
+//
+//
+//
+//
+//   //read buffers
+//   err = clEnqueueReadBuffer(ocl.queue, d_partial_us, CL_TRUE, 0, sizeof(float)* nwork_groups, h_partial_us, 0, NULL, NULL );
+//   checkError(err, "Reading back d_partial_us", __LINE__);
+//
+//   err = clEnqueueReadBuffer(ocl.queue, d_partial_tot_cells, CL_TRUE, 0, sizeof(int)* nwork_groups, h_partial_tot_cells, 0, NULL, NULL );
+//   checkError(err, "Reading back d_partial_tot_cells", __LINE__);
+//
+//
+//
+//   //summing
+//   for (size_t i = 0; i < nwork_groups; i++)
+//   {
+//       tot_u += h_partial_us[i];
+//   }
+//
+//   for (size_t i = 0; i < nwork_groups; i++)
+//   {
+//       tot_cells += h_partial_tot_cells[i];
+//   }
+//
+//
+//
+//   //cleanup
+// clReleaseMemObject(d_partial_us);
+// clReleaseMemObject(d_partial_tot_cells);
+// free(h_partial_us);
+// free(h_partial_tot_cells);
+//
+//
+// //return av_vels
+// return tot_u/(float)tot_cells;
+//
+//
+// }
+
 float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl ocl)
 {
+  int    tot_cells = 0;  /* no. of cells used in calculation */
+  float tot_u;          /* accumulated magnitudes of velocity for each cell */
 
-  //set host variables and buffers
-  float tot_u =0.0f;
-  int tot_cells = 0;
-  float* h_partial_us;
-  int* h_partial_tot_cells;
+  /* initialise */
+  tot_u = 0.f;
 
-  // set device buffer
-  cl_mem d_partial_us;
-  cl_mem d_partial_tot_cells;
-
-  // work group variables
-  size_t nwork_groups;
-  size_t work_group_size;
-
-
-  cl_int err;
-
-
-  //get work group size and save to variable
-  err = clGetKernelWorkGroupInfo (ocl.av_vels, ocl.device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
-  checkError(err, "Getting kernel work group info", __LINE__);
-
-
-
-  // calculate number of work groups from work group size
-  nwork_groups = (params.nx * params.ny)/work_group_size;
-
-
-
-  //allocate space for host buffers
-  h_partial_us = calloc(sizeof(float), nwork_groups);
-  h_partial_tot_cells = calloc(sizeof(int), nwork_groups);
-
-
-
-
-  // create device buffers
-  d_partial_us = clCreateBuffer(ocl.context, CL_MEM_WRITE_ONLY, sizeof(float) * nwork_groups, NULL, &err);
-  checkError(err, "Creating buffer d_partial_us", __LINE__);
-
-  d_partial_tot_cells = clCreateBuffer(ocl.context, CL_MEM_WRITE_ONLY, sizeof(int) * nwork_groups, NULL, &err);
-  checkError(err, "Creating buffer d_partial_tot_cells", __LINE__);
-
-
-
-  // Set kernel arguments
-  err = clSetKernelArg(ocl.av_vels, 0, sizeof(cl_mem), &ocl.cells);
-  checkError(err, "setting av_vels cells", __LINE__);
-  err = clSetKernelArg(ocl.av_vels, 1, sizeof(cl_mem), &ocl.obstacles);
-  checkError(err, "setting av_vels obstacles", __LINE__);
-  err = clSetKernelArg(ocl.av_vels, 2, sizeof(cl_int), &params.nx);
-  checkError(err, "setting av_vels nx", __LINE__);
-  err = clSetKernelArg(ocl.av_vels, 3, sizeof(cl_int), &params.ny);
-  checkError(err, "setting av_vels ny", __LINE__);
-  err = clSetKernelArg(ocl.av_vels, 4, sizeof(cl_float)*work_group_size,NULL);
-  checkError(err, "setting av_vels local_u", __LINE__);
-  err = clSetKernelArg(ocl.av_vels, 5, sizeof(cl_mem),&d_partial_us);
-  checkError(err, "setting av_vels partial_u", __LINE__);
-  err = clSetKernelArg(ocl.av_vels, 6, sizeof(cl_int)*work_group_size,NULL);
-  checkError(err, "setting av_vels local_tot_cells", __LINE__);
-  err = clSetKernelArg(ocl.av_vels, 7, sizeof(cl_mem),&d_partial_tot_cells);
-  checkError(err, "setting av_vels partial_tot_cells", __LINE__);
-
-
-
-
-  //set global and local sizes
-  size_t global[2] = {params.nx, params.ny};
-  size_t local[2] = {sqrtf(work_group_size), sqrtf(work_group_size)};
-
-
-
-
-  //enqueue kernel
-  err = clEnqueueNDRangeKernel(ocl.queue, ocl.av_vels,
-                               2, NULL, global, local, 0, NULL, NULL);
-  checkError(err, "enqueueing av_vels kernel", __LINE__);
-
-
-
-
-  // Wait for kernel to finish
-  err = clFinish(ocl.queue);
-  checkError(err, "waiting for av_vels kernel", __LINE__);
-
-
-
-
-  //read buffers
-  err = clEnqueueReadBuffer(ocl.queue, d_partial_us, CL_TRUE, 0, sizeof(float)* nwork_groups, h_partial_us, 0, NULL, NULL );
-  checkError(err, "Reading back d_partial_us", __LINE__);
-
-  err = clEnqueueReadBuffer(ocl.queue, d_partial_tot_cells, CL_TRUE, 0, sizeof(int)* nwork_groups, h_partial_tot_cells, 0, NULL, NULL );
-  checkError(err, "Reading back d_partial_tot_cells", __LINE__);
-
-
-
-  //summing
-  for (size_t i = 0; i < nwork_groups; i++)
+  /* loop over all non-blocked cells */
+  for (int jj = 0; jj < params.ny; jj++)
   {
-      tot_u += h_partial_us[i];
+    for (int ii = 0; ii < params.nx; ii++)
+    {
+      /* ignore occupied cells */
+      if (!obstacles[ii + jj*params.nx])
+      {
+        /* local density total */
+        float local_density = 0.f;
+
+        for (int kk = 0; kk < NSPEEDS; kk++)
+        {
+          local_density += cells[ii + jj*params.nx].speeds[kk];
+        }
+
+        /* x-component of velocity */
+        float u_x = (cells[ii + jj*params.nx].speeds[1]
+                      + cells[ii + jj*params.nx].speeds[5]
+                      + cells[ii + jj*params.nx].speeds[8]
+                      - (cells[ii + jj*params.nx].speeds[3]
+                         + cells[ii + jj*params.nx].speeds[6]
+                         + cells[ii + jj*params.nx].speeds[7]))
+                     / local_density;
+        /* compute y velocity component */
+        float u_y = (cells[ii + jj*params.nx].speeds[2]
+                      + cells[ii + jj*params.nx].speeds[5]
+                      + cells[ii + jj*params.nx].speeds[6]
+                      - (cells[ii + jj*params.nx].speeds[4]
+                         + cells[ii + jj*params.nx].speeds[7]
+                         + cells[ii + jj*params.nx].speeds[8]))
+                     / local_density;
+        /* accumulate the norm of x- and y- velocity components */
+        tot_u += sqrtf((u_x * u_x) + (u_y * u_y));
+        /* increase counter of inspected cells */
+        ++tot_cells;
+      }
+    }
   }
 
-  for (size_t i = 0; i < nwork_groups; i++)
-  {
-      tot_cells += h_partial_tot_cells[i];
-  }
-
-
-
-  //cleanup
-clReleaseMemObject(d_partial_us);
-clReleaseMemObject(d_partial_tot_cells);
-free(h_partial_us);
-free(h_partial_tot_cells);
-
-
-//return av_vels
-return tot_u/(float)tot_cells;
-
-
+  return tot_u / (float)tot_cells;
 }
+
 
 int initialise(const char* paramfile, const char* obstaclefile,
                t_param* params, t_speed** cells_ptr, t_speed** tmp_cells_ptr,
