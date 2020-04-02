@@ -360,10 +360,6 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
   h_partial_tot_cells = calloc(sizeof(int), nwork_groups);
 
 
-  //checking print
-  printf(" %ld work-groups of size %ld.\n",
-          nwork_groups,
-          work_group_size);
 
 
   // create device buffers
