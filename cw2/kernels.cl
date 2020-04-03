@@ -252,7 +252,8 @@ kernel void av_vels(global t_speed* cells,
 
 
   //init local_u for this cell to 0
-  local_u[cell_index] = 0.f;
+  local_u[cell_index] = 0.0f;
+  local_tot_cells[cell_index] = 0;
 
 
 
@@ -308,7 +309,7 @@ int work_group_total_cells;
 if (local_id_x == 0 && local_id_y == 0) {
 
   //init to 0
-  work_group_total_u = 0.f;
+  work_group_total_u = 0.0f;
   work_group_total_cells = 0;
 
   //sum all cells in work group
