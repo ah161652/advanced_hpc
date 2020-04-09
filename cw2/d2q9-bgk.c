@@ -475,7 +475,7 @@ free(h_partial_tot_cells);
 printf("init tot_cells = %f\n", (float)params.unblocked_cells );
 
 //return av_vels
-return tot_u/(float)unblocked_cells;
+return tot_u/(float)params.unblocked_cells;
 }
 
 
