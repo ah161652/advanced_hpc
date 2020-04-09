@@ -296,6 +296,7 @@ kernel void av_vels(global t_speed* cells,
         // make local tot_cells =1
         // local_tot_cells[cell_index] = 1;
       }
+      else{local_u[cell_index] =0;}
 
 
 //REDUCTION (adding up all the totals from within each work group)
