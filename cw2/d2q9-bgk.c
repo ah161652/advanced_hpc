@@ -620,7 +620,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
     for (int ii = 0; ii < params->nx; ii++)
     {
       /* ignore occupied cells */
-      if (!obstacles[ii + jj*params.nx]) params->unblocked_cells++;
+      if (!(*obstacles_ptr)[ii + jj*params.nx]) params->unblocked_cells++;
       }
     }
 
