@@ -583,7 +583,6 @@ int initialise(const char* paramfile, const char* obstaclefile,
     }
   }
 
-params->unblocked_cells = (params->nx*params->ny);
   /* open the obstacle data file */
   fp = fopen(obstaclefile, "r");
 
@@ -607,11 +606,10 @@ params->unblocked_cells = (params->nx*params->ny);
 
     /* assign to array */
     (*obstacles_ptr)[xx + yy*params->nx] = blocked;
-    // params->blocked_cells++;
-    params->blocked_cells--;
+    params->blocked_cells++;
   }
 
-  // params->unblocked_cells = (params->nx*params->ny)-params->blocked_cells;
+  params->unblocked_cells = (params->nx*params->ny)-params->blocked_cells;
 
   /* and close the file */
   fclose(fp);
