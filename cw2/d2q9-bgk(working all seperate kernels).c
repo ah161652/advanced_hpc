@@ -38,8 +38,11 @@ typedef struct
   cl_command_queue  queue;
 
   cl_program program;
-  cl_kernel  fusion;
-  cl_kernel av_vels;
+  cl_kernel  accelerate_flow;
+  cl_kernel  propagate;
+  cl_kernel  rebound;
+  cl_kernel  collision;
+  cl_kernel  av_vels;
 
   cl_mem cells;
   cl_mem tmp_cells;
@@ -66,8 +69,12 @@ int initialise(const char* paramfile, const char* obstaclefile,
 ** timestep calls, in order, the functions:
 ** accelerate_flow(), propagate(), rebound() & collision()
 */
+int timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl);
+int accelerate_flow(const t_param params, t_speed* cells, int* obstacles, t_ocl ocl);
+int propagate(const t_param params, t_speed* cells, t_speed* tmp_cells, t_ocl ocl);
+int rebound(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl);
+int collision(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl);
 int write_values(const t_param params, t_speed* cells, int* obstacles, float* av_vels);
-float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl);
 
 /* finalise, including freeing up allocated memory */
 int finalise(const t_param* params, t_speed** cells_ptr, t_speed** tmp_cells_ptr,
@@ -158,15 +165,11 @@ int main(int argc, char* argv[])
 
 
 
-  for (int tt = 0; tt < params.maxIters; tt=tt+2)
+  for (int tt = 0; tt < params.maxIters; tt++)
   {
 
-
-    av_vels[tt] = fusion(params, cells, tmp_cells, obstacles, ocl)
-
-    av_vels[tt+1] = fusion(params, tmp_cells, cells, obstacles, ocl)
-
-
+    timestep(params, cells, tmp_cells, obstacles, ocl);
+    av_vels[tt] = av_velocity(params, cells, obstacles, ocl);
 #ifdef DEBUG
     printf("==timestep: %d==\n", tt);
     printf("av velocity: %.12E\n", av_vels[tt]);
@@ -200,142 +203,153 @@ int main(int argc, char* argv[])
   return EXIT_SUCCESS;
 }
 
-float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl){
-  //set host variables and buffers
-  float tot_u =0.0f;
-  int tot_cells = 0;
-  float* h_partial_us;
-  int* h_partial_tot_cells;
+int timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl)
+{
+  // cl_int err;
 
-  // set device buffer
-  cl_mem d_partial_us;
-  cl_mem d_partial_tot_cells;
+  // // Write cells to device
+  // err = clEnqueueWriteBuffer(
+  // ocl.queue, ocl.cells, CL_TRUE, 0,
+  // sizeof(t_speed) * params.nx * params.ny, cells, 0, NULL, NULL);
+  // checkError(err, "writing cells data", __LINE__);
 
-  // work group variables
-  size_t nwork_groups;
-  size_t work_group_size;
+  accelerate_flow(params, cells, obstacles, ocl);
+  propagate(params, cells, tmp_cells, ocl);
+  rebound(params, cells, tmp_cells, obstacles, ocl);
+  collision(params, cells, tmp_cells, obstacles, ocl);
 
+  // // Read cells from device
+  // err = clEnqueueReadBuffer(
+  //   ocl.queue, ocl.cells, CL_TRUE, 0,
+  //   sizeof(t_speed) * params.nx * params.ny, cells, 0, NULL, NULL);
+  // checkError(err, "reading cells data", __LINE__);
 
+  return EXIT_SUCCESS;
+}
+
+int accelerate_flow(const t_param params, t_speed* cells, int* obstacles, t_ocl ocl)
+{
   cl_int err;
 
-
-  //get work group size and save to variable
-  err = clGetKernelWorkGroupInfo (ocl.fusion, ocl.device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
-  checkError(err, "Getting kernel work group info", __LINE__);
-
-
-
-  // calculate number of work groups from work group size
-  nwork_groups = (params.nx * params.ny)/work_group_size;
-
-
-
-  //allocate space for host buffers
-  h_partial_us = calloc(sizeof(float), nwork_groups);
-  h_partial_tot_cells = calloc(sizeof(int), nwork_groups);
-
-
-
-
-  // create device buffers
-  d_partial_us = clCreateBuffer(ocl.context, CL_MEM_WRITE_ONLY, sizeof(float) * nwork_groups, NULL, &err);
-  checkError(err, "Creating buffer d_partial_us", __LINE__);
-
-  d_partial_tot_cells = clCreateBuffer(ocl.context, CL_MEM_WRITE_ONLY, sizeof(int) * nwork_groups, NULL, &err);
-  checkError(err, "Creating buffer d_partial_tot_cells", __LINE__);
-
-
-
   // Set kernel arguments
-  err = clSetKernelArg(ocl.fusion, 0, sizeof(cl_mem), &ocl.cells);
-  checkError(err, "setting fusion cells", __LINE__);
-  err = clSetKernelArg(ocl.fusion, 1, sizeof(cl_mem), &ocl.obstacles);
-  checkError(err, "setting fusion obstacles", __LINE__);
-  err = clSetKernelArg(ocl.fusion, 2, sizeof(cl_int), &params.nx);
-  checkError(err, "setting fusion nx", __LINE__);
-  err = clSetKernelArg(ocl.fusion, 3, sizeof(cl_int), &params.ny);
-  checkError(err, "setting fusion ny", __LINE__);
-  err = clSetKernelArg(ocl.fusion, 4, sizeof(cl_float)*work_group_size,NULL);
-  checkError(err, "setting fusion local_u", __LINE__);
-  err = clSetKernelArg(ocl.fusion, 5, sizeof(cl_mem),&d_partial_us);
-  checkError(err, "setting fusion partial_u", __LINE__);
-  err = clSetKernelArg(ocl.fusion, 6, sizeof(cl_int)*work_group_size,NULL);
-  checkError(err, "setting fusion local_tot_cells", __LINE__);
-  err = clSetKernelArg(ocl.fusion, 7, sizeof(cl_mem),&d_partial_tot_cells);
-  checkError(err, "setting fusion partial_tot_cells", __LINE__);
-  err = clSetKernelArg(ocl.fusion, 8, sizeof(cl_mem), &ocl.tmp_cells);
-  checkError(err, "setting fusion temp_cells", __LINE__);
-  err = clSetKernelArg(ocl.fusion, 9, sizeof(cl_float), &params.density);
-  checkError(err, "setting fusion dwensity", __LINE__);
-  err = clSetKernelArg(ocl.fusion, 10, sizeof(cl_float), &ocl.accel);
-  checkError(err, "setting fusion accel", __LINE__);
-  err = clSetKernelArg(ocl.fusion, 11, sizeof(cl_float), &ocl.omega);
-  checkError(err, "setting fusion omega", __LINE__);
+  err = clSetKernelArg(ocl.accelerate_flow, 0, sizeof(cl_mem), &ocl.cells);
+  checkError(err, "setting accelerate_flow arg 0", __LINE__);
+  err = clSetKernelArg(ocl.accelerate_flow, 1, sizeof(cl_mem), &ocl.obstacles);
+  checkError(err, "setting accelerate_flow arg 1", __LINE__);
+  err = clSetKernelArg(ocl.accelerate_flow, 2, sizeof(cl_int), &params.nx);
+  checkError(err, "setting accelerate_flow arg 2", __LINE__);
+  err = clSetKernelArg(ocl.accelerate_flow, 3, sizeof(cl_int), &params.ny);
+  checkError(err, "setting accelerate_flow arg 3", __LINE__);
+  err = clSetKernelArg(ocl.accelerate_flow, 4, sizeof(cl_float), &params.density);
+  checkError(err, "setting accelerate_flow arg 4", __LINE__);
+  err = clSetKernelArg(ocl.accelerate_flow, 5, sizeof(cl_float), &params.accel);
+  checkError(err, "setting accelerate_flow arg 5", __LINE__);
 
-
-
-
-  //set global and local sizes
-  size_t global[2] = {params.nx, params.ny};
-  size_t local[2] = {sqrtf(work_group_size), sqrtf(work_group_size)};
-
-
-
-
-  //enqueue kernel
-  err = clEnqueueNDRangeKernel(ocl.queue, ocl.fusion,
-                               2, NULL, global, local, 0, NULL, NULL);
-  checkError(err, "enqueueing av_vels kernel", __LINE__);
-
-
-
+  // Enqueue kernel
+  size_t global[1] = {params.nx};
+  err = clEnqueueNDRangeKernel(ocl.queue, ocl.accelerate_flow,
+                               1, NULL, global, NULL, 0, NULL, NULL);
+  checkError(err, "enqueueing accelerate_flow kernel", __LINE__);
 
   // Wait for kernel to finish
   err = clFinish(ocl.queue);
-  checkError(err, "waiting for av_vels kernel", __LINE__);
+  checkError(err, "waiting for accelerate_flow kernel", __LINE__);
 
-
-
-
-  //read buffers
-  err = clEnqueueReadBuffer(ocl.queue, d_partial_us, CL_TRUE, 0, sizeof(float)* nwork_groups, h_partial_us, 0, NULL, NULL );
-  checkError(err, "Reading back d_partial_us", __LINE__);
-
-  err = clEnqueueReadBuffer(ocl.queue, d_partial_tot_cells, CL_TRUE, 0, sizeof(int)* nwork_groups, h_partial_tot_cells, 0, NULL, NULL );
-  checkError(err, "Reading back d_partial_tot_cells", __LINE__);
-
-
-
-  //summing
-  for (size_t i = 0; i < nwork_groups; i++)
-  {
-      tot_u += h_partial_us[i];
-  }
-
-  for (size_t i = 0; i < nwork_groups; i++)
-  {
-      tot_cells += h_partial_tot_cells[i];
-  }
-
-
-
-  //cleanup
-clReleaseMemObject(d_partial_us);
-clReleaseMemObject(d_partial_tot_cells);
-free(h_partial_us);
-free(h_partial_tot_cells);
-
-//printf("kernel tot_cells = %f\n", (float)tot_cells );
-//printf("init tot_cells = %f\n", (float)params.unblocked_cells );
-
-//printf("kernel tot_u = %f\n", tot_u );
-
-
-//return av_vels
-return tot_u/(float)tot_cells;
-
-
+  return EXIT_SUCCESS;
 }
+
+int propagate(const t_param params, t_speed* cells, t_speed* tmp_cells, t_ocl ocl)
+{
+  cl_int err;
+
+  // Set kernel arguments
+  err = clSetKernelArg(ocl.propagate, 0, sizeof(cl_mem), &ocl.cells);
+  checkError(err, "setting propagate arg 0", __LINE__);
+  err = clSetKernelArg(ocl.propagate, 1, sizeof(cl_mem), &ocl.tmp_cells);
+  checkError(err, "setting propagate arg 1", __LINE__);
+  err = clSetKernelArg(ocl.propagate, 2, sizeof(cl_mem), &ocl.obstacles);
+  checkError(err, "setting propagate arg 2", __LINE__);
+  err = clSetKernelArg(ocl.propagate, 3, sizeof(cl_int), &params.nx);
+  checkError(err, "setting propagate arg 3", __LINE__);
+  err = clSetKernelArg(ocl.propagate, 4, sizeof(cl_int), &params.ny);
+  checkError(err, "setting propagate arg 4", __LINE__);
+
+  // Enqueue kernel
+  size_t global[2] = {params.nx, params.ny};
+  err = clEnqueueNDRangeKernel(ocl.queue, ocl.propagate,
+                               2, NULL, global, NULL, 0, NULL, NULL);
+  checkError(err, "enqueueing propagate kernel", __LINE__);
+
+  // Wait for kernel to finish
+  err = clFinish(ocl.queue);
+  checkError(err, "waiting for propagate kernel", __LINE__);
+
+  return EXIT_SUCCESS;
+}
+
+int rebound(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl)
+{
+  cl_int err;
+
+  // Set kernel arguments
+  err = clSetKernelArg(ocl.rebound, 0, sizeof(cl_mem), &ocl.cells);
+  checkError(err, "setting rebound arg 0", __LINE__);
+  err = clSetKernelArg(ocl.rebound, 1, sizeof(cl_mem), &ocl.tmp_cells);
+  checkError(err, "setting rebound arg 1", __LINE__);
+  err = clSetKernelArg(ocl.rebound, 2, sizeof(cl_mem), &ocl.obstacles);
+  checkError(err, "setting rebound arg 2", __LINE__);
+  err = clSetKernelArg(ocl.rebound, 3, sizeof(cl_int), &params.nx);
+  checkError(err, "setting rebound arg 3", __LINE__);
+
+  size_t global[2] = {params.nx, params.ny};
+  err = clEnqueueNDRangeKernel(ocl.queue, ocl.rebound,
+                               2, NULL, global, NULL, 0, NULL, NULL);
+  checkError(err, "enqueueing rebound kernel", __LINE__);
+
+  // Wait for kernel to finish
+  err = clFinish(ocl.queue);
+  checkError(err, "waiting for rebound kernel", __LINE__);
+
+
+
+  return EXIT_SUCCESS;
+}
+
+int collision(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl)
+{
+
+  cl_int err;
+
+  // Set kernel arguments
+  err = clSetKernelArg(ocl.collision, 0, sizeof(cl_mem), &ocl.cells);
+  checkError(err, "setting collision arg 0", __LINE__);
+  err = clSetKernelArg(ocl.collision, 1, sizeof(cl_mem), &ocl.tmp_cells);
+  checkError(err, "setting collision arg 1", __LINE__);
+  err = clSetKernelArg(ocl.collision, 2, sizeof(cl_mem), &ocl.obstacles);
+  checkError(err, "setting collision arg 2", __LINE__);
+  err = clSetKernelArg(ocl.collision, 3, sizeof(cl_int), &params.nx);
+  checkError(err, "setting collision arg 3", __LINE__);
+  err = clSetKernelArg(ocl.collision, 4, sizeof(cl_int), &params.ny);
+  checkError(err, "setting collision arg 4", __LINE__);
+  err = clSetKernelArg(ocl.collision, 5, sizeof(cl_float), &params.omega);
+  checkError(err, "setting collision arg 5", __LINE__);
+
+  size_t global[2] = {params.nx, params.ny};
+  err = clEnqueueNDRangeKernel(ocl.queue, ocl.collision,
+                               2, NULL, global, NULL, 0, NULL, NULL);
+  checkError(err, "enqueueing collision kernel", __LINE__);
+
+  // Wait for kernel to finish
+  err = clFinish(ocl.queue);
+  checkError(err, "waiting for collision kernel", __LINE__);
+
+
+  return EXIT_SUCCESS;
+}
+
+
+
+
 
 float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl ocl)
 {
@@ -459,7 +473,7 @@ free(h_partial_tot_cells);
 //printf("kernel tot_cells = %f\n", (float)tot_cells );
 //printf("init tot_cells = %f\n", (float)params.unblocked_cells );
 
-// printf("kernel tot_u = %f\n", tot_u );
+printf("kernel tot_u = %f\n", tot_u );
 
 
 //return av_vels
@@ -677,10 +691,16 @@ int initialise(const char* paramfile, const char* obstaclefile,
   checkError(err, "building program", __LINE__);
 
   // Create OpenCL kernels
+  ocl->accelerate_flow = clCreateKernel(ocl->program, "accelerate_flow", &err);
+  checkError(err, "creating accelerate_flow kernel", __LINE__);
+  ocl->propagate = clCreateKernel(ocl->program, "propagate", &err);
+  checkError(err, "creating propagate kernel", __LINE__);
+  ocl->rebound = clCreateKernel(ocl->program, "rebound", &err);
+  checkError(err, "creating rebound kernel", __LINE__);
+  ocl->collision = clCreateKernel(ocl->program, "collision", &err);
+  checkError(err, "creating collision kernel", __LINE__);
   ocl->av_vels = clCreateKernel(ocl->program, "av_vels", &err);
   checkError(err, "creating av_vels kernel", __LINE__);
-  ocl->fusion = clCreateKernel(ocl->program, "fusion", &err);
-  checkError(err, "creating fusion kernel", __LINE__);
 
   // Allocate OpenCL buffers
   ocl->cells = clCreateBuffer(
@@ -720,8 +740,11 @@ int finalise(const t_param* params, t_speed** cells_ptr, t_speed** tmp_cells_ptr
   clReleaseMemObject(ocl.cells);
   clReleaseMemObject(ocl.tmp_cells);
   clReleaseMemObject(ocl.obstacles);
+  clReleaseKernel(ocl.accelerate_flow);
+  clReleaseKernel(ocl.propagate);
+  clReleaseKernel(ocl.rebound);
+  clReleaseKernel(ocl.collision);
   clReleaseKernel(ocl.av_vels);
-    clReleaseKernel(ocl.fusion);
   clReleaseProgram(ocl.program);
   clReleaseCommandQueue(ocl.queue);
   clReleaseContext(ocl.context);
