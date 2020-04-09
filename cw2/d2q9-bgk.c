@@ -67,7 +67,8 @@ int initialise(const char* paramfile, const char* obstaclefile,
 ** accelerate_flow(), propagate(), rebound() & collision()
 */
 int write_values(const t_param params, t_speed* cells, int* obstacles, float* av_vels);
-float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl);
+float fusion1(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl);
+float fusion2(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl);
 
 /* finalise, including freeing up allocated memory */
 int finalise(const t_param* params, t_speed** cells_ptr, t_speed** tmp_cells_ptr,
@@ -162,9 +163,9 @@ int main(int argc, char* argv[])
   {
 
 
-    av_vels[tt] = fusion(params, cells, tmp_cells, obstacles, ocl);
+    av_vels[tt] = fusion1(params, cells, tmp_cells, obstacles, ocl);
 
-    av_vels[tt+1] = fusion(params, tmp_cells, cells, obstacles, ocl);
+    av_vels[tt+1] = fusion2(params, cells, tmp_cells, obstacles, ocl);
 
 
 #ifdef DEBUG
@@ -200,7 +201,7 @@ int main(int argc, char* argv[])
   return EXIT_SUCCESS;
 }
 
-float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl){
+float fusion1(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl){
   //set host variables and buffers
   float tot_u =0.0f;
   int tot_cells = 0;
@@ -264,6 +265,143 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
   err = clSetKernelArg(ocl.fusion, 7, sizeof(cl_mem),&d_partial_tot_cells);
   checkError(err, "setting fusion partial_tot_cells", __LINE__);
   err = clSetKernelArg(ocl.fusion, 8, sizeof(cl_mem), &ocl.tmp_cells);
+  checkError(err, "setting fusion temp_cells", __LINE__);
+  err = clSetKernelArg(ocl.fusion, 9, sizeof(cl_float), &params.density);
+  checkError(err, "setting fusion dwensity", __LINE__);
+  err = clSetKernelArg(ocl.fusion, 10, sizeof(cl_float), &params.accel);
+  checkError(err, "setting fusion accel", __LINE__);
+  err = clSetKernelArg(ocl.fusion, 11, sizeof(cl_float), &params.omega);
+  checkError(err, "setting fusion omega", __LINE__);
+
+
+
+
+  //set global and local sizes
+  size_t global[2] = {params.nx, params.ny};
+  size_t local[2] = {sqrtf(work_group_size), sqrtf(work_group_size)};
+
+
+
+
+  //enqueue kernel
+  err = clEnqueueNDRangeKernel(ocl.queue, ocl.fusion,
+                               2, NULL, global, local, 0, NULL, NULL);
+  checkError(err, "enqueueing av_vels kernel", __LINE__);
+
+
+
+
+  // Wait for kernel to finish
+  err = clFinish(ocl.queue);
+  checkError(err, "waiting for av_vels kernel", __LINE__);
+
+
+
+
+  //read buffers
+  err = clEnqueueReadBuffer(ocl.queue, d_partial_us, CL_TRUE, 0, sizeof(float)* nwork_groups, h_partial_us, 0, NULL, NULL );
+  checkError(err, "Reading back d_partial_us", __LINE__);
+
+  err = clEnqueueReadBuffer(ocl.queue, d_partial_tot_cells, CL_TRUE, 0, sizeof(int)* nwork_groups, h_partial_tot_cells, 0, NULL, NULL );
+  checkError(err, "Reading back d_partial_tot_cells", __LINE__);
+
+
+
+  //summing
+  for (size_t i = 0; i < nwork_groups; i++)
+  {
+      tot_u += h_partial_us[i];
+  }
+
+  for (size_t i = 0; i < nwork_groups; i++)
+  {
+      tot_cells += h_partial_tot_cells[i];
+  }
+
+
+
+  //cleanup
+clReleaseMemObject(d_partial_us);
+clReleaseMemObject(d_partial_tot_cells);
+free(h_partial_us);
+free(h_partial_tot_cells);
+
+//printf("kernel tot_cells = %f\n", (float)tot_cells );
+//printf("init tot_cells = %f\n", (float)params.unblocked_cells );
+
+//printf("kernel tot_u = %f\n", tot_u );
+
+
+//return av_vels
+return tot_u/(float)tot_cells;
+
+
+}
+
+float fusion2(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl){
+  //set host variables and buffers
+  float tot_u =0.0f;
+  int tot_cells = 0;
+  float* h_partial_us;
+  int* h_partial_tot_cells;
+
+  // set device buffer
+  cl_mem d_partial_us;
+  cl_mem d_partial_tot_cells;
+
+  // work group variables
+  size_t nwork_groups;
+  size_t work_group_size;
+
+
+  cl_int err;
+
+
+  //get work group size and save to variable
+  err = clGetKernelWorkGroupInfo (ocl.fusion, ocl.device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
+  checkError(err, "Getting kernel work group info", __LINE__);
+
+
+
+  // calculate number of work groups from work group size
+  nwork_groups = (params.nx * params.ny)/work_group_size;
+
+
+
+  //allocate space for host buffers
+  h_partial_us = calloc(sizeof(float), nwork_groups);
+  h_partial_tot_cells = calloc(sizeof(int), nwork_groups);
+
+
+
+
+  // create device buffers
+  d_partial_us = clCreateBuffer(ocl.context, CL_MEM_WRITE_ONLY, sizeof(float) * nwork_groups, NULL, &err);
+  checkError(err, "Creating buffer d_partial_us", __LINE__);
+
+  d_partial_tot_cells = clCreateBuffer(ocl.context, CL_MEM_WRITE_ONLY, sizeof(int) * nwork_groups, NULL, &err);
+  checkError(err, "Creating buffer d_partial_tot_cells", __LINE__);
+
+
+
+  // Set kernel arguments
+  err = clSetKernelArg(ocl.fusion, 0, sizeof(cl_mem), &ocl.tmp_cells);
+  checkError(err, "setting fusion cells", __LINE__);
+  err = clSetKernelArg(ocl.fusion, 1, sizeof(cl_mem), &ocl.obstacles);
+  checkError(err, "setting fusion obstacles", __LINE__);
+  err = clSetKernelArg(ocl.fusion, 2, sizeof(cl_int), &params.nx);
+  checkError(err, "setting fusion nx", __LINE__);
+  err = clSetKernelArg(ocl.fusion, 3, sizeof(cl_int), &params.ny);
+  checkError(err, "setting fusion ny", __LINE__);
+  err = clSetKernelArg(ocl.fusion, 4, sizeof(cl_float)*work_group_size,NULL);
+  checkError(err, "setting fusion local_u", __LINE__);
+  err = clSetKernelArg(ocl.fusion, 5, sizeof(cl_mem),&d_partial_us);
+  checkError(err, "setting fusion partial_u", __LINE__);
+  err = clSetKernelArg(ocl.fusion, 6, sizeof(cl_int)*work_group_size,NULL);
+  checkError(err, "setting fusion local_tot_cells", __LINE__);
+  err = clSetKernelArg(ocl.fusion, 7, sizeof(cl_mem),&d_partial_tot_cells);
+  checkError(err, "setting fusion partial_tot_cells", __LINE__);
+  err = clSetKernelArg(ocl.fusion, 8, sizeof(cl_mem), &ocl.cells);
   checkError(err, "setting fusion temp_cells", __LINE__);
   err = clSetKernelArg(ocl.fusion, 9, sizeof(cl_float), &params.density);
   checkError(err, "setting fusion dwensity", __LINE__);

@@ -484,7 +484,7 @@ kernel void fusion(         global t_speed* cells,
              d_equ[7] = w2 * local_density * (1.f + u[7] / c_sq + (u[7]*u[7]) / w3 - u_sq / w4);
              d_equ[8] = w2 * local_density * (1.f + u[8] / c_sq + (u[8]*u[8]) / w3 - u_sq / w4);
 
-             tmp_cells[ii + jj*nx].speeds[0] = (!obstacles[jj*nx + ii]) ? cells[ii + jj*nx].speeds[0] + omega * (d_equ[0] - cells[ii + jj*nx].speeds[0]) :   tmp_cells[ii + jj*nx].speeds[0];
+           tmp_cells[ii + jj*nx].speeds[0] = (!obstacles[jj*nx + ii]) ? cells[ii + jj*nx].speeds[0] + omega * (d_equ[0] - cells[ii + jj*nx].speeds[0]) :   tmp_cells[ii + jj*nx].speeds[0];
            tmp_cells[ii + jj*nx].speeds[1] = (obstacles[jj*nx + ii]) ? cells[x_e + jj*nx].speeds[3] : cells[x_w + jj*nx].speeds[1]  + omega * (d_equ[1] - cells[x_w + jj*nx].speeds[1] );
            tmp_cells[ii + jj*nx].speeds[2] = (obstacles[jj*nx + ii]) ? cells[ii + y_n*nx].speeds[4] : cells[ii + y_s*nx].speeds[2]  + omega * (d_equ[2] - cells[ii + y_s*nx].speeds[2] );
            tmp_cells[ii + jj*nx].speeds[3] = (obstacles[jj*nx + ii]) ? cells[x_w + jj*nx].speeds[1] : cells[x_e + jj*nx].speeds[3] + omega * (d_equ[3] -cells[x_e + jj*nx].speeds[3] );
