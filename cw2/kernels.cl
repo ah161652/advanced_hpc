@@ -293,7 +293,7 @@ kernel void av_vels(global t_speed* cells,
           local_u[cell_index] = sqrt((u_x * u_x) + (u_y * u_y));
 
 
-        make local tot_cells =1
+       local_tot_cells =1
         local_tot_cells[cell_index] = 1;
       }
 
