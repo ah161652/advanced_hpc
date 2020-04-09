@@ -477,7 +477,7 @@ printf("kernel tot_u = %f\n", tot_u );
 
 
 //return av_vels
-return tot_u/(float)params.total_cells;
+return tot_u/(float)tot_cells;
 }
 
 
