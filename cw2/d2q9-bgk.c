@@ -26,7 +26,9 @@ typedef struct
   int    reynolds_dim;  /* dimension for Reynolds number */
   float density;       /* density per link */
   float accel;         /* density redistribution */
-  float omega;         /* relaxation parameter */
+  float omega;
+  int unblocked_cells;
+  int blocked_cells;       /* relaxation parameter */
 } t_param;
 
 /* struct to hold OpenCL objects */
@@ -339,11 +341,11 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
   float tot_u =0.0f;
   int tot_cells = 0;
   float* h_partial_us;
-  int* h_partial_tot_cells;
+  // int* h_partial_tot_cells;
 
   // set device buffer
   cl_mem d_partial_us;
-  cl_mem d_partial_tot_cells;
+  // cl_mem d_partial_tot_cells;
 
   // work group variables
   size_t nwork_groups;
@@ -366,7 +368,7 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
 
   //allocate space for host buffers
   h_partial_us = calloc(sizeof(float), nwork_groups);
-  h_partial_tot_cells = calloc(sizeof(int), nwork_groups);
+  // h_partial_tot_cells = calloc(sizeof(int), nwork_groups);
 
 
 
@@ -375,8 +377,8 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
   d_partial_us = clCreateBuffer(ocl.context, CL_MEM_WRITE_ONLY, sizeof(float) * nwork_groups, NULL, &err);
   checkError(err, "Creating buffer d_partial_us", __LINE__);
 
-  d_partial_tot_cells = clCreateBuffer(ocl.context, CL_MEM_WRITE_ONLY, sizeof(int) * nwork_groups, NULL, &err);
-  checkError(err, "Creating buffer d_partial_tot_cells", __LINE__);
+  // d_partial_tot_cells = clCreateBuffer(ocl.context, CL_MEM_WRITE_ONLY, sizeof(int) * nwork_groups, NULL, &err);
+  // checkError(err, "Creating buffer d_partial_tot_cells", __LINE__);
 
 
 
@@ -393,10 +395,10 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
   checkError(err, "setting av_vels local_u", __LINE__);
   err = clSetKernelArg(ocl.av_vels, 5, sizeof(cl_mem),&d_partial_us);
   checkError(err, "setting av_vels partial_u", __LINE__);
-  err = clSetKernelArg(ocl.av_vels, 6, sizeof(cl_int)*work_group_size,NULL);
-  checkError(err, "setting av_vels local_tot_cells", __LINE__);
-  err = clSetKernelArg(ocl.av_vels, 7, sizeof(cl_mem),&d_partial_tot_cells);
-  checkError(err, "setting av_vels partial_tot_cells", __LINE__);
+  // err = clSetKernelArg(ocl.av_vels, 6, sizeof(cl_int)*work_group_size,NULL);
+  // checkError(err, "setting av_vels local_tot_cells", __LINE__);
+  // err = clSetKernelArg(ocl.av_vels, 7, sizeof(cl_mem),&d_partial_tot_cells);
+  // checkError(err, "setting av_vels partial_tot_cells", __LINE__);
 
 
 
@@ -427,8 +429,8 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
   err = clEnqueueReadBuffer(ocl.queue, d_partial_us, CL_TRUE, 0, sizeof(float)* nwork_groups, h_partial_us, 0, NULL, NULL );
   checkError(err, "Reading back d_partial_us", __LINE__);
 
-  err = clEnqueueReadBuffer(ocl.queue, d_partial_tot_cells, CL_TRUE, 0, sizeof(int)* nwork_groups, h_partial_tot_cells, 0, NULL, NULL );
-  checkError(err, "Reading back d_partial_tot_cells", __LINE__);
+  // err = clEnqueueReadBuffer(ocl.queue, d_partial_tot_cells, CL_TRUE, 0, sizeof(int)* nwork_groups, h_partial_tot_cells, 0, NULL, NULL );
+  // checkError(err, "Reading back d_partial_tot_cells", __LINE__);
 
 
 
@@ -438,76 +440,22 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
       tot_u += h_partial_us[i];
   }
 
-  for (size_t i = 0; i < nwork_groups; i++)
-  {
-      tot_cells += h_partial_tot_cells[i];
-  }
+  // for (size_t i = 0; i < nwork_groups; i++)
+  // {
+  //     tot_cells += h_partial_tot_cells[i];
+  // }
 
 
 
   //cleanup
 clReleaseMemObject(d_partial_us);
-clReleaseMemObject(d_partial_tot_cells);
+// clReleaseMemObject(d_partial_tot_cells);
 free(h_partial_us);
-free(h_partial_tot_cells);
+//free(h_partial_tot_cells);
 
 
 //return av_vels
-return tot_u/(float)tot_cells;
-
-
-}
-
-// float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl ocl)
-// {
-//   int    tot_cells = 0;  /* no. of cells used in calculation */
-//   float tot_u;          /* accumulated magnitudes of velocity for each cell */
-//
-//   /* initialise */
-//   tot_u = 0.f;
-//
-//   /* loop over all non-blocked cells */
-//   for (int jj = 0; jj < params.ny; jj++)
-//   {
-//     for (int ii = 0; ii < params.nx; ii++)
-//     {
-//       /* ignore occupied cells */
-//       if (!obstacles[ii + jj*params.nx])
-//       {
-//         /* local density total */
-//         float local_density = 0.f;
-//
-//         for (int kk = 0; kk < NSPEEDS; kk++)
-//         {
-//           local_density += cells[ii + jj*params.nx].speeds[kk];
-//         }
-//
-//         /* x-component of velocity */
-//         float u_x = (cells[ii + jj*params.nx].speeds[1]
-//                       + cells[ii + jj*params.nx].speeds[5]
-//                       + cells[ii + jj*params.nx].speeds[8]
-//                       - (cells[ii + jj*params.nx].speeds[3]
-//                          + cells[ii + jj*params.nx].speeds[6]
-//                          + cells[ii + jj*params.nx].speeds[7]))
-//                      / local_density;
-//         /* compute y velocity component */
-//         float u_y = (cells[ii + jj*params.nx].speeds[2]
-//                       + cells[ii + jj*params.nx].speeds[5]
-//                       + cells[ii + jj*params.nx].speeds[6]
-//                       - (cells[ii + jj*params.nx].speeds[4]
-//                          + cells[ii + jj*params.nx].speeds[7]
-//                          + cells[ii + jj*params.nx].speeds[8]))
-//                      / local_density;
-//         /* accumulate the norm of x- and y- velocity components */
-//         tot_u += sqrtf((u_x * u_x) + (u_y * u_y));
-//         /* increase counter of inspected cells */
-//         ++tot_cells;
-//       }
-//     }
-//   }
-//
-//   return tot_u / (float)tot_cells;
-// }
+return tot_u/(float)params.unblocked_cells;
 
 
 int initialise(const char* paramfile, const char* obstaclefile,
@@ -521,6 +469,8 @@ int initialise(const char* paramfile, const char* obstaclefile,
   int    retval;         /* to hold return value for checking */
   char*  ocl_src;        /* OpenCL kernel source */
   long   ocl_size;       /* size of OpenCL kernel source */
+
+  params->blocked_cells =0;
 
   /* open the parameter file */
   fp = fopen(paramfile, "r");
@@ -653,7 +603,10 @@ int initialise(const char* paramfile, const char* obstaclefile,
 
     /* assign to array */
     (*obstacles_ptr)[xx + yy*params->nx] = blocked;
+    params->blocked_cells++;
   }
+
+  params->unblocked_cells = (params->nx*params.ny)-params->blocked_cells;
 
   /* and close the file */
   fclose(fp);
