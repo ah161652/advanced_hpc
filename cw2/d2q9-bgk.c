@@ -474,6 +474,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
   long   ocl_size;       /* size of OpenCL kernel source */
 
   params->blocked_cells =0;
+  params->unblocked_cells = 0;
 
   /* open the parameter file */
   fp = fopen(paramfile, "r");
