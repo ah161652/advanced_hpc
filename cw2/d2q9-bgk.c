@@ -182,22 +182,22 @@ int timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
 {
   cl_int err;
 
-  // Write cells to device
-  err = clEnqueueWriteBuffer(
-  ocl.queue, ocl.cells, CL_TRUE, 0,
-  sizeof(t_speed) * params.nx * params.ny, cells, 0, NULL, NULL);
-  checkError(err, "writing cells data", __LINE__);
+  // // Write cells to device
+  // err = clEnqueueWriteBuffer(
+  // ocl.queue, ocl.cells, CL_TRUE, 0,
+  // sizeof(t_speed) * params.nx * params.ny, cells, 0, NULL, NULL);
+  // checkError(err, "writing cells data", __LINE__);
 
   accelerate_flow(params, cells, obstacles, ocl);
   propagate(params, cells, tmp_cells, ocl);
   rebound(params, cells, tmp_cells, obstacles, ocl);
   collision(params, cells, tmp_cells, obstacles, ocl);
 
-  // Read cells from device
-  err = clEnqueueReadBuffer(
-    ocl.queue, ocl.cells, CL_TRUE, 0,
-    sizeof(t_speed) * params.nx * params.ny, cells, 0, NULL, NULL);
-  checkError(err, "reading cells data", __LINE__);
+  // // Read cells from device
+  // err = clEnqueueReadBuffer(
+  //   ocl.queue, ocl.cells, CL_TRUE, 0,
+  //   sizeof(t_speed) * params.nx * params.ny, cells, 0, NULL, NULL);
+  // checkError(err, "reading cells data", __LINE__);
 
   return EXIT_SUCCESS;
 }
