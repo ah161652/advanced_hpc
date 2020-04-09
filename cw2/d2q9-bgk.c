@@ -27,7 +27,7 @@ typedef struct
   float density;       /* density per link */
   float accel;         /* density redistribution */
   float omega;
-  int total_cells;       /* relaxation parameter */
+  //int total_cells;       /* relaxation parameter */
 } t_param;
 
 /* struct to hold OpenCL objects */
@@ -150,18 +150,18 @@ int main(int argc, char* argv[])
 
 
 
-  params.total_cells =0;
-  for (int jj = 0; jj < params.ny; jj++)
-  {
-    for (int ii = 0; ii < params.nx; ii++)
-    {
-      /* ignore occupied cells */
-      if (!obstacles[ii + jj*params.nx])
-      {
-        ++params.total_cells;
-      }
-    }
-  }
+  // params.total_cells =0;
+  // for (int jj = 0; jj < params.ny; jj++)
+  // {
+  //   for (int ii = 0; ii < params.nx; ii++)
+  //   {
+  //     /* ignore occupied cells */
+  //     if (!obstacles[ii + jj*params.nx])
+  //     {
+  //       ++params.total_cells;
+  //     }
+  //   }
+  // }
 
 
 
@@ -446,8 +446,8 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
   err = clEnqueueReadBuffer(ocl.queue, d_partial_us, CL_TRUE, 0, sizeof(float)* nwork_groups, h_partial_us, 0, NULL, NULL );
   checkError(err, "Reading back d_partial_us", __LINE__);
 
-  // err = clEnqueueReadBuffer(ocl.queue, d_partial_tot_cells, CL_TRUE, 0, sizeof(int)* nwork_groups, h_partial_tot_cells, 0, NULL, NULL );
-  // checkError(err, "Reading back d_partial_tot_cells", __LINE__);
+  err = clEnqueueReadBuffer(ocl.queue, d_partial_tot_cells, CL_TRUE, 0, sizeof(int)* nwork_groups, h_partial_tot_cells, 0, NULL, NULL );
+  checkError(err, "Reading back d_partial_tot_cells", __LINE__);
 
 
 
@@ -457,18 +457,18 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
       tot_u += h_partial_us[i];
   }
 
-  // for (size_t i = 0; i < nwork_groups; i++)
-  // {
-  //     tot_cells += h_partial_tot_cells[i];
-  // }
+  for (size_t i = 0; i < nwork_groups; i++)
+  {
+      tot_cells += h_partial_tot_cells[i];
+  }
 
 
 
   //cleanup
 clReleaseMemObject(d_partial_us);
-// clReleaseMemObject(d_partial_tot_cells);
+clReleaseMemObject(d_partial_tot_cells);
 free(h_partial_us);
-// free(h_partial_tot_cells);
+free(h_partial_tot_cells);
 
 //printf("kernel tot_cells = %f\n", (float)tot_cells );
 //printf("init tot_cells = %f\n", (float)params.unblocked_cells );
@@ -477,7 +477,7 @@ printf("kernel tot_u = %f\n", tot_u );
 
 
 //return av_vels
-return tot_u/(float)params.total_cells;
+return tot_u/(float)tot_cells;
 }
 
 
