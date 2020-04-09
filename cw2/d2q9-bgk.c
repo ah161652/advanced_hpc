@@ -620,12 +620,10 @@ int initialise(const char* paramfile, const char* obstaclefile,
     for (int ii = 0; ii < params->nx; ii++)
     {
       /* ignore occupied cells */
-      if (!obstacles[ii + jj*params.nx])
-
-        params->unblocked_cells++;
+      if (!obstacles[ii + jj*params.nx]) params->unblocked_cells++;
       }
     }
-  }
+
 
   /*
   ** allocate space to hold a record of the avarage velocities computed
