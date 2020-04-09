@@ -417,10 +417,10 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
   checkError(err, "setting av_vels local_u", __LINE__);
   err = clSetKernelArg(ocl.av_vels, 5, sizeof(cl_mem),&d_partial_us);
   checkError(err, "setting av_vels partial_u", __LINE__);
-  err = clSetKernelArg(ocl.av_vels, 6, sizeof(cl_int)*work_group_size,NULL);
-  checkError(err, "setting av_vels local_tot_cells", __LINE__);
-  err = clSetKernelArg(ocl.av_vels, 7, sizeof(cl_mem),&d_partial_tot_cells);
-  checkError(err, "setting av_vels partial_tot_cells", __LINE__);
+  // err = clSetKernelArg(ocl.av_vels, 6, sizeof(cl_int)*work_group_size,NULL);
+  // checkError(err, "setting av_vels local_tot_cells", __LINE__);
+  // err = clSetKernelArg(ocl.av_vels, 7, sizeof(cl_mem),&d_partial_tot_cells);
+  // checkError(err, "setting av_vels partial_tot_cells", __LINE__);
 
 
 
