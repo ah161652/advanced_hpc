@@ -27,8 +27,7 @@ typedef struct
   float density;       /* density per link */
   float accel;         /* density redistribution */
   float omega;
-  int unblocked_cells;
-  int blocked_cells;       /* relaxation parameter */
+  int total_cells;       /* relaxation parameter */
 } t_param;
 
 /* struct to hold OpenCL objects */
@@ -151,7 +150,7 @@ int main(int argc, char* argv[])
 
 
 
-  params.unblocked_cells =0;
+  params.total_cells =0;
   for (int jj = 0; jj < params.ny; jj++)
   {
     for (int ii = 0; ii < params.nx; ii++)
@@ -159,7 +158,7 @@ int main(int argc, char* argv[])
       /* ignore occupied cells */
       if (!obstacles[ii + jj*params.nx])
       {
-        ++params.unblocked_cells;
+        ++params.total_cells;
       }
     }
   }
@@ -472,10 +471,13 @@ free(h_partial_us);
 free(h_partial_tot_cells);
 
 //printf("kernel tot_cells = %f\n", (float)tot_cells );
-printf("init tot_cells = %f\n", (float)params.unblocked_cells );
+//printf("init tot_cells = %f\n", (float)params.unblocked_cells );
+
+printf("kernel tot_u = %f\n", tot_u );
+
 
 //return av_vels
-return tot_u/(float)params.unblocked_cells;
+return tot_u/(float)params.total_cells;
 }
 
 
