@@ -475,8 +475,8 @@ clReleaseMemObject(d_partial_tot_cells);
 free(h_partial_us);
 free(h_partial_tot_cells);
 
-printf("kernel tot_cells = %f\n", tot_cells );
-printf("init tot_cells = %f\n", params.unblocked_cells );
+printf("kernel tot_cells = %f\n", (float)tot_cells );
+printf("init tot_cells = %f\n", (float)params.unblocked_cells );
 
 //return av_vels
 return tot_u/(float)tot_cells;
