@@ -151,20 +151,24 @@ int main(int argc, char* argv[])
 
 
 
-  for (int tt = 0; tt < params.maxIters; tt++)
+  params.unblocked_cells =0;
+  for (int jj = 0; jj < params.ny; jj++)
   {
-    params.unblocked_cells =0;
-    for (int jj = 0; jj < params.ny; jj++)
+    for (int ii = 0; ii < params.nx; ii++)
     {
-      for (int ii = 0; ii < params.nx; ii++)
+      /* ignore occupied cells */
+      if (!obstacles[ii + jj*params.nx])
       {
-        /* ignore occupied cells */
-        if (!obstacles[ii + jj*params.nx])
-        {
-          ++params.unblocked_cells;
-        }
+        ++params.unblocked_cells;
       }
     }
+  }
+
+
+
+  for (int tt = 0; tt < params.maxIters; tt++)
+  {
+
     timestep(params, cells, tmp_cells, obstacles, ocl);
     av_vels[tt] = av_velocity(params, cells, obstacles, ocl);
 #ifdef DEBUG
@@ -487,8 +491,6 @@ int initialise(const char* paramfile, const char* obstaclefile,
   char*  ocl_src;        /* OpenCL kernel source */
   long   ocl_size;       /* size of OpenCL kernel source */
 
-  params->blocked_cells = 0;
-  params->unblocked_cells = 0;
 
   /* open the parameter file */
   fp = fopen(paramfile, "r");
@@ -621,10 +623,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
 
     /* assign to array */
     (*obstacles_ptr)[xx + yy*params->nx] = blocked;
-    // params->blocked_cells++;
   }
-
-  // params->unblocked_cells = (params->nx*params->ny)-params->blocked_cells;
 
   /* and close the file */
   fclose(fp);
