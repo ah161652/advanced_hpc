@@ -162,9 +162,9 @@ int main(int argc, char* argv[])
   {
 
 
-    av_vels[tt] = fusion(params, cells, tmp_cells, obstacles, ocl)
+    av_vels[tt] = fusion(params, cells, tmp_cells, obstacles, ocl);
 
-    av_vels[tt+1] = fusion(params, tmp_cells, cells, obstacles, ocl)
+    av_vels[tt+1] = fusion(params, tmp_cells, cells, obstacles, ocl);
 
 
 #ifdef DEBUG
@@ -267,9 +267,9 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
   checkError(err, "setting fusion temp_cells", __LINE__);
   err = clSetKernelArg(ocl.fusion, 9, sizeof(cl_float), &params.density);
   checkError(err, "setting fusion dwensity", __LINE__);
-  err = clSetKernelArg(ocl.fusion, 10, sizeof(cl_float), &ocl.accel);
+  err = clSetKernelArg(ocl.fusion, 10, sizeof(cl_float), &params.accel);
   checkError(err, "setting fusion accel", __LINE__);
-  err = clSetKernelArg(ocl.fusion, 11, sizeof(cl_float), &ocl.omega);
+  err = clSetKernelArg(ocl.fusion, 11, sizeof(cl_float), &params.omega);
   checkError(err, "setting fusion omega", __LINE__);
 
 
