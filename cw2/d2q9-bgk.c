@@ -27,7 +27,7 @@ typedef struct
   float density;       /* density per link */
   float accel;         /* density redistribution */
   float omega;
-  //int total_cells;       /* relaxation parameter */
+  int total_cells;       /* relaxation parameter */
 } t_param;
 
 /* struct to hold OpenCL objects */
@@ -144,18 +144,18 @@ int main(int argc, char* argv[])
 
 
 
-  // params.total_cells =0;
-  // for (int jj = 0; jj < params.ny; jj++)
-  // {
-  //   for (int ii = 0; ii < params.nx; ii++)
-  //   {
-  //     /* ignore occupied cells */
-  //     if (!obstacles[ii + jj*params.nx])
-  //     {
-  //       ++params.total_cells;
-  //     }
-  //   }
-  // }
+  params.total_cells =0;
+  for (int jj = 0; jj < params.ny; jj++)
+  {
+    for (int ii = 0; ii < params.nx; ii++)
+    {
+      /* ignore occupied cells */
+      if (!obstacles[ii + jj*params.nx])
+      {
+        ++params.total_cells;
+      }
+    }
+  }
 
 
 
@@ -326,14 +326,14 @@ clReleaseMemObject(d_partial_tot_cells);
 free(h_partial_us);
 free(h_partial_tot_cells);
 
-printf("fusion1 tot_cells  = %f\n", (float)tot_cells );
+// printf("fusion1 tot_cells  = %f\n", (float)tot_cells );
 
 
 // printf("fusion1 tot_u  = %f\n", tot_u );
 
 
 //return av_vels
-return tot_u/(float)tot_cells;
+return tot_u/(float)params.total_cells;
 
 
 }
@@ -601,7 +601,7 @@ free(h_partial_tot_cells);
 
 
 //return av_vels
-return tot_u/(float)tot_cells;
+return tot_u/(float)params.total_cells;
 }
 
 
