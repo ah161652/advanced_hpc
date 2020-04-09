@@ -326,10 +326,10 @@ clReleaseMemObject(d_partial_tot_cells);
 free(h_partial_us);
 free(h_partial_tot_cells);
 
-//printf("kernel tot_cells = %f\n", (float)tot_cells );
-//printf("init tot_cells = %f\n", (float)params.unblocked_cells );
+printf("fusion1 tot_cells  = %f\n", (float)tot_cells );
 
-//printf("kernel tot_u = %f\n", tot_u );
+
+// printf("fusion1 tot_u  = %f\n", tot_u );
 
 
 //return av_vels
@@ -463,10 +463,10 @@ clReleaseMemObject(d_partial_tot_cells);
 free(h_partial_us);
 free(h_partial_tot_cells);
 
-//printf("kernel tot_cells = %f\n", (float)tot_cells );
-//printf("init tot_cells = %f\n", (float)params.unblocked_cells );
+printf("fusion2 tot_cells  = %f\n", (float)tot_cells );
 
-//printf("kernel tot_u = %f\n", tot_u );
+
+// printf("fusion2 tot_u  = %f\n", tot_u );
 
 
 //return av_vels
