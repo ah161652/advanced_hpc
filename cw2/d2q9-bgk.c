@@ -606,13 +606,26 @@ int initialise(const char* paramfile, const char* obstaclefile,
 
     /* assign to array */
     (*obstacles_ptr)[xx + yy*params->nx] = blocked;
-    params->blocked_cells++;
+    // params->blocked_cells++;
   }
 
-  params->unblocked_cells = (params->nx*params->ny)-params->blocked_cells;
+  // params->unblocked_cells = (params->nx*params->ny)-params->blocked_cells;
 
   /* and close the file */
   fclose(fp);
+
+  /* loop over all non-blocked cells */
+  for (int jj = 0; jj < params->ny; jj++)
+  {
+    for (int ii = 0; ii < params->nx; ii++)
+    {
+      /* ignore occupied cells */
+      if (!obstacles[ii + jj*params.nx])
+
+        params->unblocked_cells++;
+      }
+    }
+  }
 
   /*
   ** allocate space to hold a record of the avarage velocities computed
