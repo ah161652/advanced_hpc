@@ -219,7 +219,7 @@ kernel void av_vels(global t_speed* cells,
                             int nx,
                             int ny,
                             local float* local_u ,
-                            global float* partial_u ),
+                            global float* partial_u ,
                            local int* local_tot_cells ,
                             global int* partial_tot_cells )
 {
