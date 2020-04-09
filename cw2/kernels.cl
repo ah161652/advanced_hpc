@@ -317,13 +317,13 @@ if (local_id_x == 0 && local_id_y == 0) {
   //sum all cells in work group
   for (size_t i=0; i<total_work_items; i++) {
       work_group_total_u += local_u[i];
-      // work_group_total_cells += local_tot_cells[i];
+      work_group_total_cells += local_tot_cells[i];
   }
 
 
   //add work group sums to global arrays
   partial_u[group_index] = work_group_total_u;
-  // partial_tot_cells[group_index] = work_group_total_cells;
+  partial_tot_cells[group_index] = work_group_total_cells;
 
 }
 
