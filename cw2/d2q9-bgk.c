@@ -149,6 +149,28 @@ int main(int argc, char* argv[])
     sizeof(cl_int) * params.nx * params.ny, obstacles, 0, NULL, NULL);
   checkError(err, "writing obstacles data", __LINE__);
 
+
+
+  for (int jj = 0; jj < params.ny; jj++)
+  {
+    for (int ii = 0; ii < params.nx; ii++)
+    {
+      /* ignore occupied cells */
+      if (!obstacles[ii + jj*params.nx])
+      {
+        ++params.unblocked_cells;
+      }
+    }
+  }
+
+
+
+
+
+
+
+
+
   for (int tt = 0; tt < params.maxIters; tt++)
   {
     timestep(params, cells, tmp_cells, obstacles, ocl);
@@ -473,7 +495,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
   char*  ocl_src;        /* OpenCL kernel source */
   long   ocl_size;       /* size of OpenCL kernel source */
 
-  params->blocked_cells =0;
+  params->blocked_cells = 0;
   params->unblocked_cells = 0;
 
   /* open the parameter file */
@@ -615,15 +637,6 @@ int initialise(const char* paramfile, const char* obstaclefile,
   /* and close the file */
   fclose(fp);
 
-  /* loop over all non-blocked cells */
-  for (int jj = 0; jj < params->ny; jj++)
-  {
-    for (int ii = 0; ii < params->nx; ii++)
-    {
-      /* ignore occupied cells */
-      if (!(*obstacles_ptr)[ii + jj*params->nx]) params->unblocked_cells++;
-      }
-    }
 
 
   /*
