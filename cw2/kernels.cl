@@ -408,24 +408,24 @@ kernel void fusion(         global t_speed* cells,
     float a1 = density * accel / 9.f;
     float a2 = density * accel / 36.f;
 
-      int jj = ny - 2;
+      int jjj = ny - 2;
 
 
 
 
-      if (!obstacles[ii + jj*nx]
-        && (cells[ii + jj*nx].speeds[3] - a1) > 0.f
-        && (cells[ii + jj*nx].speeds[6] - a2) > 0.f
-        && (cells[ii + jj*nx].speeds[7] - a2) > 0.f)
+      if (!obstacles[ii + jjj*nx]
+        && (cells[ii + jjj*nx].speeds[3] - a1) > 0.f
+        && (cells[ii + jjj*nx].speeds[6] - a2) > 0.f
+        && (cells[ii + jjj*nx].speeds[7] - a2) > 0.f)
     {
       /* increase 'east-side' densities */
-      cells[ii + jj*nx].speeds[1] += a1;
-      cells[ii + jj*nx].speeds[5] += a2;
-      cells[ii + jj*nx].speeds[8] += a2;
+      cells[ii + jjj*nx].speeds[1] += a1;
+      cells[ii + jjj*nx].speeds[5] += a2;
+      cells[ii + jjj*nx].speeds[8] += a2;
       /* decrease 'west-side' densities */
-      cells[ii + jj*nx].speeds[3] -= a1;
-      cells[ii + jj*nx].speeds[6] -= a2;
-      cells[ii + jj*nx].speeds[7] -= a2;
+      cells[ii + jjj*nx].speeds[3] -= a1;
+      cells[ii + jjj*nx].speeds[6] -= a2;
+      cells[ii + jjj*nx].speeds[7] -= a2;
     }
 
 
