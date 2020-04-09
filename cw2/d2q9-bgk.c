@@ -446,8 +446,8 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
   err = clEnqueueReadBuffer(ocl.queue, d_partial_us, CL_TRUE, 0, sizeof(float)* nwork_groups, h_partial_us, 0, NULL, NULL );
   checkError(err, "Reading back d_partial_us", __LINE__);
 
-  err = clEnqueueReadBuffer(ocl.queue, d_partial_tot_cells, CL_TRUE, 0, sizeof(int)* nwork_groups, h_partial_tot_cells, 0, NULL, NULL );
-  checkError(err, "Reading back d_partial_tot_cells", __LINE__);
+  // err = clEnqueueReadBuffer(ocl.queue, d_partial_tot_cells, CL_TRUE, 0, sizeof(int)* nwork_groups, h_partial_tot_cells, 0, NULL, NULL );
+  // checkError(err, "Reading back d_partial_tot_cells", __LINE__);
 
 
 
@@ -457,18 +457,18 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
       tot_u += h_partial_us[i];
   }
 
-  for (size_t i = 0; i < nwork_groups; i++)
-  {
-      tot_cells += h_partial_tot_cells[i];
-  }
+  // for (size_t i = 0; i < nwork_groups; i++)
+  // {
+  //     tot_cells += h_partial_tot_cells[i];
+  // }
 
 
 
   //cleanup
 clReleaseMemObject(d_partial_us);
-clReleaseMemObject(d_partial_tot_cells);
+// clReleaseMemObject(d_partial_tot_cells);
 free(h_partial_us);
-free(h_partial_tot_cells);
+// free(h_partial_tot_cells);
 
 //printf("kernel tot_cells = %f\n", (float)tot_cells );
 //printf("init tot_cells = %f\n", (float)params.unblocked_cells );
