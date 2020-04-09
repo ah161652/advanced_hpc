@@ -456,6 +456,7 @@ free(h_partial_us);
 
 //return av_vels
 return tot_u/(float)params.unblocked_cells;
+}
 
 
 int initialise(const char* paramfile, const char* obstaclefile,
@@ -606,7 +607,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
     params->blocked_cells++;
   }
 
-  params->unblocked_cells = (params->nx*params.ny)-params->blocked_cells;
+  params->unblocked_cells = (params->nx*params->ny)-params->blocked_cells;
 
   /* and close the file */
   fclose(fp);
