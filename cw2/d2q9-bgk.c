@@ -466,9 +466,9 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
 
   //cleanup
 clReleaseMemObject(d_partial_us);
-clReleaseMemObject(d_partial_tot_cells);
+// clReleaseMemObject(d_partial_tot_cells);
 free(h_partial_us);
-free(h_partial_tot_cells);
+// free(h_partial_tot_cells);
 
 //printf("kernel tot_cells = %f\n", (float)tot_cells );
 //printf("init tot_cells = %f\n", (float)params.unblocked_cells );
