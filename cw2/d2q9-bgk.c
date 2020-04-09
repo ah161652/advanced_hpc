@@ -151,28 +151,20 @@ int main(int argc, char* argv[])
 
 
 
-  for (int jj = 0; jj < params.ny; jj++)
-  {
-    for (int ii = 0; ii < params.nx; ii++)
-    {
-      /* ignore occupied cells */
-      if (!obstacles[ii + jj*params.nx])
-      {
-        ++params.unblocked_cells;
-      }
-    }
-  }
-
-
-
-
-
-
-
-
-
   for (int tt = 0; tt < params.maxIters; tt++)
   {
+    params.unblocked_cells =0;
+    for (int jj = 0; jj < params.ny; jj++)
+    {
+      for (int ii = 0; ii < params.nx; ii++)
+      {
+        /* ignore occupied cells */
+        if (!obstacles[ii + jj*params.nx])
+        {
+          ++params.unblocked_cells;
+        }
+      }
+    }
     timestep(params, cells, tmp_cells, obstacles, ocl);
     av_vels[tt] = av_velocity(params, cells, obstacles, ocl);
 #ifdef DEBUG
