@@ -473,7 +473,7 @@ free(h_partial_tot_cells);
 //printf("kernel tot_cells = %f\n", (float)tot_cells );
 //printf("init tot_cells = %f\n", (float)params.unblocked_cells );
 
-printf("kernel tot_u = %f\n", tot_u );
+// printf("kernel tot_u = %f\n", tot_u );
 
 
 //return av_vels
