@@ -150,21 +150,6 @@ int main(int argc, char* argv[])
 
 
 
-  // params.total_cells =0;
-  // for (int jj = 0; jj < params.ny; jj++)
-  // {
-  //   for (int ii = 0; ii < params.nx; ii++)
-  //   {
-  //     /* ignore occupied cells */
-  //     if (!obstacles[ii + jj*params.nx])
-  //     {
-  //       ++params.total_cells;
-  //     }
-  //   }
-  // }
-
-
-
   for (int tt = 0; tt < params.maxIters; tt++)
   {
 
@@ -205,24 +190,12 @@ int main(int argc, char* argv[])
 
 int timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl)
 {
-  // cl_int err;
-
-  // // Write cells to device
-  // err = clEnqueueWriteBuffer(
-  // ocl.queue, ocl.cells, CL_TRUE, 0,
-  // sizeof(t_speed) * params.nx * params.ny, cells, 0, NULL, NULL);
-  // checkError(err, "writing cells data", __LINE__);
 
   accelerate_flow(params, cells, obstacles, ocl);
   propagate(params, cells, tmp_cells, ocl);
   rebound(params, cells, tmp_cells, obstacles, ocl);
   collision(params, cells, tmp_cells, obstacles, ocl);
 
-  // // Read cells from device
-  // err = clEnqueueReadBuffer(
-  //   ocl.queue, ocl.cells, CL_TRUE, 0,
-  //   sizeof(t_speed) * params.nx * params.ny, cells, 0, NULL, NULL);
-  // checkError(err, "reading cells data", __LINE__);
 
   return EXIT_SUCCESS;
 }
@@ -470,10 +443,6 @@ clReleaseMemObject(d_partial_tot_cells);
 free(h_partial_us);
 free(h_partial_tot_cells);
 
-//printf("kernel tot_cells = %f\n", (float)tot_cells );
-//printf("init tot_cells = %f\n", (float)params.unblocked_cells );
-
-// printf("kernel tot_u = %f\n", tot_u );
 
 
 //return av_vels
