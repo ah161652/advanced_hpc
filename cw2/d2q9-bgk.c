@@ -225,8 +225,8 @@ int accelerate_flow(const t_param params, t_speed* cells, int* obstacles, t_ocl 
   checkError(err, "enqueueing accelerate_flow kernel", __LINE__);
 
   // Wait for kernel to finish
-  err = clFinish(ocl.queue);
-  checkError(err, "waiting for accelerate_flow kernel", __LINE__);
+  // err = clFinish(ocl.queue);
+  // checkError(err, "waiting for accelerate_flow kernel", __LINE__);
 
   return EXIT_SUCCESS;
 }
@@ -254,8 +254,8 @@ int propagate(const t_param params, t_speed* cells, t_speed* tmp_cells, t_ocl oc
   checkError(err, "enqueueing propagate kernel", __LINE__);
 
   // Wait for kernel to finish
-  err = clFinish(ocl.queue);
-  checkError(err, "waiting for propagate kernel", __LINE__);
+  // err = clFinish(ocl.queue);
+  // checkError(err, "waiting for propagate kernel", __LINE__);
 
   return EXIT_SUCCESS;
 }
@@ -280,8 +280,8 @@ int rebound(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obsta
   checkError(err, "enqueueing rebound kernel", __LINE__);
 
   // Wait for kernel to finish
-  err = clFinish(ocl.queue);
-  checkError(err, "waiting for rebound kernel", __LINE__);
+  // err = clFinish(ocl.queue);
+  // checkError(err, "waiting for rebound kernel", __LINE__);
 
 
 
@@ -313,8 +313,8 @@ int collision(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
   checkError(err, "enqueueing collision kernel", __LINE__);
 
   // Wait for kernel to finish
-  err = clFinish(ocl.queue);
-  checkError(err, "waiting for collision kernel", __LINE__);
+  // err = clFinish(ocl.queue);
+  // checkError(err, "waiting for collision kernel", __LINE__);
 
 
   return EXIT_SUCCESS;
@@ -409,8 +409,8 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
 
 
   // Wait for kernel to finish
-  err = clFinish(ocl.queue);
-  checkError(err, "waiting for av_vels kernel", __LINE__);
+  // err = clFinish(ocl.queue);
+  // checkError(err, "waiting for av_vels kernel", __LINE__);
 
 
 
