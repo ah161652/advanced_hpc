@@ -300,7 +300,7 @@ kernel void av_vels(global t_speed* cells,
 
 //REDUCTION (adding up all the totals from within each work group)
 
-work_group_barrier();
+work_group_barrier(CLK_LOCAL_MEM_FENCE);
 
 // work group variables
 float work_group_total_u = 0.0f;
