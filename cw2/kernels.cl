@@ -219,9 +219,7 @@ kernel void av_vels(global t_speed* cells,
                             int nx,
                             int ny,
                             local float* local_u ,
-                            global float* partial_u)// ,
-                            // local int* local_tot_cells ,
-                            // global int* partial_tot_cells )
+                            global float* partial_u)
 {
 
   // global id's
@@ -253,7 +251,7 @@ kernel void av_vels(global t_speed* cells,
 
   //init local_u for this cell to 0
   local_u[cell_index] = 0.0f;
-//  local_tot_cells[cell_index] = 0;
+
 
 
 
@@ -292,9 +290,6 @@ kernel void av_vels(global t_speed* cells,
         // calculate cell local_u value
           local_u[cell_index] = sqrt((u_x * u_x) + (u_y * u_y));
 
-
-        // make local tot_cells =1
-      //  local_tot_cells[cell_index] = 1;
       }
 
 
@@ -304,27 +299,26 @@ work_group_barrier(CLK_LOCAL_MEM_FENCE);
 
 // work group variables
 float work_group_total_u = 0.0f;
-//int work_group_total_cells = 0;
+
 
 // Check so you only do the summing on one cell
 if (local_id_x == 0 && local_id_y == 0) {
 
   //init to 0
   work_group_total_u = 0.0f;
-  //work_group_total_cells = 0;
   partial_u[group_index] = 0;
-  //partial_tot_cells[group_index] = 0;
+
 
   //sum all cells in work group
   for (size_t i=0; i<total_work_items; i++) {
       work_group_total_u += local_u[i];
-      //work_group_total_cells += local_tot_cells[i];
+
   }
 
 
   //add work group sums to global arrays
   partial_u[group_index] = work_group_total_u;
-  //partial_tot_cells[group_index] = work_group_total_cells;
+
 
 }
 
