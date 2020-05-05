@@ -147,7 +147,7 @@ int main(int argc, char* argv[])
 
 
 
-  for (int tt = 0; tt < params.maxIters; tt=tt+2)
+  for (int tt = 0; tt < 1; tt=tt+2)
   {
     accelerate_flow1(params, cells, obstacles, ocl);
     av_vels[tt] = fusion1(params, cells, tmp_cells, obstacles,ocl);
