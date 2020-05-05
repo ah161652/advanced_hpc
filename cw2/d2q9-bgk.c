@@ -17,6 +17,7 @@
 #define AVVELSFILE      "av_vels.dat"
 #define OCLFILE         "kernels.cl"
 
+
 int global_tot_cells = 0;
 
 /* struct to hold the parameter values */
@@ -147,13 +148,18 @@ int main(int argc, char* argv[])
 
 
 
-  for (int tt = 0; tt < 1; tt=tt+2)
+  for (int tt = 0; tt < params.maxIters; tt=tt+2)
   {
     accelerate_flow1(params, cells, obstacles, ocl);
     av_vels[tt] = fusion1(params, cells, tmp_cells, obstacles,ocl);
 
     accelerate_flow2(params, tmp_cells, obstacles, ocl);
     av_vels[tt+1] = fusion2(params, cells, tmp_cells, obstacles,ocl);
+
+
+    printf("==timestep: %d==\n", tt+1);
+    printf("av velocity: %.12E\n", av_vels[tt+1]);
+
 
   }
 
