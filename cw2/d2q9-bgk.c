@@ -153,6 +153,9 @@ int main(int argc, char* argv[])
     accelerate_flow1(params, cells, obstacles, ocl);
     av_vels[tt] = fusion1(params, cells, tmp_cells, obstacles,ocl);
 
+    printf("==timestep: %d==\n", tt);
+    printf("av velocity: %.12E\n", av_vels[tt]);
+
     accelerate_flow2(params, tmp_cells, obstacles, ocl);
     av_vels[tt+1] = fusion2(params, cells, tmp_cells, obstacles,ocl);
 
