@@ -157,23 +157,36 @@ kernel void fusion1(global t_speed* cells,
   u[8] =   u_x - u_y;  /* south-east */
 
   /* equilibrium densities */
-  float d_equ[NSPEEDS];
+  float d_equ[9];
   /* zero velocity density: weight w0 */
-
   d_equ[0] = w0 * local_density
-             * (1.f - u_sq / w4);
-
-
-  #pragma novector
-  d_equ[1] = w1 * local_density * (1.f + u[1] / c_sq + (u[1]*u[1]) / w3 - u_sq / w4);
-  d_equ[2] = w1 * local_density * (1.f + u[2] / c_sq + (u[2]*u[2]) / w3 - u_sq / w4);
-  d_equ[3] = w1 * local_density * (1.f + u[3] / c_sq + (u[3]*u[3]) / w3 - u_sq / w4);
-  d_equ[4] = w1 * local_density * (1.f + u[4] / c_sq + (u[4]*u[4]) / w3 - u_sq / w4);
-
-  d_equ[5] = w2 * local_density * (1.f + u[5] / c_sq + (u[5]*u[5]) / w3 - u_sq / w4);
-  d_equ[6] = w2 * local_density * (1.f + u[6] / c_sq + (u[6]*u[6]) / w3 - u_sq / w4);
-  d_equ[7] = w2 * local_density * (1.f + u[7] / c_sq + (u[7]*u[7]) / w3 - u_sq / w4);
-  d_equ[8] = w2 * local_density * (1.f + u[8] / c_sq + (u[8]*u[8]) / w3 - u_sq / w4);
+             * (1.f - u_sq / (2.f * c_sq));
+  /* axis speeds: weight w1 */
+  d_equ[1] = w1 * local_density * (1.f + u[1] / c_sq
+                                   + (u[1] * u[1]) / (2.f * c_sq * c_sq)
+                                   - u_sq / (2.f * c_sq));
+  d_equ[2] = w1 * local_density * (1.f + u[2] / c_sq
+                                   + (u[2] * u[2]) / (2.f * c_sq * c_sq)
+                                   - u_sq / (2.f * c_sq));
+  d_equ[3] = w1 * local_density * (1.f + u[3] / c_sq
+                                   + (u[3] * u[3]) / (2.f * c_sq * c_sq)
+                                   - u_sq / (2.f * c_sq));
+  d_equ[4] = w1 * local_density * (1.f + u[4] / c_sq
+                                   + (u[4] * u[4]) / (2.f * c_sq * c_sq)
+                                   - u_sq / (2.f * c_sq));
+  /* diagonal speeds: weight w2 */
+  d_equ[5] = w2 * local_density * (1.f + u[5] / c_sq
+                                   + (u[5] * u[5]) / (2.f * c_sq * c_sq)
+                                   - u_sq / (2.f * c_sq));
+  d_equ[6] = w2 * local_density * (1.f + u[6] / c_sq
+                                   + (u[6] * u[6]) / (2.f * c_sq * c_sq)
+                                   - u_sq / (2.f * c_sq));
+  d_equ[7] = w2 * local_density * (1.f + u[7] / c_sq
+                                   + (u[7] * u[7]) / (2.f * c_sq * c_sq)
+                                   - u_sq / (2.f * c_sq));
+  d_equ[8] = w2 * local_density * (1.f + u[8] / c_sq
+                                   + (u[8] * u[8]) / (2.f * c_sq * c_sq)
+                                   - u_sq / (2.f * c_sq));
 
 
 
