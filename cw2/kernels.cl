@@ -228,7 +228,6 @@ kernel void fusion1(global t_speed* cells,
 
 
   // calculate cell local_u value
-  printf("%.3f\n", sqrt((u_x * u_x) + (u_y * u_y)));
     local_u[cell_index] = sqrt((u_x * u_x) + (u_y * u_y));
 
 
@@ -256,6 +255,7 @@ kernel void fusion1(global t_speed* cells,
 
 
       //add work group sums to global arrays
+      printf("%.3f\n", work_group_total_u);
       partial_u[group_index] = work_group_total_u;
 
 
