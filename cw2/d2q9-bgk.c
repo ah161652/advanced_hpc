@@ -333,7 +333,6 @@ float fusion1(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
     //summing
     for (size_t i = 0; i < nwork_groups; i++)
     {
-        printf("%.3f\n", h_partial_us[i] );
         tot_u += h_partial_us[i];
     }
 
