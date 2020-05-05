@@ -94,7 +94,6 @@ kernel void fusion1(global t_speed* cells,
   const float w4 = 2.f * c_sq;
   const float w3 =w4 * c_sq;
 
-  int   tot_cells = 0;  /* no. of cells used in calculation */
   float tot_u =0.f;         /* accumulated magnitudes of velocity for each cell */
 
   int ii = get_global_id(0);
@@ -120,6 +119,7 @@ kernel void fusion1(global t_speed* cells,
   float local_density = 0.f;
 
   local_density = local_density + cells[ii + jj*nx].speeds[0] + cells[x_w + jj*nx].speeds[1] + cells[ii + y_s*nx].speeds[2] + cells[x_e + jj*nx].speeds[3] + cells[ii + y_n*nx].speeds[4] + cells[x_w + y_s*nx].speeds[5] + cells[x_e + y_s*nx].speeds[6] + cells[x_e + y_n*nx].speeds[7] + cells[x_w + y_n*nx].speeds[8];
+  printf("%.6f\n", local_density);
 
 
 
