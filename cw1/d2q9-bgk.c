@@ -250,25 +250,7 @@ float fusion(const t_param params, t_speed* restrict cells, t_speed* restrict tm
       int y_s = (jj == 0) ? (jj + params.ny - 1) : (jj - 1);
       int x_w = (ii == 0) ? (ii + params.nx - 1) : (ii - 1);
 
-      //printf("cell check: %d==\n", cells->speeds3[x_e + jj*params.nx]);
 
-
-
-      //////////////////////////////////
-      //////////REBOUND////////////////
-      /////////////////////////////////
-      // if (obstacles[jj*params.nx + ii])
-      // {
-        // tmp_cells->speeds1[ii + jj*params.nx] = cells->speeds3[x_e + jj*params.nx];
-        // tmp_cells->speeds2[ii + jj*params.nx] = cells->speeds4[ii + y_n*params.nx];
-        // tmp_cells->speeds3[ii + jj*params.nx] = cells->speeds1[x_w + jj*params.nx];
-        // tmp_cells->speeds4[ii + jj*params.nx] = cells->speeds2[ii + y_s*params.nx];
-        // tmp_cells->speeds5[ii + jj*params.nx] = cells->speeds7[x_e + y_n*params.nx];
-        // tmp_cells->speeds6[ii + jj*params.nx] = cells->speeds8[x_w + y_n*params.nx];
-        // tmp_cells->speeds7[ii + jj*params.nx] = cells->speeds5[x_w + y_s*params.nx];
-        // tmp_cells->speeds8[ii + jj*params.nx] = cells->speeds6[x_e + y_s*params.nx];
-      // }else
-      // {
 
         /* compute local density total */
         float local_density = 0.f;
