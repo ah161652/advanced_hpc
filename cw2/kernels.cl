@@ -317,6 +317,7 @@ if (local_id_x == 0 && local_id_y == 0) {
 
 
   //add work group sums to global arrays
+  printf("%.3f\n", work_group_total_u);
   partial_u[group_index] = work_group_total_u;
 
 
