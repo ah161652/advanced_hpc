@@ -10,6 +10,73 @@ typedef struct
 
 
 
+kernel void accelerate_flow1(global t_speed* cells,
+                            global int* obstacles,
+                            int nx, int ny,
+                            float density, float accel)
+{
+  /* compute weighting factors */
+  float w1 = density * accel / 9.0;
+  float w2 = density * accel / 36.0;
+
+  /* modify the 2nd row of the grid */
+  int jj = ny - 2;
+
+  /* get column index */
+  int ii = get_global_id(0);
+
+  /* if the cell is not occupied and
+  ** we don't send a negative density */
+  if (!obstacles[ii + jj* nx]
+      && (cells[ii + jj* nx].speeds[3] - w1) > 0.f
+      && (cells[ii + jj* nx].speeds[6] - w2) > 0.f
+      && (cells[ii + jj* nx].speeds[7] - w2) > 0.f)
+  {
+    /* increase 'east-side' densities */
+    cells[ii + jj* nx].speeds[1] += w1;
+    cells[ii + jj* nx].speeds[5] += w2;
+    cells[ii + jj* nx].speeds[8] += w2;
+    /* decrease 'west-side' densities */
+    cells[ii + jj* nx].speeds[3] -= w1;
+    cells[ii + jj* nx].speeds[6] -= w2;
+    cells[ii + jj* nx].speeds[7] -= w2;
+  }
+}
+
+
+kernel void accelerate_flow2(global t_speed* tmp_cells,
+                            global int* obstacles,
+                            int nx, int ny,
+                            float density, float accel)
+{
+  /* compute weighting factors */
+  float w1 = density * accel / 9.0;
+  float w2 = density * accel / 36.0;
+
+  /* modify the 2nd row of the grid */
+  int jj = ny - 2;
+
+  /* get column index */
+  int ii = get_global_id(0);
+
+  /* if the cell is not occupied and
+  ** we don't send a negative density */
+  if (!obstacles[ii + jj* nx]
+      && (tmp_cells[ii + jj* nx].speeds[3] - w1) > 0.f
+      && (tmp_cells[ii + jj* nx].speeds[6] - w2) > 0.f
+      && (tmp_cells[ii + jj* nx].speeds[7] - w2) > 0.f)
+  {
+    /* increase 'east-side' densities */
+    tmp_cells[ii + jj* nx].speeds[1] += w1;
+    tmp_cells[ii + jj* nx].speeds[5] += w2;
+    tmp_cells[ii + jj* nx].speeds[8] += w2;
+    /* decrease 'west-side' densities */
+    tmp_cells[ii + jj* nx].speeds[3] -= w1;
+    tmp_cells[ii + jj* nx].speeds[6] -= w2;
+    tmp_cells[ii + jj* nx].speeds[7] -= w2;
+  }
+}
+
 kernel void fusion1(global t_speed* cells,
                             global t_speed* tmp_cells,
                             global int* obstacles,
@@ -17,7 +84,7 @@ kernel void fusion1(global t_speed* cells,
                             int ny,
                             local float* local_u ,
                             global float* partial_u,
-                            float density, float accel, float omega)
+                            float omega)
 {
 
   const float c_sq = 1.f / 3.f; /* square of speed of sound */
@@ -30,44 +97,8 @@ kernel void fusion1(global t_speed* cells,
   int   tot_cells = 0;  /* no. of cells used in calculation */
   float tot_u =0.f;         /* accumulated magnitudes of velocity for each cell */
 
-
-
-  ///////////////////////////////////
-  //////////////////////////////////
-  /////////////ACELLERATE FLOW//////
-  //////////////////////////////////
-  /////////////////////////////////
-
-
-    float a1 = density * accel / 9.f;
-    float a2 = density * accel / 36.f;
-    int jj = ny - 2;
-    int ii = get_global_id(0);
-
-
-    /* if the cell is not occupied and
-    ** we don't send a negative density */
-    if (!obstacles[ii + jj* nx]
-        && (cells[ii + jj* nx].speeds[3] - w1) > 0.f
-        && (cells[ii + jj* nx].speeds[6] - w2) > 0.f
-        && (cells[ii + jj* nx].speeds[7] - w2) > 0.f)
-    {
-      /* increase 'east-side' densities */
-      cells[ii + jj* nx].speeds[1] += w1;
-      cells[ii + jj* nx].speeds[5] += w2;
-      cells[ii + jj* nx].speeds[8] += w2;
-      /* decrease 'west-side' densities */
-      cells[ii + jj* nx].speeds[3] -= w1;
-      cells[ii + jj* nx].speeds[6] -= w2;
-      cells[ii + jj* nx].speeds[7] -= w2;
-    }
-
-
-
-  work_group_barrier(CLK_LOCAL_MEM_FENCE);
-
-
-
+  int ii = get_global_id(0);
+  int jj = get_global_id(1);
 
 
   ///////////////////////////////////
@@ -76,8 +107,6 @@ kernel void fusion1(global t_speed* cells,
   //////////////////////////////////
   /////////////////////////////////
 
-
-jj = get_global_id(1);
 
   //PROPAGATE VARIABLES
   int y_n = (jj + 1) % ny;
@@ -244,7 +273,7 @@ kernel void fusion2(global t_speed* cells,
                             int ny,
                             local float* local_u ,
                             global float* partial_u,
-                            float density, float accel, float omega)
+                            float omega)
 {
 
 
@@ -260,42 +289,8 @@ kernel void fusion2(global t_speed* cells,
   int   tot_cells = 0;  /* no. of cells used in calculation */
   float tot_u =0.f;         /* accumulated magnitudes of velocity for each cell */
 
-
-
-  ///////////////////////////////////
-  //////////////////////////////////
-  /////////////ACELLERATE FLOW//////
-  //////////////////////////////////
-  /////////////////////////////////
-
-
-    float a1 = density * accel / 9.f;
-    float a2 = density * accel / 36.f;
-    int jj = ny - 2;
-    int ii = get_global_id(0);
-
-
-    /* if the cell is not occupied and
-    ** we don't send a negative density */
-    if (!obstacles[ii + jj* nx]
-        && (tmp_cells[ii + jj* nx].speeds[3] - w1) > 0.f
-        && (tmp_cells[ii + jj* nx].speeds[6] - w2) > 0.f
-        && (tmp_cells[ii + jj* nx].speeds[7] - w2) > 0.f)
-    {
-      /* increase 'east-side' densities */
-      tmp_cells[ii + jj* nx].speeds[1] += w1;
-      tmp_cells[ii + jj* nx].speeds[5] += w2;
-      tmp_cells[ii + jj* nx].speeds[8] += w2;
-      /* decrease 'west-side' densities */
-      tmp_cells[ii + jj* nx].speeds[3] -= w1;
-      tmp_cells[ii + jj* nx].speeds[6] -= w2;
-      tmp_cells[ii + jj* nx].speeds[7] -= w2;
-    }
-
-
-
-  work_group_barrier(CLK_LOCAL_MEM_FENCE);
-
+  int ii = get_global_id(0);
+  int jj = get_global_id(1);
 
 
 
@@ -307,7 +302,6 @@ kernel void fusion2(global t_speed* cells,
   /////////////////////////////////
 
 
-jj = get_global_id(1);
 
   //PROPAGATE VARIABLES
   int y_n = (jj + 1) % ny;
