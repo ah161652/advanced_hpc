@@ -77,7 +77,7 @@ kernel void fusion1(global t_speed* cells,
   /////////////////////////////////
 
 
-  int jj = get_global_id(1);
+jj = get_global_id(1);
 
   //PROPAGATE VARIABLES
   int y_n = (jj + 1) % ny;
@@ -307,7 +307,7 @@ kernel void fusion2(global t_speed* cells,
   /////////////////////////////////
 
 
-  int jj = get_global_id(1);
+jj = get_global_id(1);
 
   //PROPAGATE VARIABLES
   int y_n = (jj + 1) % ny;
