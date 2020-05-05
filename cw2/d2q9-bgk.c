@@ -19,7 +19,7 @@
 
 
 int global_tot_cells = 0;
-
+//
 /* struct to hold the parameter values */
 typedef struct
 {
