@@ -152,16 +152,16 @@ int main(int argc, char* argv[])
 
 
 
-  for (int tt = 0; tt < 1; tt++)
+  for (int tt = 0; tt < params.maxIters; tt++)
   {
 
     timestep(params, cells, tmp_cells, obstacles, ocl);
     av_vels[tt] = av_velocity(params, cells, obstacles, ocl);
-#ifdef DEBUG
+
     printf("==timestep: %d==\n", tt);
     printf("av velocity: %.12E\n", av_vels[tt]);
-    printf("tot density: %.12E\n", total_density(params, cells));
-#endif
+
+
   }
 
   // Read cells from device
