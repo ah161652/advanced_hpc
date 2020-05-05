@@ -267,6 +267,7 @@ kernel void av_vels(global t_speed* cells,
         {
           local_density += cells[ii + jj*nx].speeds[kk];
         }
+                                            printf("%.9f\n", local_density);
 
 
         /* x-component of velocity */
@@ -277,7 +278,7 @@ kernel void av_vels(global t_speed* cells,
                          + cells[ii + jj*nx].speeds[6]
                          + cells[ii + jj*nx].speeds[7]))
                      / local_density;
-                                    printf("%.9f\n", u_x);
+
         /* compute y velocity component */
         float u_y = (cells[ii + jj*nx].speeds[2]
                       + cells[ii + jj*nx].speeds[5]
