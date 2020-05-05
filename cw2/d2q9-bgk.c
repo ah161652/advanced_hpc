@@ -160,8 +160,8 @@ int main(int argc, char* argv[])
     av_vels[tt+1] = fusion2(params, cells, tmp_cells, obstacles,ocl);
 
 
-    printf("==timestep: %d==\n", tt+1);
-    printf("av velocity: %.12E\n", av_vels[tt+1]);
+    // printf("==timestep: %d==\n", tt+1);
+    // printf("av velocity: %.12E\n", av_vels[tt+1]);
 
 
   }
