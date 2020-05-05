@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
 
 
 
-  for (int tt = 0; tt < params.maxIters; tt++)
+  for (int tt = 0; tt < 1; tt++)
   {
 
     timestep(params, cells, tmp_cells, obstacles, ocl);
