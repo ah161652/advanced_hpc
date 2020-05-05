@@ -228,7 +228,7 @@ kernel void fusion1(global t_speed* cells,
 
 
   // calculate cell local_u value
-  printf("%.3f\n", sqrt((u_x * u_x) + (u_y * u_y)))
+  printf("%.3f\n", sqrt((u_x * u_x) + (u_y * u_y)));
     local_u[cell_index] = sqrt((u_x * u_x) + (u_y * u_y));
 
 
