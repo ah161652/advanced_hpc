@@ -119,7 +119,7 @@ kernel void fusion1(global t_speed* cells,
   float local_density = 0.f;
 
   local_density = local_density + cells[ii + jj*nx].speeds[0] + cells[x_w + jj*nx].speeds[1] + cells[ii + y_s*nx].speeds[2] + cells[x_e + jj*nx].speeds[3] + cells[ii + y_n*nx].speeds[4] + cells[x_w + y_s*nx].speeds[5] + cells[x_e + y_s*nx].speeds[6] + cells[x_e + y_n*nx].speeds[7] + cells[x_w + y_n*nx].speeds[8];
-  printf("%.6f\n", local_density);
+
 
 
 
@@ -131,6 +131,7 @@ kernel void fusion1(global t_speed* cells,
                    + cells[x_e + y_s*nx].speeds[6]
                    + cells[x_e + y_n*nx].speeds[7]))
                / local_density;
+                 printf("%.9f\n", u_x);
 
   /* compute y velocity component */
   float u_y = (cells[ii + y_s*nx].speeds[2]
