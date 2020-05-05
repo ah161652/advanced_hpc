@@ -267,6 +267,7 @@ kernel void av_vels(global t_speed* cells,
         {
           local_density += cells[ii + jj*nx].speeds[kk];
         }
+          printf("%.6f\n", local_density);
 
         /* x-component of velocity */
         float u_x = (cells[ii + jj*nx].speeds[1]
