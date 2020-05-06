@@ -72,7 +72,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
                t_param* params, t_speed** cells_ptr, t_speed** tmp_cells_ptr,
                int** obstacles_ptr, float** av_vels_ptr, t_ocl* ocl);
 
-float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl);
+void fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl);
 // float fusion2(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl);
 
 // int accelerate_flow1(const t_param params, t_speed* cells, int* obstacles, t_ocl ocl);
@@ -120,7 +120,8 @@ int main(int argc, char* argv[])
   struct rusage ru;             /* structure to hold CPU time--system and user */
   double tic, toc;              /* floating point numbers to calculate elapsed wallclock time */
   double usrtim;                /* floating point number to record elapsed user CPU time */
-  double systim;                /* floating point number to record elapsed system CPU time */
+  double systim;
+  float* times;                 /* floating point number to record elapsed system CPU time */
 
   /* parse the command line */
   if (argc != 3)
@@ -152,7 +153,6 @@ int main(int argc, char* argv[])
     sizeof(cl_int) * params.nx * params.ny, obstacles, 0, NULL, NULL);
   checkError(err, "writing obstacles data", __LINE__);
 
-  float times[2];
 
   for (int tt = 0; tt < params.maxIters; tt=tt+2)
   {
@@ -163,12 +163,11 @@ int main(int argc, char* argv[])
     // //accelerate_flow2(params, tmp_cells, obstacles, ocl);
     // av_vels[tt+1] = fusion2(params, cells, tmp_cells, obstacles,ocl);
 
-    times[0]=0;
-    times[1]=0;
 
 
 
-    times = fusion(params,cells,tmp_cells,obstacles,ocl);
+
+    fusion(params,cells,tmp_cells,obstacles,ocl,times);
 
     av_vels[tt] = times[0];
     av_vels[tt+1] = times[1];
@@ -261,7 +260,7 @@ int main(int argc, char* argv[])
 //   return EXIT_SUCCESS;
 // }
 
-float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl){
+float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl, float* times){
 
 
     //set host variables and buffers
@@ -348,7 +347,7 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
 
 
     //enqueue kernel
-    err = clEnqueueNDRangeKernel(ocl.queue, ocl.fusion1,
+    err = clEnqueueNDRangeKernel(ocl.queue, ocl.fusion,
                                  2, NULL, global, local, 0, NULL, NULL);
     checkError(err, "enqueueing fusion1 kernel", __LINE__);
 
@@ -379,8 +378,8 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
 
     float av_vels[2];
 
-    av_vels[0]= av_vel_1;
-    av_vels[1] = av_vel_2;
+    times[0]= av_vel_1;
+    times[1] = av_vel_2;
 
   //cleanup
   // clReleaseMemObject(d_partial_us);
@@ -388,7 +387,7 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
   free(h_partial_us_2);
 
 
-  return av_vels;
+  return;
 
 
 
