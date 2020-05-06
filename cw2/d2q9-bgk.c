@@ -374,25 +374,25 @@ float fusion2(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
 
 
       // set device buffer
-      cl_mem d_partial_us;
+      // cl_mem d_partial_us;
 
 
       // work group variables
-      size_t nwork_groups;
-      size_t work_group_size;
+      // size_t nwork_groups;
+      // size_t work_group_size;
 
 
       cl_int err;
 
 
       //get work group size and save to variable
-      err = clGetKernelWorkGroupInfo (ocl.fusion2, ocl.device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
-      checkError(err, "Getting kernel work group info", __LINE__);
+      // err = clGetKernelWorkGroupInfo (ocl.fusion2, ocl.device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
+      // checkError(err, "Getting kernel work group info", __LINE__);
 
 
 
       // calculate number of work groups from work group size
-      nwork_groups = (params.nx * params.ny)/work_group_size;
+      // nwork_groups = (params.nx * params.ny)/work_group_size;
 
 
 
@@ -402,8 +402,8 @@ float fusion2(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
 
 
       // create device buffers
-      d_partial_us = clCreateBuffer(ocl.context, CL_MEM_WRITE_ONLY, sizeof(float) * nwork_groups, NULL, &err);
-      checkError(err, "Creating buffer d_partial_us", __LINE__);
+      // d_partial_us = clCreateBuffer(ocl.context, CL_MEM_WRITE_ONLY, sizeof(float) * nwork_groups, NULL, &err);
+      // checkError(err, "Creating buffer d_partial_us", __LINE__);
 
 
 
@@ -422,7 +422,7 @@ float fusion2(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
       checkError(err, "setting fusion2 ny", __LINE__);
       err = clSetKernelArg(ocl.fusion2, 5, sizeof(cl_float)*work_group_size,NULL);
       checkError(err, "setting fusion2 local_u", __LINE__);
-      err = clSetKernelArg(ocl.fusion2, 6, sizeof(cl_mem),&d_partial_us);
+      err = clSetKernelArg(ocl.fusion2, 6, sizeof(cl_mem),&ocl.d_partial_us);
       checkError(err, "setting fusion2 partial_u", __LINE__);
       err = clSetKernelArg(ocl.fusion2, 7, sizeof(cl_float), &params.omega);
       checkError(err, "setting fusion2 omega", __LINE__);
@@ -453,7 +453,7 @@ float fusion2(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
 
 
       //read buffers
-      err = clEnqueueReadBuffer(ocl.queue, d_partial_us, CL_TRUE, 0, sizeof(float)* nwork_groups, h_partial_us, 0, NULL, NULL );
+      err = clEnqueueReadBuffer(ocl.queue, ocl.d_partial_us, CL_TRUE, 0, sizeof(float)* nwork_groups, h_partial_us, 0, NULL, NULL );
       checkError(err, "Reading back d_partial_us", __LINE__);
 
 
@@ -468,7 +468,7 @@ float fusion2(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
 
 
       //cleanup
-    clReleaseMemObject(d_partial_us);
+    // clReleaseMemObject(d_partial_us);
     free(h_partial_us);
 
 
