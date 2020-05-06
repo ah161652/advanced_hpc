@@ -19,8 +19,7 @@
 
 
 int global_tot_cells = 0;
-size_t nwork_groups;
-size_t work_group_size;
+
 
 
 //
@@ -263,16 +262,16 @@ float fusion1(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
 
 
     // work group variables
-    // size_t nwork_groups;
-    // size_t work_group_size;
+    size_t nwork_groups;
+    size_t work_group_size;
 
 
     cl_int err;
 
 
     //get work group size and save to variable
-    // err = clGetKernelWorkGroupInfo (ocl.fusion1, ocl.device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
-    // checkError(err, "Getting kernel work group info", __LINE__);
+    err = clGetKernelWorkGroupInfo (ocl.fusion1, ocl.device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
+    checkError(err, "Getting kernel work group info", __LINE__);
 
 
 
@@ -754,6 +753,8 @@ int initialise(const char* paramfile, const char* obstaclefile,
   ocl->accelerate_flow2 = clCreateKernel(ocl->program, "accelerate_flow2", &err);
   checkError(err, "creating accelerate_flow2 kernel", __LINE__);
 
+  size_t nwork_groups;
+  size_t work_group_size;
 
   err = clGetKernelWorkGroupInfo (ocl->fusion1, ocl->device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
   checkError(err, "Getting kernel work group info", __LINE__);
