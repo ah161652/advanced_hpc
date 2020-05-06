@@ -84,7 +84,7 @@ kernel void fusion1(global t_speed* cells,
                             int ny,
                             local float* local_u ,
                             global float* partial_u,
-                            float omega)
+                            float omega, float accel, float density)
 {
 
   const float c_sq = 1.f / 3.f; /* square of speed of sound */
@@ -98,6 +98,46 @@ kernel void fusion1(global t_speed* cells,
 
   int ii = get_global_id(0);
   int jj = get_global_id(1);
+
+
+
+
+
+
+
+
+
+
+  /* compute weighting factors */
+  float w1 = density * accel / 9.0;
+  float w2 = density * accel / 36.0;
+
+  /* modify the 2nd row of the grid */
+  int jjj = ny - 2;
+
+  /* get column index */
+  int ii = get_global_id(0);
+
+  /* if the cell is not occupied and
+  ** we don't send a negative density */
+  if (!obstacles[ii + jjj* nx]
+      && (cells[ii + jjj* nx].speeds[3] - w1) > 0.f
+      && (cells[ii + jjj* nx].speeds[6] - w2) > 0.f
+      && (cells[ii + jjj* nx].speeds[7] - w2) > 0.f
+      && jj==0)
+  {
+    /* increase 'east-side' densities */
+    cells[ii + jjj* nx].speeds[1] += w1;
+    cells[ii + jjj* nx].speeds[5] += w2;
+    cells[ii + jjj* nx].speeds[8] += w2;
+    /* decrease 'west-side' densities */
+    cells[ii + jjj* nx].speeds[3] -= w1;
+    cells[ii + jjj* nx].speeds[6] -= w2;
+    cells[ii + jjj* nx].speeds[7] -= w2;
+  }
+
+
+    work_group_barrier(CLK_LOCAL_MEM_FENCE);
 
 
   ///////////////////////////////////
@@ -274,7 +314,7 @@ kernel void fusion2(global t_speed* cells,
                             int ny,
                             local float* local_u ,
                             global float* partial_u,
-                            float omega)
+                            float omega, float accel, float density)
 {
 
 
@@ -292,6 +332,41 @@ kernel void fusion2(global t_speed* cells,
 
   int ii = get_global_id(0);
   int jj = get_global_id(1);
+
+
+
+
+
+  /* compute weighting factors */
+  float w1 = density * accel / 9.0;
+  float w2 = density * accel / 36.0;
+
+  /* modify the 2nd row of the grid */
+  int jjj = ny - 2;
+
+  /* get column index */
+  int ii = get_global_id(0);
+
+  /* if the cell is not occupied and
+  ** we don't send a negative density */
+  if (!obstacles[ii + jjj* nx]
+      && (tmp_cells[ii + jjj* nx].speeds[3] - w1) > 0.f
+      && (tmp_cells[ii + jjj* nx].speeds[6] - w2) > 0.f
+      && (tmp_cells[ii + jjj* nx].speeds[7] - w2) > 0.f
+      && jj==0)
+  {
+    /* increase 'east-side' densities */
+    tmp_cells[ii + jjj* nx].speeds[1] += w1;
+    tmp_cells[ii + jjj* nx].speeds[5] += w2;
+    tmp_cells[ii + jjj* nx].speeds[8] += w2;
+    /* decrease 'west-side' densities */
+    tmp_cells[ii + jjj* nx].speeds[3] -= w1;
+    tmp_cells[ii + jjj* nx].speeds[6] -= w2;
+    tmp_cells[ii + jjj* nx].speeds[7] -= w2;
+  }
+
+
+    work_group_barrier(CLK_LOCAL_MEM_FENCE);
 
 
 

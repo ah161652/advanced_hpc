@@ -150,18 +150,13 @@ int main(int argc, char* argv[])
 
   for (int tt = 0; tt < params.maxIters; tt=tt+2)
   {
-    accelerate_flow1(params, cells, obstacles, ocl);
+    //accelerate_flow1(params, cells, obstacles, ocl);
     av_vels[tt] = fusion1(params, cells, tmp_cells, obstacles,ocl);
 
-    // printf("==timestep: %d==\n", tt);
-    // printf("av velocity: %.12E\n", av_vels[tt]);
 
-    accelerate_flow2(params, tmp_cells, obstacles, ocl);
+    //accelerate_flow2(params, tmp_cells, obstacles, ocl);
     av_vels[tt+1] = fusion2(params, cells, tmp_cells, obstacles,ocl);
 
-
-    // printf("==timestep: %d==\n", tt+1);
-    // printf("av velocity: %.12E\n", av_vels[tt+1]);
 
 
   }
@@ -311,6 +306,10 @@ float fusion1(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
     checkError(err, "setting fusion1 partial_u", __LINE__);
     err = clSetKernelArg(ocl.fusion1, 7, sizeof(cl_float), &params.omega);
     checkError(err, "setting fusion1 omega", __LINE__);
+    err = clSetKernelArg(ocl.fusion1, 8, sizeof(cl_float), &params.density);
+    checkError(err, "setting fusion1 arg 4", __LINE__);
+    err = clSetKernelArg(ocl.fusion1, 9, sizeof(cl_float), &params.accel);
+    checkError(err, "setting fusion1 arg 5", __LINE__);
 
 
 
@@ -422,6 +421,10 @@ float fusion2(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
       checkError(err, "setting fusion2 partial_u", __LINE__);
       err = clSetKernelArg(ocl.fusion2, 7, sizeof(cl_float), &params.omega);
       checkError(err, "setting fusion2 omega", __LINE__);
+      err = clSetKernelArg(ocl.fusion2, 8, sizeof(cl_float), &params.density);
+      checkError(err, "setting fusion2 arg 4", __LINE__);
+      err = clSetKernelArg(ocl.fusion2, 9, sizeof(cl_float), &params.accel);
+      checkError(err, "setting fusion2 arg 5", __LINE__);
 
 
 
