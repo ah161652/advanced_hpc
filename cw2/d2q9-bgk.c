@@ -753,7 +753,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
   ocl->accelerate_flow2 = clCreateKernel(ocl->program, "accelerate_flow2", &err);
   checkError(err, "creating accelerate_flow2 kernel", __LINE__);
 
-  size_t nwork_groups;
+
   size_t work_group_size;
 
   err = clGetKernelWorkGroupInfo (ocl->fusion1, ocl->device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
