@@ -302,7 +302,7 @@ kernel void fusion(global t_speed* cells,
     }
 
 
-
+        work_group_barrier(CLK_LOCAL_MEM_FENCE);
 
     ///////////////////////////////////
     //////////////////////////////////
