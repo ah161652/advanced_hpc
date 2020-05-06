@@ -4,7 +4,15 @@
 
 typedef struct
 {
-  float speeds[NSPEEDS];
+  float* speeds0;
+  float* speeds1;
+  float* speeds2;
+  float* speeds3;
+  float* speeds4;
+  float* speeds5;
+  float* speeds6;
+  float* speeds7;
+  float* speeds8;
 } t_speed;
 
 
