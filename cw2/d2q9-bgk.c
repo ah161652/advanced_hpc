@@ -772,7 +772,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
     ocl->context, CL_MEM_READ_WRITE,
     sizeof(cl_int) * params->nx * params->ny, NULL, &err);
   checkError(err, "creating obstacles buffer", __LINE__);
-  ocl->d_partial_us = clCreateBuffer(ocl.context, CL_MEM_WRITE_ONLY, sizeof(float) * nwork_groups, NULL, &err);
+  ocl->d_partial_us = clCreateBuffer(ocl->context, CL_MEM_WRITE_ONLY, sizeof(float) * nwork_groups, NULL, &err);
   checkError(err, "Creating buffer d_partial_us", __LINE__);
 
   return EXIT_SUCCESS;
