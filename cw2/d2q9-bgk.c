@@ -44,16 +44,17 @@ typedef struct
   cl_command_queue  queue;
 
   cl_program program;
-  cl_kernel  fusion1;
-  cl_kernel fusion2;
-  cl_kernel accelerate_flow1;
-  cl_kernel accelerate_flow2;
+  cl_kernel  fusion;
+  // cl_kernel fusion2;
+  // cl_kernel accelerate_flow1;
+  // cl_kernel accelerate_flow2;
 
 
   cl_mem cells;
   cl_mem tmp_cells;
   cl_mem obstacles;
-  cl_mem d_partial_us;
+  cl_mem d_partial_us_1;
+  cl_mem d_partial_us_2;
 } t_ocl;
 
 /* struct to hold the 'speed' values */
@@ -71,11 +72,11 @@ int initialise(const char* paramfile, const char* obstaclefile,
                t_param* params, t_speed** cells_ptr, t_speed** tmp_cells_ptr,
                int** obstacles_ptr, float** av_vels_ptr, t_ocl* ocl);
 
-float fusion1(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl);
-float fusion2(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl);
+float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl);
+// float fusion2(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl);
 
-int accelerate_flow1(const t_param params, t_speed* cells, int* obstacles, t_ocl ocl);
-int accelerate_flow2(const t_param params, t_speed* tmp_cells, int* obstacles, t_ocl ocl);
+// int accelerate_flow1(const t_param params, t_speed* cells, int* obstacles, t_ocl ocl);
+// int accelerate_flow2(const t_param params, t_speed* tmp_cells, int* obstacles, t_ocl ocl);
 
 int write_values(const t_param params, t_speed* cells, int* obstacles, float* av_vels);
 
@@ -151,16 +152,26 @@ int main(int argc, char* argv[])
     sizeof(cl_int) * params.nx * params.ny, obstacles, 0, NULL, NULL);
   checkError(err, "writing obstacles data", __LINE__);
 
-
+  float times[2];
 
   for (int tt = 0; tt < params.maxIters; tt=tt+2)
   {
-    //accelerate_flow1(params, cells, obstacles, ocl);
-    av_vels[tt] = fusion1(params, cells, tmp_cells, obstacles,ocl);
+    // //accelerate_flow1(params, cells, obstacles, ocl);
+    // av_vels[tt] = fusion1(params, cells, tmp_cells, obstacles,ocl);
+    //
+    //
+    // //accelerate_flow2(params, tmp_cells, obstacles, ocl);
+    // av_vels[tt+1] = fusion2(params, cells, tmp_cells, obstacles,ocl);
+
+    times[0]=0;
+    times[1]=0;
 
 
-    //accelerate_flow2(params, tmp_cells, obstacles, ocl);
-    av_vels[tt+1] = fusion2(params, cells, tmp_cells, obstacles,ocl);
+
+    times = fusion(params,cells,tmp_cells,obstacles,ocl);
+
+    av_vels[tt] = times[0];
+    av_vels[tt+1] = times[1];
 
 
 
@@ -193,69 +204,73 @@ int main(int argc, char* argv[])
 }
 
 
-int accelerate_flow1(const t_param params, t_speed* cells, int* obstacles, t_ocl ocl)
-{
-  cl_int err;
+// int accelerate_flow1(const t_param params, t_speed* cells, int* obstacles, t_ocl ocl)
+// {
+//   cl_int err;
+//
+//   // Set kernel arguments
+//   err = clSetKernelArg(ocl.accelerate_flow1, 0, sizeof(cl_mem), &ocl.cells);
+//   checkError(err, "setting accelerate_flow1 arg 0", __LINE__);
+//   err = clSetKernelArg(ocl.accelerate_flow1, 1, sizeof(cl_mem), &ocl.obstacles);
+//   checkError(err, "setting accelerate_flow1 arg 1", __LINE__);
+//   err = clSetKernelArg(ocl.accelerate_flow1, 2, sizeof(cl_int), &params.nx);
+//   checkError(err, "setting accelerate_flow1 arg 2", __LINE__);
+//   err = clSetKernelArg(ocl.accelerate_flow1, 3, sizeof(cl_int), &params.ny);
+//   checkError(err, "setting accelerate_flow1 arg 3", __LINE__);
+//   err = clSetKernelArg(ocl.accelerate_flow1, 4, sizeof(cl_float), &params.density);
+//   checkError(err, "setting accelerate_flow1 arg 4", __LINE__);
+//   err = clSetKernelArg(ocl.accelerate_flow1, 5, sizeof(cl_float), &params.accel);
+//   checkError(err, "setting accelerate_flow1 arg 5", __LINE__);
+//
+//   // Enqueue kernel
+//   size_t global[1] = {params.nx};
+//   err = clEnqueueNDRangeKernel(ocl.queue, ocl.accelerate_flow1,
+//                                1, NULL, global, NULL, 0, NULL, NULL);
+//   checkError(err, "enqueueing accelerate_flow1 kernel", __LINE__);
+//
+//   return EXIT_SUCCESS;
+// }
+//
+//
+//
+//
+// int accelerate_flow2(const t_param params, t_speed* tmp_cells, int* obstacles, t_ocl ocl)
+// {
+//   cl_int err;
+//
+//   // Set kernel arguments
+//   err = clSetKernelArg(ocl.accelerate_flow2, 0, sizeof(cl_mem), &ocl.tmp_cells);
+//   checkError(err, "setting accelerate_flow2 arg 0", __LINE__);
+//   err = clSetKernelArg(ocl.accelerate_flow2, 1, sizeof(cl_mem), &ocl.obstacles);
+//   checkError(err, "setting accelerate_flow2 arg 1", __LINE__);
+//   err = clSetKernelArg(ocl.accelerate_flow2, 2, sizeof(cl_int), &params.nx);
+//   checkError(err, "setting accelerate_flow2 arg 2", __LINE__);
+//   err = clSetKernelArg(ocl.accelerate_flow2, 3, sizeof(cl_int), &params.ny);
+//   checkError(err, "setting accelerate_flow2 arg 3", __LINE__);
+//   err = clSetKernelArg(ocl.accelerate_flow2, 4, sizeof(cl_float), &params.density);
+//   checkError(err, "setting accelerate_flow2 arg 4", __LINE__);
+//   err = clSetKernelArg(ocl.accelerate_flow2, 5, sizeof(cl_float), &params.accel);
+//   checkError(err, "setting accelerate_flow2 arg 5", __LINE__);
+//
+//   // Enqueue kernel
+//   size_t global[1] = {params.nx};
+//   err = clEnqueueNDRangeKernel(ocl.queue, ocl.accelerate_flow2,
+//                                1, NULL, global, NULL, 0, NULL, NULL);
+//   checkError(err, "enqueueing accelerate_flow2 kernel", __LINE__);
+//
+//   return EXIT_SUCCESS;
+// }
 
-  // Set kernel arguments
-  err = clSetKernelArg(ocl.accelerate_flow1, 0, sizeof(cl_mem), &ocl.cells);
-  checkError(err, "setting accelerate_flow1 arg 0", __LINE__);
-  err = clSetKernelArg(ocl.accelerate_flow1, 1, sizeof(cl_mem), &ocl.obstacles);
-  checkError(err, "setting accelerate_flow1 arg 1", __LINE__);
-  err = clSetKernelArg(ocl.accelerate_flow1, 2, sizeof(cl_int), &params.nx);
-  checkError(err, "setting accelerate_flow1 arg 2", __LINE__);
-  err = clSetKernelArg(ocl.accelerate_flow1, 3, sizeof(cl_int), &params.ny);
-  checkError(err, "setting accelerate_flow1 arg 3", __LINE__);
-  err = clSetKernelArg(ocl.accelerate_flow1, 4, sizeof(cl_float), &params.density);
-  checkError(err, "setting accelerate_flow1 arg 4", __LINE__);
-  err = clSetKernelArg(ocl.accelerate_flow1, 5, sizeof(cl_float), &params.accel);
-  checkError(err, "setting accelerate_flow1 arg 5", __LINE__);
-
-  // Enqueue kernel
-  size_t global[1] = {params.nx};
-  err = clEnqueueNDRangeKernel(ocl.queue, ocl.accelerate_flow1,
-                               1, NULL, global, NULL, 0, NULL, NULL);
-  checkError(err, "enqueueing accelerate_flow1 kernel", __LINE__);
-
-  return EXIT_SUCCESS;
-}
-
-
-
-
-int accelerate_flow2(const t_param params, t_speed* tmp_cells, int* obstacles, t_ocl ocl)
-{
-  cl_int err;
-
-  // Set kernel arguments
-  err = clSetKernelArg(ocl.accelerate_flow2, 0, sizeof(cl_mem), &ocl.tmp_cells);
-  checkError(err, "setting accelerate_flow2 arg 0", __LINE__);
-  err = clSetKernelArg(ocl.accelerate_flow2, 1, sizeof(cl_mem), &ocl.obstacles);
-  checkError(err, "setting accelerate_flow2 arg 1", __LINE__);
-  err = clSetKernelArg(ocl.accelerate_flow2, 2, sizeof(cl_int), &params.nx);
-  checkError(err, "setting accelerate_flow2 arg 2", __LINE__);
-  err = clSetKernelArg(ocl.accelerate_flow2, 3, sizeof(cl_int), &params.ny);
-  checkError(err, "setting accelerate_flow2 arg 3", __LINE__);
-  err = clSetKernelArg(ocl.accelerate_flow2, 4, sizeof(cl_float), &params.density);
-  checkError(err, "setting accelerate_flow2 arg 4", __LINE__);
-  err = clSetKernelArg(ocl.accelerate_flow2, 5, sizeof(cl_float), &params.accel);
-  checkError(err, "setting accelerate_flow2 arg 5", __LINE__);
-
-  // Enqueue kernel
-  size_t global[1] = {params.nx};
-  err = clEnqueueNDRangeKernel(ocl.queue, ocl.accelerate_flow2,
-                               1, NULL, global, NULL, 0, NULL, NULL);
-  checkError(err, "enqueueing accelerate_flow2 kernel", __LINE__);
-
-  return EXIT_SUCCESS;
-}
-
-float fusion1(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl){
+float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl){
 
 
     //set host variables and buffers
-    float tot_u =0.0f;
-    float* h_partial_us;
+    float tot_u_1 =0.0f;
+    float* h_partial_us_1;
+
+    float tot_u_2 =0.0f;
+    float* h_partial_us_2;
+
 
 
     // // set device buffer
@@ -282,7 +297,8 @@ float fusion1(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
 
 
     //allocate space for host buffers
-    h_partial_us = calloc(sizeof(float), nwork_groups);
+    h_partial_us_1 = calloc(sizeof(float), nwork_groups);
+    h_partial_us_2 = calloc(sizeof(float), nwork_groups);
 
 
 
@@ -295,26 +311,30 @@ float fusion1(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
 
 
     // Set kernel arguments
-    err = clSetKernelArg(ocl.fusion1, 0, sizeof(cl_mem), &ocl.cells);
-    checkError(err, "setting fusion1 cells", __LINE__);
-    err = clSetKernelArg(ocl.fusion1, 1, sizeof(cl_mem), &ocl.tmp_cells);
-    checkError(err, "setting fusion1 tmp_cells", __LINE__);
-    err = clSetKernelArg(ocl.fusion1, 2, sizeof(cl_mem), &ocl.obstacles);
-    checkError(err, "setting fusion1 obstacles", __LINE__);
-    err = clSetKernelArg(ocl.fusion1, 3, sizeof(cl_int), &params.nx);
-    checkError(err, "setting fusion1 nx", __LINE__);
-    err = clSetKernelArg(ocl.fusion1, 4, sizeof(cl_int), &params.ny);
-    checkError(err, "setting fusion1 ny", __LINE__);
-    err = clSetKernelArg(ocl.fusion1, 5, sizeof(cl_float)*work_group_size,NULL);
-    checkError(err, "setting fusion1 local_u", __LINE__);
-    err = clSetKernelArg(ocl.fusion1, 6, sizeof(cl_mem),&ocl.d_partial_us);
-    checkError(err, "setting fusion1 partial_u", __LINE__);
-    err = clSetKernelArg(ocl.fusion1, 7, sizeof(cl_float), &params.omega);
-    checkError(err, "setting fusion1 omega", __LINE__);
-    err = clSetKernelArg(ocl.fusion1, 8, sizeof(cl_float), &params.density);
-    checkError(err, "setting fusion1 arg 4", __LINE__);
-    err = clSetKernelArg(ocl.fusion1, 9, sizeof(cl_float), &params.accel);
-    checkError(err, "setting fusion1 arg 5", __LINE__);
+    err = clSetKernelArg(ocl.fusion, 0, sizeof(cl_mem), &ocl.cells);
+    checkError(err, "setting fusion cells", __LINE__);
+    err = clSetKernelArg(ocl.fusion, 1, sizeof(cl_mem), &ocl.tmp_cells);
+    checkError(err, "setting fusion tmp_cells", __LINE__);
+    err = clSetKernelArg(ocl.fusion, 2, sizeof(cl_mem), &ocl.obstacles);
+    checkError(err, "setting fusion obstacles", __LINE__);
+    err = clSetKernelArg(ocl.fusion, 3, sizeof(cl_int), &params.nx);
+    checkError(err, "setting fusion nx", __LINE__);
+    err = clSetKernelArg(ocl.fusion, 4, sizeof(cl_int), &params.ny);
+    checkError(err, "setting fusion ny", __LINE__);
+    err = clSetKernelArg(ocl.fusion, 5, sizeof(cl_float)*work_group_size,NULL);
+    checkError(err, "setting fusion local_u_1", __LINE__);
+    err = clSetKernelArg(ocl.fusion, 6, sizeof(cl_mem),&ocl.d_partial_us_1);
+    checkError(err, "setting fusion partial_u_1", __LINE__);
+    err = clSetKernelArg(ocl.fusion, 7, sizeof(cl_float)*work_group_size,NULL);
+    checkError(err, "setting fusion local_u_2", __LINE__);
+    err = clSetKernelArg(ocl.fusion, 8, sizeof(cl_mem),&ocl.d_partial_us_2);
+    checkError(err, "setting fusion partial_u_2", __LINE__);
+    err = clSetKernelArg(ocl.fusion, 9, sizeof(cl_float), &params.omega);
+    checkError(err, "setting fusion omega", __LINE__);
+    err = clSetKernelArg(ocl.fusion, 10, sizeof(cl_float), &params.density);
+    checkError(err, "setting fusion arg 4", __LINE__);
+    err = clSetKernelArg(ocl.fusion, 11, sizeof(cl_float), &params.accel);
+    checkError(err, "setting fusion arg 5", __LINE__);
 
 
 
@@ -338,143 +358,154 @@ float fusion1(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
 
 
     //read buffers
-    err = clEnqueueReadBuffer(ocl.queue, ocl.d_partial_us, CL_TRUE, 0, sizeof(float)* nwork_groups, h_partial_us, 0, NULL, NULL );
-    checkError(err, "Reading back d_partial_us", __LINE__);
+    err = clEnqueueReadBuffer(ocl.queue, ocl.d_partial_us_1, CL_TRUE, 0, sizeof(float)* nwork_groups, h_partial_us_1, 0, NULL, NULL );
+    checkError(err, "Reading back d_partial_us_1", __LINE__);
+
+    err = clEnqueueReadBuffer(ocl.queue, ocl.d_partial_us_2, CL_TRUE, 0, sizeof(float)* nwork_groups, h_partial_us_2, 0, NULL, NULL );
+    checkError(err, "Reading back d_partial_us_2", __LINE__);
 
 
 
     //summing
     for (size_t i = 0; i < nwork_groups; i++)
     {
-        tot_u += h_partial_us[i];
+        tot_u_1 += h_partial_us_1[i];
+        tot_u_2 += h_partial_us_2[i];
     }
 
 
+    float av_vel_1 = tot_u_1/(float)global_tot_cells;
+    float av_vel_2 = tot_u_2/(float)global_tot_cells;
 
+    float av_vels[2];
 
-    //cleanup
+    av_vels[0]= av_vel_1;
+    av_vels[1] = av_vel_2;
+
+  //cleanup
   // clReleaseMemObject(d_partial_us);
-  free(h_partial_us);
+  free(h_partial_us_1);
+  free(h_partial_us_2);
 
 
-  return tot_u/(float)global_tot_cells;
+  return av_vels;
 
 
 
 
 }
 
-float fusion2(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl){
-
-
-
-      //set host variables and buffers
-      float tot_u =0.0f;
-      float* h_partial_us;
-
-
-      // set device buffer
-      // cl_mem d_partial_us;
-
-
-      // work group variables
-      // size_t nwork_groups;
-      // size_t work_group_size;
-
-
-      cl_int err;
-
-
-      //get work group size and save to variable
-      // err = clGetKernelWorkGroupInfo (ocl.fusion2, ocl.device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
-      // checkError(err, "Getting kernel work group info", __LINE__);
-
-
-
-      // calculate number of work groups from work group size
-      // nwork_groups = (params.nx * params.ny)/work_group_size;
-
-
-
-      //allocate space for host buffers
-      h_partial_us = calloc(sizeof(float), nwork_groups);
-
-
-
-      // create device buffers
-      // d_partial_us = clCreateBuffer(ocl.context, CL_MEM_WRITE_ONLY, sizeof(float) * nwork_groups, NULL, &err);
-      // checkError(err, "Creating buffer d_partial_us", __LINE__);
-
-
-
-
-
-      // Set kernel arguments
-      err = clSetKernelArg(ocl.fusion2, 0, sizeof(cl_mem), &ocl.cells);
-      checkError(err, "setting fusion2 cells", __LINE__);
-      err = clSetKernelArg(ocl.fusion2, 1, sizeof(cl_mem), &ocl.tmp_cells);
-      checkError(err, "setting fusion2 tmp_cells", __LINE__);
-      err = clSetKernelArg(ocl.fusion2, 2, sizeof(cl_mem), &ocl.obstacles);
-      checkError(err, "setting fusion2 obstacles", __LINE__);
-      err = clSetKernelArg(ocl.fusion2, 3, sizeof(cl_int), &params.nx);
-      checkError(err, "setting fusion2 nx", __LINE__);
-      err = clSetKernelArg(ocl.fusion2, 4, sizeof(cl_int), &params.ny);
-      checkError(err, "setting fusion2 ny", __LINE__);
-      err = clSetKernelArg(ocl.fusion2, 5, sizeof(cl_float)*work_group_size,NULL);
-      checkError(err, "setting fusion2 local_u", __LINE__);
-      err = clSetKernelArg(ocl.fusion2, 6, sizeof(cl_mem),&ocl.d_partial_us);
-      checkError(err, "setting fusion2 partial_u", __LINE__);
-      err = clSetKernelArg(ocl.fusion2, 7, sizeof(cl_float), &params.omega);
-      checkError(err, "setting fusion2 omega", __LINE__);
-      err = clSetKernelArg(ocl.fusion2, 8, sizeof(cl_float), &params.density);
-      checkError(err, "setting fusion2 arg 4", __LINE__);
-      err = clSetKernelArg(ocl.fusion2, 9, sizeof(cl_float), &params.accel);
-      checkError(err, "setting fusion2 arg 5", __LINE__);
-
-
-
-
-
-      //set global and local sizes
-      size_t global[2] = {params.nx, params.ny};
-      size_t local[2] = {sqrtf(work_group_size), sqrtf(work_group_size)};
-
-
-
-
-      //enqueue kernel
-      err = clEnqueueNDRangeKernel(ocl.queue, ocl.fusion2,
-                                   2, NULL, global, local, 0, NULL, NULL);
-      checkError(err, "enqueueing fusion1 kernel", __LINE__);
-
-
-
-
-
-
-      //read buffers
-      err = clEnqueueReadBuffer(ocl.queue, ocl.d_partial_us, CL_TRUE, 0, sizeof(float)* nwork_groups, h_partial_us, 0, NULL, NULL );
-      checkError(err, "Reading back d_partial_us", __LINE__);
-
-
-
-      //summing
-      for (size_t i = 0; i < nwork_groups; i++)
-      {
-          tot_u += h_partial_us[i];
-      }
-
-
-
-
-      //cleanup
-    // clReleaseMemObject(d_partial_us);
-    free(h_partial_us);
-
-
-    return tot_u/(float)global_tot_cells;
-
-}
+// float fusion2(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl){
+//
+//
+//
+//       //set host variables and buffers
+//       float tot_u =0.0f;
+//       float* h_partial_us;
+//
+//
+//       // set device buffer
+//       // cl_mem d_partial_us;
+//
+//
+//       // work group variables
+//       // size_t nwork_groups;
+//       // size_t work_group_size;
+//
+//
+//       cl_int err;
+//
+//
+//       //get work group size and save to variable
+//       // err = clGetKernelWorkGroupInfo (ocl.fusion2, ocl.device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
+//       // checkError(err, "Getting kernel work group info", __LINE__);
+//
+//
+//
+//       // calculate number of work groups from work group size
+//       // nwork_groups = (params.nx * params.ny)/work_group_size;
+//
+//
+//
+//       //allocate space for host buffers
+//       h_partial_us = calloc(sizeof(float), nwork_groups);
+//
+//
+//
+//       // create device buffers
+//       // d_partial_us = clCreateBuffer(ocl.context, CL_MEM_WRITE_ONLY, sizeof(float) * nwork_groups, NULL, &err);
+//       // checkError(err, "Creating buffer d_partial_us", __LINE__);
+//
+//
+//
+//
+//
+//       // Set kernel arguments
+//       err = clSetKernelArg(ocl.fusion2, 0, sizeof(cl_mem), &ocl.cells);
+//       checkError(err, "setting fusion2 cells", __LINE__);
+//       err = clSetKernelArg(ocl.fusion2, 1, sizeof(cl_mem), &ocl.tmp_cells);
+//       checkError(err, "setting fusion2 tmp_cells", __LINE__);
+//       err = clSetKernelArg(ocl.fusion2, 2, sizeof(cl_mem), &ocl.obstacles);
+//       checkError(err, "setting fusion2 obstacles", __LINE__);
+//       err = clSetKernelArg(ocl.fusion2, 3, sizeof(cl_int), &params.nx);
+//       checkError(err, "setting fusion2 nx", __LINE__);
+//       err = clSetKernelArg(ocl.fusion2, 4, sizeof(cl_int), &params.ny);
+//       checkError(err, "setting fusion2 ny", __LINE__);
+//       err = clSetKernelArg(ocl.fusion2, 5, sizeof(cl_float)*work_group_size,NULL);
+//       checkError(err, "setting fusion2 local_u", __LINE__);
+//       err = clSetKernelArg(ocl.fusion2, 6, sizeof(cl_mem),&ocl.d_partial_us);
+//       checkError(err, "setting fusion2 partial_u", __LINE__);
+//       err = clSetKernelArg(ocl.fusion2, 7, sizeof(cl_float), &params.omega);
+//       checkError(err, "setting fusion2 omega", __LINE__);
+//       err = clSetKernelArg(ocl.fusion2, 8, sizeof(cl_float), &params.density);
+//       checkError(err, "setting fusion2 arg 4", __LINE__);
+//       err = clSetKernelArg(ocl.fusion2, 9, sizeof(cl_float), &params.accel);
+//       checkError(err, "setting fusion2 arg 5", __LINE__);
+//
+//
+//
+//
+//
+//       //set global and local sizes
+//       size_t global[2] = {params.nx, params.ny};
+//       size_t local[2] = {sqrtf(work_group_size), sqrtf(work_group_size)};
+//
+//
+//
+//
+//       //enqueue kernel
+//       err = clEnqueueNDRangeKernel(ocl.queue, ocl.fusion2,
+//                                    2, NULL, global, local, 0, NULL, NULL);
+//       checkError(err, "enqueueing fusion1 kernel", __LINE__);
+//
+//
+//
+//
+//
+//
+//       //read buffers
+//       err = clEnqueueReadBuffer(ocl.queue, ocl.d_partial_us, CL_TRUE, 0, sizeof(float)* nwork_groups, h_partial_us, 0, NULL, NULL );
+//       checkError(err, "Reading back d_partial_us", __LINE__);
+//
+//
+//
+//       //summing
+//       for (size_t i = 0; i < nwork_groups; i++)
+//       {
+//           tot_u += h_partial_us[i];
+//       }
+//
+//
+//
+//
+//       //cleanup
+//     // clReleaseMemObject(d_partial_us);
+//     free(h_partial_us);
+//
+//
+//     return tot_u/(float)global_tot_cells;
+//
+// }
 
 
 
@@ -745,17 +776,17 @@ int initialise(const char* paramfile, const char* obstaclefile,
   checkError(err, "building program", __LINE__);
 
   // Create OpenCL kernels
-  ocl->fusion1 = clCreateKernel(ocl->program, "fusion1", &err);
+  ocl->fusion = clCreateKernel(ocl->program, "fusion", &err);
   checkError(err, "creating fusion1 kernel", __LINE__);
-  ocl->fusion2 = clCreateKernel(ocl->program, "fusion2", &err);
-  checkError(err, "creating fusion2 kernel", __LINE__);
-  ocl->accelerate_flow1 = clCreateKernel(ocl->program, "accelerate_flow1", &err);
-  checkError(err, "creating accelerate_flow1 kernel", __LINE__);
-  ocl->accelerate_flow2 = clCreateKernel(ocl->program, "accelerate_flow2", &err);
-  checkError(err, "creating accelerate_flow2 kernel", __LINE__);
+  // ocl->fusion2 = clCreateKernel(ocl->program, "fusion2", &err);
+  // checkError(err, "creating fusion2 kernel", __LINE__);
+  // ocl->accelerate_flow1 = clCreateKernel(ocl->program, "accelerate_flow1", &err);
+  // checkError(err, "creating accelerate_flow1 kernel", __LINE__);
+  // ocl->accelerate_flow2 = clCreateKernel(ocl->program, "accelerate_flow2", &err);
+  // checkError(err, "creating accelerate_flow2 kernel", __LINE__);
 
 
-  err = clGetKernelWorkGroupInfo (ocl->fusion1, ocl->device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
+  err = clGetKernelWorkGroupInfo (ocl->fusion, ocl->device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
   checkError(err, "Getting kernel work group info", __LINE__);
 
   nwork_groups = (params->nx * params->ny)/work_group_size;
@@ -774,7 +805,9 @@ int initialise(const char* paramfile, const char* obstaclefile,
     ocl->context, CL_MEM_READ_WRITE,
     sizeof(cl_int) * params->nx * params->ny, NULL, &err);
   checkError(err, "creating obstacles buffer", __LINE__);
-  ocl->d_partial_us = clCreateBuffer(ocl->context, CL_MEM_WRITE_ONLY, sizeof(float) * nwork_groups, NULL, &err);
+  ocl->d_partial_us_1 = clCreateBuffer(ocl->context, CL_MEM_WRITE_ONLY, sizeof(float) * nwork_groups, NULL, &err);
+  checkError(err, "Creating buffer d_partial_us", __LINE__);
+  ocl->d_partial_us_2 = clCreateBuffer(ocl->context, CL_MEM_WRITE_ONLY, sizeof(float) * nwork_groups, NULL, &err);
   checkError(err, "Creating buffer d_partial_us", __LINE__);
 
   return EXIT_SUCCESS;
@@ -801,11 +834,12 @@ int finalise(const t_param* params, t_speed** cells_ptr, t_speed** tmp_cells_ptr
   clReleaseMemObject(ocl.cells);
   clReleaseMemObject(ocl.tmp_cells);
   clReleaseMemObject(ocl.obstacles);
-  clReleaseMemObject(ocl.d_partial_us);
-  clReleaseKernel(ocl.fusion1);
-  clReleaseKernel(ocl.fusion2);
-  clReleaseKernel(ocl.accelerate_flow1);
-  clReleaseKernel(ocl.accelerate_flow2);
+  clReleaseMemObject(ocl.d_partial_us_1);
+  clReleaseMemObject(ocl.d_partial_us_2);
+  clReleaseKernel(ocl.fusion);
+  //clReleaseKernel(ocl.fusion2);
+  //clReleaseKernel(ocl.accelerate_flow1);
+//  clReleaseKernel(ocl.accelerate_flow2);
   clReleaseProgram(ocl.program);
   clReleaseCommandQueue(ocl.queue);
   clReleaseContext(ocl.context);
