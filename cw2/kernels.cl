@@ -77,7 +77,7 @@ typedef struct
 //   }
 // }
 
-kernel void fusion1(global t_speed* cells,
+kernel void fusion(global t_speed* cells,
                             global t_speed* tmp_cells,
                             global int* obstacles,
                             int nx,
