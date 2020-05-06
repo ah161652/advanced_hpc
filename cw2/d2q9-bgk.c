@@ -260,7 +260,7 @@ int main(int argc, char* argv[])
 //   return EXIT_SUCCESS;
 // }
 
-float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl, float* times){
+void fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl, float* times){
 
 
     //set host variables and buffers
@@ -376,7 +376,6 @@ float fusion(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
     float av_vel_1 = tot_u_1/(float)global_tot_cells;
     float av_vel_2 = tot_u_2/(float)global_tot_cells;
 
-    float av_vels[2];
 
     times[0]= av_vel_1;
     times[1] = av_vel_2;
