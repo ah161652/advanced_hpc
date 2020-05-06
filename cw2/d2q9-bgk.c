@@ -758,7 +758,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
   err = clGetKernelWorkGroupInfo (ocl->fusion1, ocl->device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
   checkError(err, "Getting kernel work group info", __LINE__);
 
-  nwork_groups = (params.nx * params.ny)/work_group_size;
+  nwork_groups = (params->nx * params->ny)/work_group_size;
 
 
   // Allocate OpenCL buffers
