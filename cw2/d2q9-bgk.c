@@ -44,7 +44,7 @@ typedef struct
   cl_command_queue  queue;
 
   cl_program program;
-  cl_kernel  fusion;
+  cl_kernel fusion;
   // cl_kernel fusion2;
   // cl_kernel accelerate_flow1;
   // cl_kernel accelerate_flow2;
@@ -778,7 +778,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
 
   // Create OpenCL kernels
   ocl->fusion = clCreateKernel(ocl->program, "fusion", &err);
-  checkError(err, "creating fusion1 kernel", __LINE__);
+  checkError(err, "creating fusion kernel", __LINE__);
   // ocl->fusion2 = clCreateKernel(ocl->program, "fusion2", &err);
   // checkError(err, "creating fusion2 kernel", __LINE__);
   // ocl->accelerate_flow1 = clCreateKernel(ocl->program, "accelerate_flow1", &err);
