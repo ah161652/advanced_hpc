@@ -197,6 +197,8 @@ kernel void fusion1(global t_speed* cells,
   local_u[cell_index] = 0.0f;
 
 
+    work_group_barrier(CLK_LOCAL_MEM_FENCE);
+
   // calculate cell local_u value
     local_u[cell_index] = (!obstacles[jj*nx + ii]) ? (sqrt((u_x * u_x) + (u_y * u_y))): 0.0f;
 
