@@ -235,7 +235,6 @@ float fusion1(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
     size_t global[2] = {params.nx, params.ny};
     size_t local[2] = {sqrtf(work_group_size), sqrtf(work_group_size)};
 
-    printf("FUSION1 HOST %d, %d \n",work_group_size,nwork_groups );
 
 
 
@@ -325,7 +324,6 @@ float fusion2(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
       size_t global[2] = {params.nx, params.ny};
       size_t local[2] = {sqrtf(work_group_size), sqrtf(work_group_size)};
 
-          printf("FUSION2 HOST %d, %d \n",work_group_size,nwork_groups );
 
 
 
