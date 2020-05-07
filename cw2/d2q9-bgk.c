@@ -246,9 +246,6 @@ float fusion1(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
     checkError(err, "enqueueing fusion1 kernel", __LINE__);
 
 
-    // Wait for kernel to finish
-err = clFinish(ocl.queue);
-checkError(err, "waiting for fusion1 kernel", __LINE__);
 
 
 
@@ -338,9 +335,6 @@ float fusion2(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
       checkError(err, "enqueueing fusion1 kernel", __LINE__);
 
 
-      // Wait for kernel to finish
-  err = clFinish(ocl.queue);
-  checkError(err, "waiting for fusion2 kernel", __LINE__);
 
 
 
@@ -642,10 +636,10 @@ int initialise(const char* paramfile, const char* obstaclefile,
   checkError(err, "creating fusion2 kernel", __LINE__);
 
 
-  err = clGetKernelWorkGroupInfo (ocl->fusion1, ocl->device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
-  checkError(err, "Getting kernel work group info", __LINE__);
+  // err = clGetKernelWorkGroupInfo (ocl->fusion1, ocl->device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
+  // checkError(err, "Getting kernel work group info", __LINE__);
 
-  //work_group_size = 16*16;
+  work_group_size = 32*32;
 
   nwork_groups = (params->nx * params->ny)/work_group_size;
 
