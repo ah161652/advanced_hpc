@@ -201,6 +201,8 @@ float fusion1(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
     //allocate space for host buffers
     h_partial_us = calloc(sizeof(float), nwork_groups);
 
+    //maybe zero all array to make sure
+
 
     // Set kernel arguments
     err = clSetKernelArg(ocl.fusion1, 0, sizeof(cl_mem), &ocl.cells);
@@ -231,7 +233,7 @@ float fusion1(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
 
     //set global and local sizes
     size_t global[2] = {params.nx, params.ny};
-        size_t local[2] = {sqrtf(work_group_size), sqrtf(work_group_size)};
+    size_t local[2] = {sqrtf(work_group_size), sqrtf(work_group_size)};
 
 
 
@@ -288,6 +290,7 @@ float fusion2(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
 
       //allocate space for host buffers
       h_partial_us = calloc(sizeof(float), nwork_groups);
+
 
 
       // Set kernel arguments
@@ -631,10 +634,10 @@ int initialise(const char* paramfile, const char* obstaclefile,
   checkError(err, "creating fusion2 kernel", __LINE__);
 
 
-  // err = clGetKernelWorkGroupInfo (ocl->fusion1, ocl->device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
-  // checkError(err, "Getting kernel work group info", __LINE__);
+  err = clGetKernelWorkGroupInfo (ocl->fusion1, ocl->device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
+  checkError(err, "Getting kernel work group info", __LINE__);
 
-  work_group_size = 16*16;
+  //work_group_size = 16*16;
 
   nwork_groups = (params->nx * params->ny)/work_group_size;
 
