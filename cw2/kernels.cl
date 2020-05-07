@@ -198,7 +198,7 @@ kernel void fusion1(global t_speed* cells,
 
 
   // calculate cell local_u value
-    local_u[cell_index] = (!obstacles[jj*nx + ii]) ? (sqrtf((u_x * u_x) + (u_y * u_y))): 0.0f;
+    local_u[cell_index] = (!obstacles[jj*nx + ii]) ? (sqrt((u_x * u_x) + (u_y * u_y))): 0.0f;
 
 
     //REDUCTION (adding up all the totals from within each work group)
@@ -427,7 +427,7 @@ kernel void fusion2(global t_speed* cells,
 
   // calculate cell local_u value
     // local_u[cell_index] = sqrt((u_x * u_x) + (u_y * u_y));
-    local_u[cell_index] = (!obstacles[jj*nx + ii]) ? (sqrtf((u_x * u_x) + (u_y * u_y))): 0.0f;
+    local_u[cell_index] = (!obstacles[jj*nx + ii]) ? (sqrt((u_x * u_x) + (u_y * u_y))): 0.0f;
 
 
     //REDUCTION (adding up all the totals from within each work group)
