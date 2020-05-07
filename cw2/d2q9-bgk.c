@@ -235,7 +235,7 @@ float fusion1(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
     size_t global[2] = {params.nx, params.ny};
     size_t local[2] = {sqrtf(work_group_size), sqrtf(work_group_size)};
 
-    
+
 
 
 
@@ -245,6 +245,10 @@ float fusion1(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
                                  2, NULL, global, local, 0, NULL, NULL);
     checkError(err, "enqueueing fusion1 kernel", __LINE__);
 
+
+    // Wait for kernel to finish
+err = clFinish(ocl.queue);
+checkError(err, "waiting for fusion1 kernel", __LINE__);
 
 
 
@@ -334,7 +338,9 @@ float fusion2(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
       checkError(err, "enqueueing fusion1 kernel", __LINE__);
 
 
-
+      // Wait for kernel to finish
+  err = clFinish(ocl.queue);
+  checkError(err, "waiting for fusion2 kernel", __LINE__);
 
 
 
