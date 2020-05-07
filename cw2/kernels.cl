@@ -197,8 +197,6 @@ kernel void fusion1(global t_speed* cells,
   local_u[cell_index] = 0.0f;
 
 
-    work_group_barrier(CLK_LOCAL_MEM_FENCE);
-
   // calculate cell local_u value
     local_u[cell_index] = (!obstacles[jj*nx + ii]) ? (sqrt((u_x * u_x) + (u_y * u_y))): 0.0f;
 
@@ -218,21 +216,20 @@ kernel void fusion1(global t_speed* cells,
       work_group_total_u = 0.0f;
       partial_u[group_index] = 0;
 
-work_group_barrier(CLK_LOCAL_MEM_FENCE);
+
       //sum all cells in work group
       for (size_t i=0; i<total_work_items; i++) {
           work_group_total_u += local_u[i];
 
       }
 
-work_group_barrier(CLK_LOCAL_MEM_FENCE);
       //add work group sums to global arrays
       partial_u[group_index] = work_group_total_u;
-work_group_barrier(CLK_LOCAL_MEM_FENCE);
+
 
     }
 
-work_group_barrier(CLK_LOCAL_MEM_FENCE);
+
 
 }
 

@@ -226,7 +226,8 @@ float fusion1(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
 
 
 
-
+    printf("%d\n",work_group_size );
+    printf("%d\n", nwork_groups );
 
     //set global and local sizes
     size_t global[2] = {params.nx, params.ny};
