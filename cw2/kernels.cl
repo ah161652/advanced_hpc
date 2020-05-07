@@ -16,8 +16,8 @@ typedef struct
 } t_speed;
 
 
-kernel void fusion1(global t_speed* cells,
-                            global t_speed* tmp_cells,
+kernel void fusion1(global t_speed cells,
+                            global t_speed tmp_cells,
                             global int* obstacles,
                             int nx,
                             int ny,
@@ -243,8 +243,8 @@ kernel void fusion1(global t_speed* cells,
 
 
 
-kernel void fusion2(global t_speed* cells,
-                            global t_speed* tmp_cells,
+kernel void fusion2(global t_speed cells,
+                            global t_speed tmp_cells,
                             global int* obstacles,
                             int nx,
                             int ny,
