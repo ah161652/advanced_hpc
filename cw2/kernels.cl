@@ -190,6 +190,8 @@ kernel void fusion1(global t_speed* cells,
 
 
 
+
+
   // calculate cell index in work group and group index for whole problem
   int cell_index = (num_wrk_items_x * local_id_y) +  local_id_x;
   int group_index = (num_groups_x *group_id_y) +  group_id_x;
@@ -214,6 +216,9 @@ kernel void fusion1(global t_speed* cells,
 
     // Check so you only do the summing on one cell
     if (local_id_x == 0 && local_id_y == 0) {
+
+        printf("FUSION1 DEVICE %d,%d\n", group_id_x,num_groups_x*num_groups_y);
+
 
       //init to 0
       work_group_total_u = 0.0f;
@@ -450,6 +455,7 @@ kernel void fusion2(global t_speed* cells,
 
       //sum all cells in work group
       for (size_t i=0; i<total_work_items; i++) {
+                printf("FUSION2 DEVICE %d,%d\n", group_id_x,num_groups_x*num_groups_y);
           work_group_total_u += local_u[i];
 
       }
