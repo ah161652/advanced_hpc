@@ -134,7 +134,7 @@ kernel void fusion1(global t_speed* cells,
              * (1.f - u_sq / w4);
 
 
-  #pragma novector
+
   d_equ[1] = w1 * local_density * (1.f + u[1] / c_sq + (u[1]*u[1]) / w3 - u_sq / w4);
   d_equ[2] = w1 * local_density * (1.f + u[2] / c_sq + (u[2]*u[2]) / w3 - u_sq / w4);
   d_equ[3] = w1 * local_density * (1.f + u[3] / c_sq + (u[3]*u[3]) / w3 - u_sq / w4);
@@ -426,7 +426,6 @@ kernel void fusion2(global t_speed* cells,
   local_u[cell_index] = 0.0f;
 
 
-    work_group_barrier(CLK_LOCAL_MEM_FENCE);
 
   // calculate cell local_u value
     local_u[cell_index] = (!obstacles[jj*nx + ii]) ? (sqrt((u_x * u_x) + (u_y * u_y))): 0.0f;
@@ -447,20 +446,19 @@ kernel void fusion2(global t_speed* cells,
       work_group_total_u = 0.0f;
       partial_u[group_index] = 0;
 
-work_group_barrier(CLK_LOCAL_MEM_FENCE);
       //sum all cells in work group
       for (size_t i=0; i<total_work_items; i++) {
           work_group_total_u += local_u[i];
 
       }
 
-work_group_barrier(CLK_LOCAL_MEM_FENCE);
+
       //add work group sums to global arrays
       partial_u[group_index] = work_group_total_u;
-work_group_barrier(CLK_LOCAL_MEM_FENCE);
+
 
     }
 
-work_group_barrier(CLK_LOCAL_MEM_FENCE);
+
 
 }
