@@ -48,8 +48,25 @@ typedef struct
   cl_kernel fusion2;
 
 
-  cl_mem cells;
-  cl_mem tmp_cells;
+  cl_mem speeds0;
+  cl_mem speeds1;
+  cl_mem speeds2;
+  cl_mem speeds3;
+  cl_mem speeds4;
+  cl_mem speeds5;
+  cl_mem speeds6;
+  cl_mem speeds7;
+  cl_mem speeds8;
+
+  cl_mem tmp_speeds0;
+  cl_mem tmp_speeds1;
+  cl_mem tmp_speeds2;
+  cl_mem tmp_speeds3;
+  cl_mem tmp_speeds4;
+  cl_mem tmp_speeds5;
+  cl_mem tmp_speeds6;
+  cl_mem tmp_speeds7;
+  cl_mem tmp_speeds8;
   cl_mem obstacles;
   cl_mem d_partial_us;
 } t_ocl;
@@ -142,9 +159,23 @@ int main(int argc, char* argv[])
   tic = timstr.tv_sec + (timstr.tv_usec / 1000000.0);
 
   // Write cells to OpenCL buffer
-  err = clEnqueueWriteBuffer(
-    ocl.queue, ocl.cells, CL_TRUE, 0,
-    sizeof(t_speed) * params.nx * params.ny, &cells, 0, NULL, NULL);
+  err = clEnqueueWriteBuffer(ocl.queue, ocl.speeds0, CL_TRUE, 0, sizeof(cl_float) * params.nx * params.ny, cells.speeds0, 0, NULL, NULL);
+  checkError(err, "writing cells data", __LINE__);
+  err = clEnqueueWriteBuffer(ocl.queue, ocl.speeds1, CL_TRUE, 0, sizeof(cl_float) * params.nx * params.ny, cells.speeds1, 0, NULL, NULL);
+  checkError(err, "writing cells data", __LINE__);
+  err = clEnqueueWriteBuffer(ocl.queue, ocl.speeds2, CL_TRUE, 0, sizeof(cl_float) * params.nx * params.ny, cells.speeds2, 0, NULL, NULL);
+  checkError(err, "writing cells data", __LINE__);
+  err = clEnqueueWriteBuffer(ocl.queue, ocl.speeds3, CL_TRUE, 0, sizeof(cl_float) * params.nx * params.ny, cells.speeds3, 0, NULL, NULL);
+  checkError(err, "writing cells data", __LINE__);
+  err = clEnqueueWriteBuffer(ocl.queue, ocl.speeds4, CL_TRUE, 0, sizeof(cl_float) * params.nx * params.ny, cells.speeds4, 0, NULL, NULL);
+  checkError(err, "writing cells data", __LINE__);
+  err = clEnqueueWriteBuffer(ocl.queue, ocl.speeds5, CL_TRUE, 0, sizeof(cl_float) * params.nx * params.ny, cells.speeds5, 0, NULL, NULL);
+  checkError(err, "writing cells data", __LINE__);
+  err = clEnqueueWriteBuffer(ocl.queue, ocl.speeds6, CL_TRUE, 0, sizeof(cl_float) * params.nx * params.ny, cells.speeds6, 0, NULL, NULL);
+  checkError(err, "writing cells data", __LINE__);
+  err = clEnqueueWriteBuffer(ocl.queue, ocl.speeds7, CL_TRUE, 0, sizeof(cl_float) * params.nx * params.ny, cells.speeds7, 0, NULL, NULL);
+  checkError(err, "writing cells data", __LINE__);
+  err = clEnqueueWriteBuffer(ocl.queue, ocl.speeds8, CL_TRUE, 0, sizeof(cl_float) * params.nx * params.ny, cells.speeds8, 0, NULL, NULL);
   checkError(err, "writing cells data", __LINE__);
 
   // Write obstacles to OpenCL buffer
@@ -167,10 +198,24 @@ int main(int argc, char* argv[])
 
   }
 
-  // Read cells from device
-  err = clEnqueueReadBuffer(
-    ocl.queue, ocl.cells, CL_TRUE, 0,
-    sizeof(t_speed) * params.nx * params.ny, &cells, 0, NULL, NULL);
+//read cells
+  err = clEnqueueReadBuffer(ocl.queue, ocl.speeds0, CL_TRUE, 0, sizeof(cl_float) * params.nx * params.ny, cells.speeds0, 0, NULL, NULL);
+  checkError(err, "reading cells data", __LINE__);
+  err = clEnqueueReadBuffer(ocl.queue, ocl.speeds1, CL_TRUE, 0, sizeof(cl_float) * params.nx * params.ny, cells.speeds1, 0, NULL, NULL);
+  checkError(err, "reading cells data", __LINE__);
+  err = clEnqueueReadBuffer(ocl.queue, ocl.speeds2, CL_TRUE, 0, sizeof(cl_float) * params.nx * params.ny, cells.speeds2, 0, NULL, NULL);
+  checkError(err, "reading cells data", __LINE__);
+  err = clEnqueueReadBuffer(ocl.queue, ocl.speeds3, CL_TRUE, 0, sizeof(cl_float) * params.nx * params.ny, cells.speeds3, 0, NULL, NULL);
+  checkError(err, "reading cells data", __LINE__);
+  err = clEnqueueReadBuffer(ocl.queue, ocl.speeds4, CL_TRUE, 0, sizeof(cl_float) * params.nx * params.ny, cells.speeds4, 0, NULL, NULL);
+  checkError(err, "reading cells data", __LINE__);
+  err = clEnqueueReadBuffer(ocl.queue, ocl.speeds5, CL_TRUE, 0, sizeof(cl_float) * params.nx * params.ny, cells.speeds5, 0, NULL, NULL);
+  checkError(err, "reading cells data", __LINE__);
+  err = clEnqueueReadBuffer(ocl.queue, ocl.speeds6, CL_TRUE, 0, sizeof(cl_float) * params.nx * params.ny, cells.speeds6, 0, NULL, NULL);
+  checkError(err, "reading cells data", __LINE__);
+  err = clEnqueueReadBuffer(ocl.queue, ocl.speeds7, CL_TRUE, 0, sizeof(cl_float) * params.nx * params.ny, cells.speeds7, 0, NULL, NULL);
+  checkError(err, "reading cells data", __LINE__);
+  err = clEnqueueReadBuffer(ocl.queue, ocl.speeds8, CL_TRUE, 0, sizeof(cl_float) * params.nx * params.ny, cells.speeds8, 0, NULL, NULL);
   checkError(err, "reading cells data", __LINE__);
 
   gettimeofday(&timstr, NULL);
@@ -210,25 +255,57 @@ float fusion1(const t_param params, t_speed cells, t_speed tmp_cells, int* obsta
 
 
     // Set kernel arguments
-    err = clSetKernelArg(ocl.fusion1, 0, sizeof(cl_mem), &ocl.cells);
+    err = clSetKernelArg(ocl.fusion1, 0, sizeof(cl_mem), &ocl.speeds0);
     checkError(err, "setting fusion1 cells", __LINE__);
-    err = clSetKernelArg(ocl.fusion1, 1, sizeof(cl_mem), &ocl.tmp_cells);
+    err = clSetKernelArg(ocl.fusion1, 1, sizeof(cl_mem), &ocl.speeds1);
+    checkError(err, "setting fusion1 cells", __LINE__);
+    err = clSetKernelArg(ocl.fusion1, 2, sizeof(cl_mem), &ocl.speeds2);
+    checkError(err, "setting fusion1 cells", __LINE__);
+    err = clSetKernelArg(ocl.fusion1, 3, sizeof(cl_mem), &ocl.speeds3);
+    checkError(err, "setting fusion1 cells", __LINE__);
+    err = clSetKernelArg(ocl.fusion1, 4, sizeof(cl_mem), &ocl.speeds4);
+    checkError(err, "setting fusion1 cells", __LINE__);
+    err = clSetKernelArg(ocl.fusion1, 5, sizeof(cl_mem), &ocl.speeds5);
+    checkError(err, "setting fusion1 cells", __LINE__);
+    err = clSetKernelArg(ocl.fusion1, 6, sizeof(cl_mem), &ocl.speeds6);
+    checkError(err, "setting fusion1 cells", __LINE__);
+    err = clSetKernelArg(ocl.fusion1, 7, sizeof(cl_mem), &ocl.speeds7);
+    checkError(err, "setting fusion1 cells", __LINE__);
+    err = clSetKernelArg(ocl.fusion1, 8, sizeof(cl_mem), &ocl.speeds8);
+    checkError(err, "setting fusion1 cells", __LINE__);
+    err = clSetKernelArg(ocl.fusion1, 9, sizeof(cl_mem), &ocl.tmp_speeds0);
     checkError(err, "setting fusion1 tmp_cells", __LINE__);
-    err = clSetKernelArg(ocl.fusion1, 2, sizeof(cl_mem), &ocl.obstacles);
+    err = clSetKernelArg(ocl.fusion1, 10, sizeof(cl_mem), &ocl.tmp_speeds1);
+    checkError(err, "setting fusion1 tmp_cells", __LINE__);
+    err = clSetKernelArg(ocl.fusion1, 11, sizeof(cl_mem), &ocl.tmp_speeds2);
+    checkError(err, "setting fusion1 tmp_cells", __LINE__);
+    err = clSetKernelArg(ocl.fusion1, 12, sizeof(cl_mem), &ocl.tmp_speeds3);
+    checkError(err, "setting fusion1 tmp_cells", __LINE__);
+    err = clSetKernelArg(ocl.fusion1, 13, sizeof(cl_mem), &ocl.tmp_speeds4);
+    checkError(err, "setting fusion1 tmp_cells", __LINE__);
+    err = clSetKernelArg(ocl.fusion1, 14, sizeof(cl_mem), &ocl.tmp_speeds5);
+    checkError(err, "setting fusion1 tmp_cells", __LINE__);
+    err = clSetKernelArg(ocl.fusion1, 15, sizeof(cl_mem), &ocl.tmp_speeds6);
+    checkError(err, "setting fusion1 tmp_cells", __LINE__);
+    err = clSetKernelArg(ocl.fusion1, 16, sizeof(cl_mem), &ocl.tmp_speeds7);
+    checkError(err, "setting fusion1 tmp_cells", __LINE__);
+    err = clSetKernelArg(ocl.fusion1, 17, sizeof(cl_mem), &ocl.tmp_speeds8);
+    checkError(err, "setting fusion1 tmp_cells", __LINE__);
+    err = clSetKernelArg(ocl.fusion1, 18, sizeof(cl_mem), &ocl.obstacles);
     checkError(err, "setting fusion1 obstacles", __LINE__);
-    err = clSetKernelArg(ocl.fusion1, 3, sizeof(cl_int), &params.nx);
+    err = clSetKernelArg(ocl.fusion1, 19, sizeof(cl_int), &params.nx);
     checkError(err, "setting fusion1 nx", __LINE__);
-    err = clSetKernelArg(ocl.fusion1, 4, sizeof(cl_int), &params.ny);
+    err = clSetKernelArg(ocl.fusion1, 20, sizeof(cl_int), &params.ny);
     checkError(err, "setting fusion1 ny", __LINE__);
-    err = clSetKernelArg(ocl.fusion1, 5, sizeof(cl_float)*work_group_size,NULL);
+    err = clSetKernelArg(ocl.fusion1, 21, sizeof(cl_float)*work_group_size,NULL);
     checkError(err, "setting fusion1 local_u", __LINE__);
-    err = clSetKernelArg(ocl.fusion1, 6, sizeof(cl_mem),&ocl.d_partial_us);
+    err = clSetKernelArg(ocl.fusion1, 22, sizeof(cl_mem),&ocl.d_partial_us);
     checkError(err, "setting fusion1 partial_u", __LINE__);
-    err = clSetKernelArg(ocl.fusion1, 7, sizeof(cl_float), &params.omega);
+    err = clSetKernelArg(ocl.fusion1, 23, sizeof(cl_float), &params.omega);
     checkError(err, "setting fusion1 omega", __LINE__);
-    err = clSetKernelArg(ocl.fusion1, 8, sizeof(cl_float), &params.density);
+    err = clSetKernelArg(ocl.fusion1, 24, sizeof(cl_float), &params.density);
     checkError(err, "setting fusion1 arg 4", __LINE__);
-    err = clSetKernelArg(ocl.fusion1, 9, sizeof(cl_float), &params.accel);
+    err = clSetKernelArg(ocl.fusion1, 25, sizeof(cl_float), &params.accel);
     checkError(err, "setting fusion1 arg 5", __LINE__);
 
 
@@ -297,25 +374,57 @@ float fusion2(const t_param params, t_speed cells, t_speed tmp_cells, int* obsta
 
 
       // Set kernel arguments
-      err = clSetKernelArg(ocl.fusion2, 0, sizeof(cl_mem), &ocl.cells);
+      err = clSetKernelArg(ocl.fusion2, 0, sizeof(cl_mem), &ocl.speeds0);
       checkError(err, "setting fusion2 cells", __LINE__);
-      err = clSetKernelArg(ocl.fusion2, 1, sizeof(cl_mem), &ocl.tmp_cells);
+      err = clSetKernelArg(ocl.fusion2, 1, sizeof(cl_mem), &ocl.speeds1);
+      checkError(err, "setting fusion2 cells", __LINE__);
+      err = clSetKernelArg(ocl.fusion2, 2, sizeof(cl_mem), &ocl.speeds2);
+      checkError(err, "setting fusion2 cells", __LINE__);
+      err = clSetKernelArg(ocl.fusion2, 3, sizeof(cl_mem), &ocl.speeds3);
+      checkError(err, "setting fusion2 cells", __LINE__);
+      err = clSetKernelArg(ocl.fusion2, 4, sizeof(cl_mem), &ocl.speeds4);
+      checkError(err, "setting fusion2 cells", __LINE__);
+      err = clSetKernelArg(ocl.fusion2, 5, sizeof(cl_mem), &ocl.speeds5);
+      checkError(err, "setting fusion2 cells", __LINE__);
+      err = clSetKernelArg(ocl.fusion2, 6, sizeof(cl_mem), &ocl.speeds6);
+      checkError(err, "setting fusion2 cells", __LINE__);
+      err = clSetKernelArg(ocl.fusion2, 7, sizeof(cl_mem), &ocl.speeds7);
+      checkError(err, "setting fusion2 cells", __LINE__);
+      err = clSetKernelArg(ocl.fusion2, 8, sizeof(cl_mem), &ocl.speeds8);
+      checkError(err, "setting fusion2 cells", __LINE__);
+      err = clSetKernelArg(ocl.fusion2, 9, sizeof(cl_mem), &ocl.tmp_speeds0);
       checkError(err, "setting fusion2 tmp_cells", __LINE__);
-      err = clSetKernelArg(ocl.fusion2, 2, sizeof(cl_mem), &ocl.obstacles);
+      err = clSetKernelArg(ocl.fusion2, 10, sizeof(cl_mem), &ocl.tmp_speeds1);
+      checkError(err, "setting fusion2 tmp_cells", __LINE__);
+      err = clSetKernelArg(ocl.fusion2, 11, sizeof(cl_mem), &ocl.tmp_speeds2);
+      checkError(err, "setting fusion2 tmp_cells", __LINE__);
+      err = clSetKernelArg(ocl.fusion2, 12, sizeof(cl_mem), &ocl.tmp_speeds3);
+      checkError(err, "setting fusion2 tmp_cells", __LINE__);
+      err = clSetKernelArg(ocl.fusion2, 13, sizeof(cl_mem), &ocl.tmp_speeds4);
+      checkError(err, "setting fusion2 tmp_cells", __LINE__);
+      err = clSetKernelArg(ocl.fusion2, 14, sizeof(cl_mem), &ocl.tmp_speeds5);
+      checkError(err, "setting fusion2 tmp_cells", __LINE__);
+      err = clSetKernelArg(ocl.fusion2, 15, sizeof(cl_mem), &ocl.tmp_speeds6);
+      checkError(err, "setting fusion2 tmp_cells", __LINE__);
+      err = clSetKernelArg(ocl.fusion2, 16, sizeof(cl_mem), &ocl.tmp_speeds7);
+      checkError(err, "setting fusion2 tmp_cells", __LINE__);
+      err = clSetKernelArg(ocl.fusion2, 17, sizeof(cl_mem), &ocl.tmp_speeds8);
+      checkError(err, "setting fusion2 tmp_cells", __LINE__);
+      err = clSetKernelArg(ocl.fusion2, 18, sizeof(cl_mem), &ocl.obstacles);
       checkError(err, "setting fusion2 obstacles", __LINE__);
-      err = clSetKernelArg(ocl.fusion2, 3, sizeof(cl_int), &params.nx);
+      err = clSetKernelArg(ocl.fusion2, 19, sizeof(cl_int), &params.nx);
       checkError(err, "setting fusion2 nx", __LINE__);
-      err = clSetKernelArg(ocl.fusion2, 4, sizeof(cl_int), &params.ny);
+      err = clSetKernelArg(ocl.fusion2, 20, sizeof(cl_int), &params.ny);
       checkError(err, "setting fusion2 ny", __LINE__);
-      err = clSetKernelArg(ocl.fusion2, 5, sizeof(cl_float)*work_group_size,NULL);
+      err = clSetKernelArg(ocl.fusion2, 21, sizeof(cl_float)*work_group_size,NULL);
       checkError(err, "setting fusion2 local_u", __LINE__);
-      err = clSetKernelArg(ocl.fusion2, 6, sizeof(cl_mem),&ocl.d_partial_us);
+      err = clSetKernelArg(ocl.fusion2, 22, sizeof(cl_mem),&ocl.d_partial_us);
       checkError(err, "setting fusion2 partial_u", __LINE__);
-      err = clSetKernelArg(ocl.fusion2, 7, sizeof(cl_float), &params.omega);
+      err = clSetKernelArg(ocl.fusion2, 23, sizeof(cl_float), &params.omega);
       checkError(err, "setting fusion2 omega", __LINE__);
-      err = clSetKernelArg(ocl.fusion2, 8, sizeof(cl_float), &params.density);
+      err = clSetKernelArg(ocl.fusion2, 24, sizeof(cl_float), &params.density);
       checkError(err, "setting fusion2 arg 4", __LINE__);
-      err = clSetKernelArg(ocl.fusion2, 9, sizeof(cl_float), &params.accel);
+      err = clSetKernelArg(ocl.fusion2, 25, sizeof(cl_float), &params.accel);
       checkError(err, "setting fusion2 arg 5", __LINE__);
 
 
@@ -659,14 +768,45 @@ if (tmp_cells_ptr == NULL) die("cannot allocate memory for tmp_cells", __LINE__,
 
 
   // Allocate OpenCL buffers
-  ocl->cells = clCreateBuffer(
-    ocl->context, CL_MEM_READ_WRITE,
-    sizeof(t_speed) * params->nx * params->ny, NULL, &err);
+  ocl->speeds0 = clCreateBuffer(ocl->context, CL_MEM_READ_WRITE,sizeof(cl_float) * params->nx * params->ny, NULL, &err);
   checkError(err, "creating cells buffer", __LINE__);
-  ocl->tmp_cells = clCreateBuffer(
-    ocl->context, CL_MEM_READ_WRITE,
-    sizeof(t_speed) * params->nx * params->ny, NULL, &err);
+  ocl->speeds1 = clCreateBuffer(ocl->context, CL_MEM_READ_WRITE,sizeof(cl_float) * params->nx * params->ny, NULL, &err);
+  checkError(err, "creating cells buffer", __LINE__);
+  ocl->speeds2 = clCreateBuffer(ocl->context, CL_MEM_READ_WRITE,sizeof(cl_float) * params->nx * params->ny, NULL, &err);
+  checkError(err, "creating cells buffer", __LINE__);
+  ocl->speeds3 = clCreateBuffer(ocl->context, CL_MEM_READ_WRITE,sizeof(cl_float) * params->nx * params->ny, NULL, &err);
+  checkError(err, "creating cells buffer", __LINE__);
+  ocl->speeds4 = clCreateBuffer(ocl->context, CL_MEM_READ_WRITE,sizeof(cl_float) * params->nx * params->ny, NULL, &err);
+  checkError(err, "creating cells buffer", __LINE__);
+  ocl->speeds5 = clCreateBuffer(ocl->context, CL_MEM_READ_WRITE,sizeof(cl_float) * params->nx * params->ny, NULL, &err);
+  checkError(err, "creating cells buffer", __LINE__);
+  ocl->speeds6 = clCreateBuffer(ocl->context, CL_MEM_READ_WRITE,sizeof(cl_float) * params->nx * params->ny, NULL, &err);
+  checkError(err, "creating cells buffer", __LINE__);
+  ocl->speeds7 = clCreateBuffer(ocl->context, CL_MEM_READ_WRITE,sizeof(cl_float) * params->nx * params->ny, NULL, &err);
+  checkError(err, "creating cells buffer", __LINE__);
+  ocl->speeds8 = clCreateBuffer(ocl->context, CL_MEM_READ_WRITE,sizeof(cl_float) * params->nx * params->ny, NULL, &err);
+  checkError(err, "creating cells buffer", __LINE__);
+
+  ocl->tmp_speeds0 = clCreateBuffer(ocl->context, CL_MEM_READ_WRITE,sizeof(cl_float) * params->nx * params->ny, NULL, &err);
   checkError(err, "creating tmp_cells buffer", __LINE__);
+  ocl->tmp_speeds1 = clCreateBuffer(ocl->context, CL_MEM_READ_WRITE,sizeof(cl_float) * params->nx * params->ny, NULL, &err);
+  checkError(err, "creating tmp_cells buffer", __LINE__);
+  ocl->tmp_speeds2 = clCreateBuffer(ocl->context, CL_MEM_READ_WRITE,sizeof(cl_float) * params->nx * params->ny, NULL, &err);
+  checkError(err, "creating tmp_cells buffer", __LINE__);
+  ocl->tmp_speeds3 = clCreateBuffer(ocl->context, CL_MEM_READ_WRITE,sizeof(cl_float) * params->nx * params->ny, NULL, &err);
+  checkError(err, "creating tmp_cells buffer", __LINE__);
+  ocl->tmp_speeds4 = clCreateBuffer(ocl->context, CL_MEM_READ_WRITE,sizeof(cl_float) * params->nx * params->ny, NULL, &err);
+  checkError(err, "creating tmp_cells buffer", __LINE__);
+  ocl->tmp_speeds5 = clCreateBuffer(ocl->context, CL_MEM_READ_WRITE,sizeof(cl_float) * params->nx * params->ny, NULL, &err);
+  checkError(err, "creating tmp_cells buffer", __LINE__);
+  ocl->tmp_speeds6 = clCreateBuffer(ocl->context, CL_MEM_READ_WRITE,sizeof(cl_float) * params->nx * params->ny, NULL, &err);
+  checkError(err, "creating tmp_cells buffer", __LINE__);
+  ocl->tmp_speeds7 = clCreateBuffer(ocl->context, CL_MEM_READ_WRITE,sizeof(cl_float) * params->nx * params->ny, NULL, &err);
+  checkError(err, "creating tmp_cells buffer", __LINE__);
+  ocl->tmp_speeds8 = clCreateBuffer(ocl->context, CL_MEM_READ_WRITE,sizeof(cl_float) * params->nx * params->ny, NULL, &err);
+  checkError(err, "creating tmp_cells buffer", __LINE__);
+
+
   ocl->obstacles = clCreateBuffer(
     ocl->context, CL_MEM_READ_WRITE,
     sizeof(cl_int) * params->nx * params->ny, NULL, &err);
@@ -727,8 +867,24 @@ int finalise(const t_param* params, t_speed* cells_ptr, t_speed* tmp_cells_ptr,
   free(*av_vels_ptr);
   *av_vels_ptr = NULL;
 
-  clReleaseMemObject(ocl.cells);
-  clReleaseMemObject(ocl.tmp_cells);
+  clReleaseMemObject(ocl.speeds0);
+  clReleaseMemObject(ocl.speeds1);
+  clReleaseMemObject(ocl.speeds2);
+  clReleaseMemObject(ocl.speeds3);
+  clReleaseMemObject(ocl.speeds4);
+  clReleaseMemObject(ocl.speeds5);
+  clReleaseMemObject(ocl.speeds6);
+  clReleaseMemObject(ocl.speeds7);
+  clReleaseMemObject(ocl.speeds8);
+  clReleaseMemObject(ocl.tmp_speeds0);
+  clReleaseMemObject(ocl.tmp_speeds1);
+  clReleaseMemObject(ocl.tmp_speeds2);
+  clReleaseMemObject(ocl.tmp_speeds3);
+  clReleaseMemObject(ocl.tmp_speeds4);
+  clReleaseMemObject(ocl.tmp_speeds5);
+  clReleaseMemObject(ocl.tmp_speeds6);
+  clReleaseMemObject(ocl.tmp_speeds7);
+  clReleaseMemObject(ocl.tmp_speeds8);
   clReleaseMemObject(ocl.obstacles);
   clReleaseMemObject(ocl.d_partial_us);
   clReleaseKernel(ocl.fusion1);
