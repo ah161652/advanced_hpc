@@ -408,11 +408,11 @@ kernel void fusion2(global t_speed* cells,
   int local_id_x       = get_local_id(0);
   int local_id_y       = get_local_id(1);
 
-  int group_id_x       = get_group_id(0);
-  int group_id_y       = get_group_id(1);
+  // int num_groups_x = nx/num_wrk_items_x;
+  // int num_groups_y = ny/num_wrk_items_y;
 
-  int num_groups_x = nx/num_wrk_items_x;
-  int num_groups_y = ny/num_wrk_items_y;
+  int num_groups_x = get_num_groups(0);
+  int num_groups_y = get_num_groups(1);
 
 
 
