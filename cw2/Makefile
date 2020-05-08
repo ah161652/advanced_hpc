@@ -3,7 +3,7 @@
 EXE=d2q9-bgk
 
 CC=gcc
-CFLAGS= -std=c99 -Wall -Ofast -fast -march=NATIVE
+CFLAGS= -std=c99 -Wall -Ofast -march=NATIVE
 LIBS = -lm
 
 PLATFORM = $(shell uname -s)
