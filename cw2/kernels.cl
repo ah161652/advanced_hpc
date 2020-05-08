@@ -314,14 +314,14 @@ kernel void fusion2(global t_speed* cells,
   int y_s = (jj == 0) ? (jj + ny - 1) : (jj - 1);
   int x_w = (ii == 0) ? (ii + nx - 1) : (ii - 1);
 
-
+    work_group_barrier(CLK_LOCAL_MEM_FENCE);
 
   /* compute local density total */
   float local_density = 0.f;
 
   local_density = local_density + tmp_cells[ii + jj*nx].speeds[0] + tmp_cells[x_w + jj*nx].speeds[1] + tmp_cells[ii + y_s*nx].speeds[2] + tmp_cells[x_e + jj*nx].speeds[3] + tmp_cells[ii + y_n*nx].speeds[4] + tmp_cells[x_w + y_s*nx].speeds[5] + tmp_cells[x_e + y_s*nx].speeds[6] + tmp_cells[x_e + y_n*nx].speeds[7] + tmp_cells[x_w + y_n*nx].speeds[8];
 
-
+    work_group_barrier(CLK_LOCAL_MEM_FENCE);
 
   /* compute x velocity component */
   float u_x = (tmp_cells[x_w + jj*nx].speeds[1]
@@ -331,7 +331,7 @@ kernel void fusion2(global t_speed* cells,
                    + tmp_cells[x_e + y_s*nx].speeds[6]
                    + tmp_cells[x_e + y_n*nx].speeds[7]))
                / local_density;
-
+    work_group_barrier(CLK_LOCAL_MEM_FENCE);
   /* compute y velocity component */
   float u_y = (tmp_cells[ii + y_s*nx].speeds[2]
                 + tmp_cells[x_w + y_s*nx].speeds[5]
@@ -375,7 +375,7 @@ kernel void fusion2(global t_speed* cells,
   d_equ[7] = w2 * local_density * (1.f + u[7] / c_sq + (u[7]*u[7]) / w3 - u_sq / w4);
   d_equ[8] = w2 * local_density * (1.f + u[8] / c_sq + (u[8]*u[8]) / w3 - u_sq / w4);
 
-
+    work_group_barrier(CLK_LOCAL_MEM_FENCE);
 
   cells[ii + jj*nx].speeds[0] = (!obstacles[jj*nx + ii]) ? tmp_cells[ii + jj*nx].speeds[0] + omega * (d_equ[0] - tmp_cells[ii + jj*nx].speeds[0]) :   cells[ii + jj*nx].speeds[0];
   cells[ii + jj*nx].speeds[1] = (obstacles[jj*nx + ii]) ? tmp_cells[x_e + jj*nx].speeds[3] : tmp_cells[x_w + jj*nx].speeds[1]  + omega * (d_equ[1] - tmp_cells[x_w + jj*nx].speeds[1]);
