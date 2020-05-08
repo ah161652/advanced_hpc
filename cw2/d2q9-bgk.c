@@ -233,7 +233,7 @@ float fusion1(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
 
     //set global and local sizes
     size_t global[2] = {params.nx, params.ny};
-    size_t local[2] = {sqrtf(work_group_size), sqrtf(work_group_size)};
+    size_t local[2] = {64,16};
 
 
 
@@ -324,7 +324,7 @@ float fusion2(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
 
       //set global and local sizes
       size_t global[2] = {params.nx, params.ny};
-      size_t local[2] = {sqrtf(work_group_size), sqrtf(work_group_size)};
+      size_t local[2] = {64, 16};
 
 
 
