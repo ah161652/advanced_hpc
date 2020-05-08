@@ -233,7 +233,7 @@ float fusion1(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
 
     //set global and local sizes
     size_t global[2] = {params.nx, params.ny};
-    size_t local[2] = {16,8};
+    size_t local[2] = {128,8};
 
 
 
@@ -324,7 +324,7 @@ float fusion2(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obs
 
       //set global and local sizes
       size_t global[2] = {params.nx, params.ny};
-      size_t local[2] = {16, 8};
+      size_t local[2] = {128, 8};
 
 
 
@@ -639,7 +639,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
   // err = clGetKernelWorkGroupInfo (ocl->fusion1, ocl->device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
   // checkError(err, "Getting kernel work group info", __LINE__);
 
-  work_group_size = 32*4;
+  work_group_size =128*8;
 
   nwork_groups = (params->nx * params->ny)/work_group_size;
 
