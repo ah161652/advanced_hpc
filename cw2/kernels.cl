@@ -66,7 +66,7 @@ kernel void fusion1(global t_speed* cells,
   }
 
 
-    work_group_barrier(CLK_LOCAL_MEM_FENCE);
+    work_group_barrier(CLK_GLOBAL_MEM_FENCE);
 
 
   ///////////////////////////////////
@@ -165,7 +165,7 @@ kernel void fusion1(global t_speed* cells,
   //////////////////////////////////
   /////////////////////////////////
 
-  work_group_barrier(CLK_LOCAL_MEM_FENCE);
+  work_group_barrier(CLK_GLOBAL_MEM_FENCE);
 
 
 
@@ -206,7 +206,7 @@ kernel void fusion1(global t_speed* cells,
 
     //REDUCTION (adding up all the totals from within each work group)
 
-    work_group_barrier(CLK_LOCAL_MEM_FENCE);
+    work_group_barrier(CLK_GLOBAL_MEM_FENCE);
 
     // work group variables
     float work_group_total_u = 0.0f;
@@ -295,7 +295,7 @@ kernel void fusion2(global t_speed* cells,
   }
 
 
-    work_group_barrier(CLK_LOCAL_MEM_FENCE);
+    work_group_barrier(CLK_GLOBAL_MEM_FENCE);
 
 
 
@@ -394,7 +394,7 @@ kernel void fusion2(global t_speed* cells,
   /////////////AV  VELS//////
   //////////////////////////////////
   /////////////////////////////////
-  work_group_barrier(CLK_LOCAL_MEM_FENCE);
+  work_group_barrier(CLK_GLOBAL_MEM_FENCE);
 
 
 
@@ -435,7 +435,7 @@ kernel void fusion2(global t_speed* cells,
 
     //REDUCTION (adding up all the totals from within each work group)
 
-    work_group_barrier(CLK_LOCAL_MEM_FENCE);
+    work_group_barrier(CLK_GLOBAL_MEM_FENCE);
 
     // work group variables
     float work_group_total_u = 0.0f;
