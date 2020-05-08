@@ -169,6 +169,32 @@ kernel void fusion1(global t_speed* cells,
 
 
 
+  local_density = local_density + tmp_cells[ii + jj*nx].speeds[0] + tmp_cells[x_w + jj*nx].speeds[1] + tmp_cells[ii + y_s*nx].speeds[2] + tmp_cells[x_e + jj*nx].speeds[3] + tmp_cells[ii + y_n*nx].speeds[4] + tmp_cells[x_w + y_s*nx].speeds[5] + tmp_cells[x_e + y_s*nx].speeds[6] + tmp_cells[x_e + y_n*nx].speeds[7] + tmp_cells[x_w + y_n*nx].speeds[8];
+
+    work_group_barrier(CLK_LOCAL_MEM_FENCE);
+
+  /* compute x velocity component */
+ u_x = (tmp_cells[x_w + jj*nx].speeds[1]
+                + tmp_cells[x_w + y_s*nx].speeds[5]
+                + tmp_cells[x_w + y_n*nx].speeds[8]
+                - (tmp_cells[x_e + jj*nx].speeds[3]
+                   + tmp_cells[x_e + y_s*nx].speeds[6]
+                   + tmp_cells[x_e + y_n*nx].speeds[7]))
+               / local_density;
+    work_group_barrier(CLK_LOCAL_MEM_FENCE);
+  /* compute y velocity component */
+ u_y = (tmp_cells[ii + y_s*nx].speeds[2]
+                + tmp_cells[x_w + y_s*nx].speeds[5]
+                + tmp_cells[x_e + y_s*nx].speeds[6]
+                - (tmp_cells[ii + y_n*nx].speeds[4]
+                   + tmp_cells[x_e + y_n*nx].speeds[7]
+                   +tmp_cells[x_w + y_n*nx].speeds[8]))
+               / local_density;
+
+
+  /* velocity squared */
+   u_sq = u_x * u_x + u_y * u_y;
+
 
 
   // local data
@@ -396,6 +422,33 @@ kernel void fusion2(global t_speed* cells,
   /////////////////////////////////
   work_group_barrier(CLK_LOCAL_MEM_FENCE);
 
+  local_density = local_density + cells[ii + jj*nx].speeds[0] + cells[x_w + jj*nx].speeds[1] + cells[ii + y_s*nx].speeds[2] + cells[x_e + jj*nx].speeds[3] + cells[ii + y_n*nx].speeds[4] + cells[x_w + y_s*nx].speeds[5] + cells[x_e + y_s*nx].speeds[6] + cells[x_e + y_n*nx].speeds[7] + cells[x_w + y_n*nx].speeds[8];
+
+
+    work_group_barrier(CLK_LOCAL_MEM_FENCE);
+
+  /* compute x velocity component */
+  u_x = (cells[x_w + jj*nx].speeds[1]
+                + cells[x_w + y_s*nx].speeds[5]
+                + cells[x_w + y_n*nx].speeds[8]
+                - (cells[x_e + jj*nx].speeds[3]
+                   + cells[x_e + y_s*nx].speeds[6]
+                   + cells[x_e + y_n*nx].speeds[7]))
+               / local_density;
+
+    work_group_barrier(CLK_LOCAL_MEM_FENCE);
+  /* compute y velocity component */
+  u_y = (cells[ii + y_s*nx].speeds[2]
+                + cells[x_w + y_s*nx].speeds[5]
+                + cells[x_e + y_s*nx].speeds[6]
+                - (cells[ii + y_n*nx].speeds[4]
+                   + cells[x_e + y_n*nx].speeds[7]
+                   +cells[x_w + y_n*nx].speeds[8]))
+               / local_density;
+
+    work_group_barrier(CLK_LOCAL_MEM_FENCE);
+  /* velocity squared */
+  u_sq = u_x * u_x + u_y * u_y;
 
 
 
