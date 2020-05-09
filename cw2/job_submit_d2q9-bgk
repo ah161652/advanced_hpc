@@ -22,10 +22,10 @@ echo GPU number: $CUDA_VISIBLE_DEVICES
 export OCL_DEVICE=1
 
 #! Run the executable
-# ./d2q9-bgk input_128x128.params obstacles_128x128.dat
-# make check
-# ./d2q9-bgk input_128x128.params obstacles_128x128.dat
-# make check
+./d2q9-bgk input_128x128.params obstacles_128x128.dat
+make check
+./d2q9-bgk input_128x128.params obstacles_128x128.dat
+make check
 # ./d2q9-bgk input_128x128.params obstacles_128x128.dat
 # make check
 # ./d2q9-bgk input_128x128.params obstacles_128x128.dat
@@ -66,46 +66,46 @@ export OCL_DEVICE=1
 # make check
 
 
-./d2q9-bgk input_256x256.params obstacles_256x256.dat
-make check
-./d2q9-bgk input_256x256.params obstacles_256x256.dat
-make check
-./d2q9-bgk input_256x256.params obstacles_256x256.dat
-make check
-./d2q9-bgk input_256x256.params obstacles_256x256.dat
-make check
-./d2q9-bgk input_256x256.params obstacles_256x256.dat
-make check
-./d2q9-bgk input_256x256.params obstacles_256x256.dat
-make check
-./d2q9-bgk input_256x256.params obstacles_256x256.dat
-make check
-./d2q9-bgk input_256x256.params obstacles_256x256.dat
-make check
-./d2q9-bgk input_256x256.params obstacles_256x256.dat
-make check
-./d2q9-bgk input_256x256.params obstacles_256x256.dat
-make check
-./d2q9-bgk input_256x256.params obstacles_256x256.dat
-make check
-./d2q9-bgk input_256x256.params obstacles_256x256.dat
-make check
-./d2q9-bgk input_256x256.params obstacles_256x256.dat
-make check
-./d2q9-bgk input_256x256.params obstacles_256x256.dat
-make check
-./d2q9-bgk input_256x256.params obstacles_256x256.dat
-make check
-./d2q9-bgk input_256x256.params obstacles_256x256.dat
-make check
-./d2q9-bgk input_256x256.params obstacles_256x256.dat
-make check
-./d2q9-bgk input_256x256.params obstacles_256x256.dat
-make check
-./d2q9-bgk input_256x256.params obstacles_256x256.dat
-make check
-./d2q9-bgk input_256x256.params obstacles_256x256.dat
-make check
+# ./d2q9-bgk input_256x256.params obstacles_256x256.dat
+# make check
+# ./d2q9-bgk input_256x256.params obstacles_256x256.dat
+# make check
+# ./d2q9-bgk input_256x256.params obstacles_256x256.dat
+# make check
+# ./d2q9-bgk input_256x256.params obstacles_256x256.dat
+# make check
+# ./d2q9-bgk input_256x256.params obstacles_256x256.dat
+# make check
+# ./d2q9-bgk input_256x256.params obstacles_256x256.dat
+# make check
+# ./d2q9-bgk input_256x256.params obstacles_256x256.dat
+# make check
+# ./d2q9-bgk input_256x256.params obstacles_256x256.dat
+# make check
+# ./d2q9-bgk input_256x256.params obstacles_256x256.dat
+# make check
+# ./d2q9-bgk input_256x256.params obstacles_256x256.dat
+# make check
+# ./d2q9-bgk input_256x256.params obstacles_256x256.dat
+# make check
+# ./d2q9-bgk input_256x256.params obstacles_256x256.dat
+# make check
+# ./d2q9-bgk input_256x256.params obstacles_256x256.dat
+# make check
+# ./d2q9-bgk input_256x256.params obstacles_256x256.dat
+# make check
+# ./d2q9-bgk input_256x256.params obstacles_256x256.dat
+# make check
+# ./d2q9-bgk input_256x256.params obstacles_256x256.dat
+# make check
+# ./d2q9-bgk input_256x256.params obstacles_256x256.dat
+# make check
+# ./d2q9-bgk input_256x256.params obstacles_256x256.dat
+# make check
+# ./d2q9-bgk input_256x256.params obstacles_256x256.dat
+# make check
+# ./d2q9-bgk input_256x256.params obstacles_256x256.dat
+# make check
 
 
 
